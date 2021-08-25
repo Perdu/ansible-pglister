@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    packages: []
+  tasks:
+    - name: "Include roles/packages"
+      include_role:
+        name: "packages"

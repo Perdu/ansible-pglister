@@ -1,0 +1,56 @@
+---
+
+- name: 'Add PGDG signing key'
+  apt_key:
+    url: 'https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc'
+    state: 'present'
+
+- name: 'Configure pgdg repositories'
+  apt_repository:
+    repo: 'deb https://apt.postgresql.org/pub/repos/apt buster-pgdg main'
+    state: 'present'
+    filename: 'pgdg'
+
+- name: 'Setup apt-preferences for PGDG'
+  copy:
+    dest: '/etc/apt/preferences.d/pgdg-pin'
+    content: |
+      Package: postgresql*
+      Pin: origin "apt.postgresql.org"
+      Pin-Priority: 900
+    owner: 'root'
+    group: 'root'
+    mode: 0640
+
+- name: 'Install postgresl'
+  apt:
+    name:
+      - 'postgresql-12'
+      - 'postgresql-client'
+    state: 'latest'
+
+- name: 'Drop SPI specific configuration for Postgresql'
+  copy:
+    src: 'spi-pg.conf'
+    dest: '/etc/postgresql/12/main/conf.d/spi-pg.conf'
+    owner: 'postgres'
+    group: 'postgres'
+    mode: 0640
+#  notify: 'restart postgresql'
+
+- name: 'Copy connection file for postgresql'
+  copy:
+    src: 'pg_hba.conf'
+    dest: '/etc/postgresql/12/main/pg_hba.conf'
+    owner: 'postgres'
+    group: 'postgres'
+    mode: 0640
+  notify: 'restart postgresql'
+
+- include: "pgbackrest.yml"
+
+- name: 'Ensure postgresql is enabled/started'
+  service:
+    name: 'postgresql'
+    state: 'started'
+    enabled: true

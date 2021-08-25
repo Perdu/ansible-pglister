@@ -1,0 +1,27 @@
+#! /bin/sh
+# vim: set ft=shell
+
+set -eu
+
+ls "{{ le_deploy_hooks_path }}"
+
+LE_PATH="/etc/letsencrypt"
+ARCHIVE_PATH="${LE_PATH}/archive"
+LIVE_PATH="${LE_PATH}/live/{{ ansible_host }}"
+
+# Update perms as certbot rewrites that
+find "${ARCHIVE_PATH}" -type d -exec chmod 750 {} +
+find "${ARCHIVE_PATH}" -type f -exec chmod 640 {} +
+chown root:ssl-cert -R "${ARCHIVE_PATH}"
+
+# Update global symlinks
+# TODO: Even though it's fine changing these files for running processes
+# having them opened, we may prefer to have these operations atomic to prevent
+# issues with new processes or processes trying to reopen them.
+rm "{{ le_cert_path }}" "{{ le_key_path }}"
+cp "${LIVE_PATH}/fullchain.pem" "{{ le_cert_path }}"
+cp "${LIVE_PATH}/privkey.pem" "{{ le_key_path }}"
+
+for hook in "{{ le_deploy_hooks_path }}"/*; do
+  $hook
+done

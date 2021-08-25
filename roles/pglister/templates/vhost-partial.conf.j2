@@ -1,0 +1,14 @@
+        Alias /media {{ service_base_path }}/web/media
+        <Directory {{ service_base_path }}/web/media/>
+           Require all granted
+        </Directory>
+
+        WSGIScriptAlias / {{ service_base_path }}/web/pglister/wsgi.py
+        WSGIDaemonProcess {{ service_vhost_name }} python-path={{ service_base_path }}/web python-home={{ service_base_path }}/web/pglister
+        WSGIProcessGroup {{ service_vhost_name }}
+
+        <Directory {{ service_base_path }}/web/pglister>
+          <Files wsgi.py>
+            Require all granted
+          </Files>
+        </Directory>

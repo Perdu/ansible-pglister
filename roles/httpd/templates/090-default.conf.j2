@@ -1,0 +1,28 @@
+# vim: ft=apache noet:
+#
+# {{ ansible_managed }}
+#
+
+<VirtualHost *:80>
+  ServerAdmin {{ httpd_serveradmin }}
+  DocumentRoot /var/www/html
+
+  Alias "/.well-known/acme-challenge" "/srv/letsencrypt/.well-known/acme-challenge"
+  <Directory "/srv/letsencrypt/.well-known/acme-challenge">
+    Require all granted
+  </Directory>
+
+  RewriteEngine On
+  RewriteCond %{REQUEST_URI} !^\/.well-known\/acme-challenge\/
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+
+  ErrorLog ${APACHE_LOG_DIR}/error.log
+  CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+  ServerAdmin {{ httpd_serveradmin }}
+  DocumentRoot /var/www/html
+
+  Include "{{ httpd_ssl_conf }}"
+</VirtualHost>

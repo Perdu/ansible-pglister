@@ -1,0 +1,5 @@
+---
+dependencies:
+  - role: 'postgresql'
+  - role: geerlingguy.exim # https://github.com/geerlingguy/ansible-role-exim
+

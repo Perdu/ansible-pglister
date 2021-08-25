@@ -1,0 +1,46 @@
+---
+
+- fail:
+    msg: 'Please fill the service_vhost_name variable'
+  when: service_vhost_name|length == 0
+
+- set_fact:
+    le_domains: '{{ le_domains + [service_vhost_name] + service_vhost_aliases }}'
+
+- name: 'Drop apache restart script'
+  copy:
+    content: "#!/bin/sh\n\nsystemctl restart apache2\n"
+    dest: '{{ le_deploy_hooks_path }}/apache2.sh'
+    owner: 'root'
+    group: 'root'
+    mode: 0755
+
+- name: 'Create necessary folders'
+  file:
+    path: '{{ item }}'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: 0755
+  loop:
+    - '{{ service_document_root }}'
+    - '{{ service_log_root }}'
+  notify: 'reload httpd'
+
+- name: 'Drop vhost template for {{ service_vhost_name }}'
+  template:
+    src: 'vhost.conf.j2'
+    dest: '/etc/apache2/sites-available/{{ service_vhost_priority }}-{{ service_vhost_name }}.conf'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+  notify: 'reload httpd'
+
+# TODO: Ensure unneeded vhosts are disabled.
+- name: 'Enable vhost {{ service_vhost_name }}'
+  command: '/usr/sbin/a2ensite {{ service_vhost_priority }}-{{ service_vhost_name }}'
+  notify: 'reload httpd'
+
+- name: 'Call LE handler'
+  command: 'echo "Call LE handler"'
+  notify: 'ensure certificate'

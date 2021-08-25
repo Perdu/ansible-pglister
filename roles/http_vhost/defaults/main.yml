@@ -1,0 +1,12 @@
+---
+service_vhost_name: ''
+service_vhost_aliases: []
+service_vhost_priority: '000'
+service_base_path: '/srv/{{ service_vhost_name }}'
+service_log_root: '{{ service_base_path }}/log'
+service_document_root: '{{ service_base_path }}/www'
+service_log_prefix: ''
+
+# Allows for vhosts to add extra content in the template. boolean variable
+service_needs_document_root: true
+service_vhost_extra: false

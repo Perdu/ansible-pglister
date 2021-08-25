@@ -1,0 +1,36 @@
+# vim: ft=apache noet:
+#
+# {{ ansible_managed }}
+#
+
+{% if service_vhost_aliases -%}
+<VirtualHost *:443>
+	{% for redir in service_vhost_aliases -%}
+	{% if loop.first %}ServerName{% else %}ServerAlias{% endif %} {{ redir }}
+	{% endfor %}
+
+	Include "{{ httpd_ssl_conf }}"
+
+	Redirect 301 "/" "https://{{ service_vhost_name }}/
+</VirtualHost>
+{% endif %}
+
+<VirtualHost *:443>
+	ServerAdmin {{ httpd_serveradmin }}
+	ServerName {{ service_vhost_name }}
+
+	Include "{{ httpd_ssl_conf }}"
+
+	ErrorLog {{ service_log_root }}/{{ service_log_prefix }}{% if service_log_prefix %}-{% endif %}error.log
+	CustomLog {{ service_log_root }}/{{ service_log_prefix }}{% if service_log_prefix %}-{% endif %}access.log combined
+
+	{% if service_document_root -%}
+	DocumentRoot "{{ service_document_root }}"
+	<Directory "{{ service_document_root }}">
+		Require all granted
+	</Directory>
+	{%- endif %}
+
+{% if service_vhost_extra %}{% include 'vhost-partial.conf.j2' %}{% endif %}
+
+</VirtualHost>

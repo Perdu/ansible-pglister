@@ -1,0 +1,40 @@
+# {{ ansible_managed }}
+
+[db]
+connstr=dbname={{ database_name }}
+
+[sender]
+smtpaddr=localhost:25
+adminsmtpaddr=localhost:25
+sessions=5
+batchsize=10
+heloname=localhost
+
+[web]
+root={{ external_url }}
+
+[bounces]
+senderaddr='testsender@{{ ansible_host }}'
+sendername='MAILER-DAEMON'
+
+[notify]
+address='notify@{{ ansible_host }}'
+name='Notification Receiver'
+
+[nagios]
+incoming_failed_crit=3
+incoming_failed_warn=3
+
+[cleanup]
+whitelist_expire_days=365
+unsubscribe_expire_days=14
+blocklist_expire_days=120
+log_expire_days=200
+
+[defaults]
+spamscore_threshold=100
+size_moderate=1048576
+size_drop=10485760
+
+[moderation]
+notice_delay=5

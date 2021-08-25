@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+
+# Because we are using logrotate for greater flexibility, disable the internal
+# certbot logrotation.
+max-log-backups = 0
+
+rsa-key-size = 4096
+
+agree-tos = true
+email = {{ le_email }}
+non-interactive = true
+
+authenticator = webroot
+webroot-path = /srv/letsencrypt
+expand = true
+
+domains = {{ le_domains | join(', ') }}
