@@ -5,6 +5,7 @@ Ansible script to install pglister (work in progress)
 # Install
 
 ```
+ansible-galaxy install -r requirements.yml
 ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
 ```
 
@@ -23,3 +24,8 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
       vars:
         service_vhost_name: 'pglister.yourdomain.com'
 ```
+
+# Authors
+
+- Célestin Matte
+- Maxime "pep" Buquet
