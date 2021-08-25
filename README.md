@@ -17,6 +17,7 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
   become: true
   vars:
     le_domains: ['pglister.yourdomain.com']
+    domain: 'yourdomain.com'
   roles:
     - role: 'pglister'
       vars:
