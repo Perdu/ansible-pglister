@@ -1,6 +1,6 @@
 ---
 repo_name: 'pglister.git'
-repo_uri: 'https://gitlab.com/pglister/{{ repo_name }}'
+repo_uri: 'https://gitlab.com/cmatte/{{ repo_name }}'
 base_path: '/srv/pglister'
 service_base_path: '{{ base_path }}/local'
 external_url: 'https://{{ service_vhost_name }}'
