@@ -40,7 +40,3 @@
 - name: 'Enable vhost {{ service_vhost_name }}'
   command: '/usr/sbin/a2ensite {{ service_vhost_priority }}-{{ service_vhost_name }}'
   notify: 'reload httpd'
-
-- name: 'Call LE handler'
-  command: 'echo "Call LE handler"'
-  notify: 'ensure certificate'
