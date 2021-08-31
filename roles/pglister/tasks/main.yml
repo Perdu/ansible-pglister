@@ -101,7 +101,7 @@
 - name: 'install required packages for django using pip'
   pip:
     name:
-      - django
+      - django==2.2.24
       - psycopg2-binary
       - requests
       - pycryptodome
