@@ -29,7 +29,7 @@
   command:
     cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
 
-- name: 'chown www-data:www-data pgweb directory'
+- name: 'chown list:www-data pgweb directory'
   file:
     path: '{{ service_base_path }}'
     owner: 'list'
