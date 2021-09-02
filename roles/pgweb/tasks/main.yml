@@ -52,7 +52,6 @@
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
-    website_repo_path: '{{ service_base_path }}/{{ repo_name }}'
 
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'
