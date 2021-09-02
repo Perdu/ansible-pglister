@@ -4,7 +4,7 @@
         </Directory>
 
         WSGIScriptAlias / {{ web_path }}/wsgi.py
-        WSGIDaemonProcess {{ service_vhost_name }} python-path={{ service_base_path }} python-home={{ service_base_path }}
+        WSGIDaemonProcess {{ service_vhost_name }} python-path={{ service_base_path }} python-home={{ web_path }}
         WSGIProcessGroup {{ service_vhost_name }}
 
         <Directory {{ web_path }}/>
