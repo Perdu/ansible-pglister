@@ -1,0 +1,10 @@
+---
+repo_name: 'pgweb.git'
+repo_uri: 'https://github.com/postgres/{{ repo_name }}'
+base_path: '/srv/pgweb'
+service_base_path: '{{ base_path }}/local'
+web_path: '{{ base_path }}/local/pgweb'
+repo_path: '{{ base_path }}/{{ repo_name }}'
+
+admin_email_address: 'webmaster@{{ domain }}'
+django_secret_key: 'changemechangeme!-ansible'

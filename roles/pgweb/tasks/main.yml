@@ -1,0 +1,99 @@
+---
+- name: 'Install required packages'
+  package:
+    state: 'latest'
+    name:
+      - 'python3'
+      - 'libapache2-mod-wsgi-py3'
+      - 'python3-pip'
+      - 'python-psycopg2'
+      - 'python-virtualenv'
+
+- name: 'Create folder tree'
+  file:
+    path: '{{ service_base_path }}'
+    state: 'directory'
+    owner: 'list'
+    group: 'www-data'
+    mode: 0755
+
+- name: 'Clone pgweb repository'
+  git:
+    repo: '{{ repo_uri }}'
+    dest: '{{ base_path }}/{{ repo_name }}'
+    clone: true
+    update: true
+  register: repo
+
+- name: 'Copy repository content to local folder'
+  command:
+    cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
+
+- name: 'chown www-data:www-data pgweb directory'
+  file:
+    path: '{{ service_base_path }}'
+    owner: 'list'
+    group: 'www-data'
+    recurse: 'yes'
+
+# Todo: fix issue: this fails silently on error
+- name: 'Create role and database'
+  command:
+    cmd: psql -v ON_ERROR_STOP=0 --no-password
+    stdin: |
+      CREATE USER {{ database_user }};
+      CREATE DATABASE {{ database_name }};
+  become: true
+  become_user: 'postgres'
+  register: result
+  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
+
+- include_role:
+    name: 'http_vhost'
+  vars:
+    service_vhost_extra: true
+    website_repo_path: '{{ service_base_path }}/{{ repo_name }}'
+
+- name: 'Activate mod_wsgi on apache2'
+  command: '/usr/sbin/a2enmod wsgi'
+  notify: 'reload httpd'
+
+- name: 'Drop settings.py for django'
+  template:
+    src: 'settings.py.j2'
+    dest: '{{ web_path }}/settings_local.py'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0660'
+
+- name: 'install virtualenv via pip'
+  pip:
+    name: virtualenv
+    executable: pip3
+  become: true
+
+- name: 'fix pycopg bug by installing -binary version'
+  lineinfile:
+    path: '{{ service_base_path }}/requirements.txt'
+    regexp: '^psycopg2=='
+    line: 'psycopg2-binary'
+
+- name: 'fix pycryptodomex bug by removing version condition'
+  lineinfile:
+    path: '{{ service_base_path }}/requirements.txt'
+    regexp: '^pycryptodomex'
+    line: 'pycryptodomex'
+
+- name: 'install required packages for django using pip'
+  pip:
+    requirements: '{{ service_base_path }}/requirements.txt'
+    virtualenv: '{{ web_path }}/'
+    virtualenv_python: python3
+  become: true
+
+- include_role:
+    name: cchurch.django
+  vars:
+    django_app_path: '{{ service_base_path }}'
+    django_user: list
+    django_virtualenv: '{{ web_path }}'

@@ -1,0 +1,14 @@
+        Alias /media {{ service_base_path }}/media
+        <Directory {{ service_base_path }}/media/>
+           Require all granted
+        </Directory>
+
+        WSGIScriptAlias / {{ web_path }}/wsgi.py
+        WSGIDaemonProcess {{ service_vhost_name }} python-path={{ service_base_path }} python-home={{ service_base_path }}
+        WSGIProcessGroup {{ service_vhost_name }}
+
+        <Directory {{ web_path }}/>
+          <Files wsgi.py>
+            Require all granted
+          </Files>
+        </Directory>
