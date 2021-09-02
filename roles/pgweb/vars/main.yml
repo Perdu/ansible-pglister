@@ -1,4 +1,5 @@
 ---
+service_vhost_name: '{{ service_vhost_name_pgweb }}'
 repo_name: 'pgweb.git'
 repo_uri: 'https://github.com/postgres/{{ repo_name }}'
 base_path: '/srv/pgweb'
