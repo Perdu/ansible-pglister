@@ -90,6 +90,11 @@
     virtualenv_python: python3
   become: true
 
+- name: 'Create /var/list'
+  file:
+    path: '/var/list'
+    state: 'directory'
+
 - include_role:
     name: cchurch.django
   vars:
