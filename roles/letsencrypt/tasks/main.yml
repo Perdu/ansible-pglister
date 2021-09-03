@@ -66,6 +66,7 @@
     state: 'present'
     name: 'certbot-renewal'
     user: 'root'
+    minute: '0'
     hour: '1'  # Every day at night
     job: 'certbot renew'
 
