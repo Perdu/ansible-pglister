@@ -101,3 +101,14 @@
     django_app_path: '{{ service_base_path }}'
     django_user: list
     django_virtualenv: '{{ web_path }}'
+
+- name: 'Drop make-dyncss.sh'
+  template:
+    src: 'make_dyncss.sh.j2'
+    dest: '{{ service_base_path }}/make_dyncss.sh'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0660'
+
+- name: 'Run make_dyncss.sh'
+  command: sh '{{ service_base_path }}/make_dyncss.sh'
