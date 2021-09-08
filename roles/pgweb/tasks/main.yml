@@ -112,3 +112,12 @@
 
 - name: 'Run make_dyncss.sh'
   command: sh '{{ service_base_path }}/make_dyncss.sh'
+
+- name: 'Add crontab to emit emails'
+  cron:
+    state: 'present'
+    name: 'Send emails'
+    user: 'list'
+    minute: '*/5'
+    hour: '*'
+    job: '{{ service_base_path }}/bin/python {{ service_base_path }}/manage.py send_queued_mail'
