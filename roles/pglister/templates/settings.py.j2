@@ -117,10 +117,10 @@ DATETIME_FORMAT = "Y-m-d H:i:s"
 STATIC_URL = '/media/'
 
 # Override in local settings
-USE_PG_COMMUNITY_AUTH = False  # Right now we *always* do, but this is used to turn on/off some local features
-PGAUTH_REDIRECT = "http://localhost:8000/account/auth/12/"
-PGAUTH_KEY = "encryption_key"
-LOGIN_URL = "{{ external_url }}/accounts/login/"
+USE_PG_COMMUNITY_AUTH = True  # Right now we *always* do, but this is used to turn on/off some local features
+PGAUTH_REDIRECT = "https://{{ service_vhost_name_pgweb }}/account/auth/13/"
+PGAUTH_KEY = "{{ pgauth_key }}"
+LOGIN_URL = "/accounts/login/"
 
 CONFIRM_SENDER_ADDRESS = "{{ confirm_sender_address }}"
 CONFIRM_SENDER_NAME = "Confirm Sender"
