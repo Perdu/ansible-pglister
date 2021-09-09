@@ -4,7 +4,7 @@
         </Directory>
 
         WSGIScriptAlias / {{ service_base_path }}/web/pglister/wsgi.py
-        WSGIDaemonProcess {{ service_vhost_name }} python-path={{ service_base_path }}/web python-home={{ service_base_path }}/web/pglister
+        WSGIDaemonProcess {{ service_vhost_name }} user={{ database_user }} python-path={{ service_base_path }}/web python-home={{ service_base_path }}/web/pglister
         WSGIProcessGroup {{ service_vhost_name }}
 
         <Directory {{ service_base_path }}/web/pglister>
