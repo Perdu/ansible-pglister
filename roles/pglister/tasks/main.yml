@@ -110,6 +110,23 @@
     virtualenv_python: python3
   become: true
 
+- name: 'Give exim permissions to list user (add list to Debian-exim group)'
+  user:
+    name: '{{ database_user }}'
+    groups: 'Debian-exim'
+    append: 'yes'
+
+- name: 'Give exim permissions to postgres user (add postgres to Debian-exim group)'
+  user:
+    name: 'postgres'
+    groups: 'Debian-exim'
+    append: 'yes'
+
+- name: 'Restart postgres to make new group perms effective'
+  service:
+    name: 'postgresql@12-main'
+    state: 'restarted'
+
 - include_role:
     name: cchurch.django
   vars:
