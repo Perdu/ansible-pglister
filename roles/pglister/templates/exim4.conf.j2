@@ -1,0 +1,20 @@
+domainlist local_domains = @ : ${lookup pgsql{select domain from domains where domain='${quote_pgsql:$domain}'} {$value}}
+# local_parts = mailer-daemon : ${lookup pgsql{select name from mailinglists WHERE name='${quote_pgsql:$local_part}' and domain='${quote_pgsql:$domain}'} {$value}}
+
+# begin transports
+
+pglister_pipe:
+  driver = pipe
+  command = /srv/pglister/local/web/pglister/bin/python /srv/pglister/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix(at)$domain -m $header_message-id:
+  #ignore_status
+  temp_errors = *
+  return_output = false
+  freeze_exec_fail = true
+  log_defer_output = true
+  log_output = true
+  headers_remove = List-Unsubscribe:List-Owner:List-Post:List-Subscribe:List-Help:List-Id:List-Archive
+  log_fail_output = true
+  umask = 022
+  environment =
+  user = Debian-exim
+  message_prefix =
