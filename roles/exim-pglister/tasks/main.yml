@@ -17,7 +17,7 @@
     cmd: '/usr/sbin/update-exim4.conf -o /etc/exim4/exim4.conf'
   become: true
 
-- name: Insert config for pglister (1/2)
+- name: Insert config for pglister (1/3)
   blockinfile:
     path: '{{ exim_configuration_file }}'
     insertafter: 'begin transports'
@@ -32,29 +32,26 @@
         log_defer_output = true
         log_output = true
         headers_remove = List-Unsubscribe:List-Owner:List-Post:List-Subscribe:List-Help:List-Id:List-Archive
-        log_fail_output = true
+        #log_fail_output = true
         umask = 022
         environment =
         user = Debian-exim
         message_prefix =
-      hide pgsql_servers = localhost/{{ database_name }}/Debian-exim/
 
-- name: Insert config for pglister (2/2)
+- name: Insert config for pglister (2/3)
   lineinfile:
     path: '{{ exim_configuration_file }}'
     regex: 'domainlist local_domains ='
     line: "domainlist local_domains = @ : ${lookup pgsql{select domain from domains where domain='${quote_pgsql:$domain}'} {$value}}"
 
-#- name: Copy exim configuration file
-#  template:
-#    src: 'exim4.conf.j2'
-#    dest: '{{ exim_configuration_file }}'
-#    owner: 'root'
-#    group: 'Debian-exim'
-#    mode: '640'
+- name: Insert config for pglister (3/3)
+  lineinfile:
+    path: '{{ exim_configuration_file }}'
+    insertafter: 'hostlist relay_from_hosts ='
+    line: 'hide pgsql_servers = localhost/{{ database_name }}/postgres/'
 
-- name: Ensure exim is running.
+- name: Restart exim.
   service:
     name: '{{ exim_daemon }}'
-    state: 'started'
+    state: 'restarted'
     enabled: 'yes'
