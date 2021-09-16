@@ -1,0 +1,60 @@
+---
+- name: Ensure exim is installed.
+  package:
+    name: '{{ exim_package }}'
+    state: 'present'
+
+- name: Copy exim configuration file
+  template:
+    src: 'update-exim4.conf.conf.j2'
+    dest: '/etc/exim4/update-exim4.conf.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '644'
+
+- name: generate exim4 config
+  command:
+    cmd: '/usr/sbin/update-exim4.conf -o /etc/exim4/exim4.conf'
+  become: true
+
+- name: Insert config for pglister (1/2)
+  blockinfile:
+    path: '{{ exim_configuration_file }}'
+    insertafter: 'begin transports'
+    block: |
+      pglister_pipe:
+        driver = pipe
+        command = /srv/pglister/local/web/pglister/bin/python /srv/pglister/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix(at)$domain -m $header_message-id:
+        #ignore_status
+        temp_errors = *
+        return_output = false
+        freeze_exec_fail = true
+        log_defer_output = true
+        log_output = true
+        headers_remove = List-Unsubscribe:List-Owner:List-Post:List-Subscribe:List-Help:List-Id:List-Archive
+        log_fail_output = true
+        umask = 022
+        environment =
+        user = Debian-exim
+        message_prefix =
+      hide pgsql_servers = localhost/{{ database_name }}/Debian-exim/
+
+- name: Insert config for pglister (2/2)
+  lineinfile:
+    path: '{{ exim_configuration_file }}'
+    regex: 'domainlist local_domains ='
+    line: "domainlist local_domains = @ : ${lookup pgsql{select domain from domains where domain='${quote_pgsql:$domain}'} {$value}}"
+
+#- name: Copy exim configuration file
+#  template:
+#    src: 'exim4.conf.j2'
+#    dest: '{{ exim_configuration_file }}'
+#    owner: 'root'
+#    group: 'Debian-exim'
+#    mode: '640'
+
+- name: Ensure exim is running.
+  service:
+    name: '{{ exim_daemon }}'
+    state: 'started'
+    enabled: 'yes'

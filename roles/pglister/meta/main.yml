@@ -1,6 +1,4 @@
 ---
 dependencies:
   - role: 'postgresql'
-  - role: geerlingguy.exim # https://github.com/geerlingguy/ansible-role-exim
-    vars:
-      - exim_package: 'exim4-daemon-heavy'
+  - role: 'exim-pglister'

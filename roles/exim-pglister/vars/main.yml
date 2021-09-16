@@ -1,0 +1,4 @@
+---
+exim_package: exim4-daemon-heavy
+exim_daemon: exim4
+exim_configuration_file: /etc/exim4/exim4.conf
