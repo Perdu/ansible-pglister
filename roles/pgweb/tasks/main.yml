@@ -41,7 +41,7 @@
   command:
     cmd: psql -v ON_ERROR_STOP=0 --no-password
     stdin: |
-      CREATE USER {{ database_user }};
+      CREATE USER {{ database_user }} WITH PASSWORD '{{ database_password }}';
       CREATE DATABASE {{ database_name }};
   become: true
   become_user: 'postgres'
