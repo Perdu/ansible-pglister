@@ -17,6 +17,12 @@
     cmd: '/usr/sbin/update-exim4.conf -o /etc/exim4/exim4.conf'
   become: true
 
+- name: add password for smarthost, if exists
+  lineinfile:
+    path: '/etc/exim4/passwd.client'
+    line: '{{ smtp_relay_password }}'
+  when: smtp_relay_password is defined
+
 - name: Insert config for pglister (1/3)
   blockinfile:
     path: '{{ exim_configuration_file }}'
