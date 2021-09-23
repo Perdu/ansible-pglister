@@ -14,6 +14,11 @@
            Require all granted
         </Directory>
 
+        # Redirect all URLs not related to account, admin or media to /account
+        RewriteEngine on
+        RewriteCond %{REQUEST_URI} "^/(?!account|media|admin|favicon.ico)"
+        RewriteRule ^ "/account" [L,R=301]
+
         WSGIScriptAlias / {{ web_path }}/wsgi.py
         WSGIDaemonProcess {{ service_vhost_name }} user={{ database_user }} python-path={{ service_base_path }} python-home={{ service_base_path }}
         WSGIProcessGroup {{ service_vhost_name }}
