@@ -36,6 +36,22 @@
     group: 'www-data'
     recurse: 'yes'
 
+- name: 'override contexts.py to disable non-account-related links'
+  template:
+    src: 'contexts.py.j2'
+    dest: '{{ service_base_path }}/pgweb/util/contexts.py'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0644'
+
+- name: 'override base.html to disable non-account-related links'
+  copy:
+    src: 'base.html'
+    dest: '{{ service_base_path }}/templates/base/base.html'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0644'
+
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
   command:

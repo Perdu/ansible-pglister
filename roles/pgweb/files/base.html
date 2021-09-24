@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <title>{%block title%}{%endblock%}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="Content-Type" content="text/xhtml; charset=utf-8" />
+  {%block meta%}{%endblock%} {# used for custom meta tags such as description which we don't want for every page #}
+  <meta name="theme-color" content="#336791"/>
+  <meta name="copyright" content="The PostgreSQL Global Development Group" />{%if og%}
+  <meta property="og:url" content="https://www.postgresql.org{{og.url}}" />
+  <meta property="og:type" content="article" />
+{%if og.author%}  <meta property="article:author" content="{{og.author}}" />{%endif%}
+  <meta property="article:published_time" content="{{og.time|date:"c"}}" />
+{%if not og.noimage%}  <meta property="og:image" content="https://www.postgresql.org/media/img/about/press/elephant.png" />{%endif%}
+  <meta property="og:title" content="{{og.title}}" />
+  <meta property="og:description" content="{{og.description|truncatewords:"20"}}" />
+  <meta property="og:site_name" content="{{og.sitename|default:""}}" />{%endif%}
+  <link href="/media/css/fontawesome.css?{{gitrev}}" rel="stylesheet">
+  <link rel="stylesheet" href="/media/css/bootstrap-4.4.1.min.css">
+  <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="/dyncss/base.css?{{gitrev}}">
+  {%block extrahead%}{%endblock%}
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row justify-content-md-center">
+        <div class="col">
+          <!-- Header -->
+          <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand p-0" href="/">
+              <img class="logo" src="/media/img/about/press/elephant.png" alt="PostgreSQL Elephant Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#pgNavbar" aria-controls="pgNavbar" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="pgNavbar">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item p-2"><a href="/account/" title="Your account">Your account</a></li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+    {%block layoutblock%}{%endblock%}
+    <script src="/media/js/jquery-3.4.1.slim.min.js"></script>
+    <script src="/media/js/popper-1.16.0.min.js"></script>
+    <script src="/media/js/bootstrap-4.4.1.min.js"></script>
+    <script src="/media/js/main.js?{{gitrev}}"></script>
+{%block extrascript%}{%endblock%}
+  </body>
+</html>
