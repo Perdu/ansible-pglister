@@ -52,6 +52,14 @@
     group: 'www-data'
     mode: '0644'
 
+- name: 'override index.html to remove non-account-related information'
+  copy:
+    src: 'index.html'
+    dest: '{{ service_base_path }}/templates/account/index.html'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0644'
+
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
   command:
