@@ -23,6 +23,9 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
     service_vhost_name_pglister: 'pglister.yourdomain.com'
   roles:
     - role: 'pgweb'
+      vars:
+        recaptcha_site_key: "YOUR_RECAPTCHA_SITE_KEY" # https://www.google.com/recaptcha/admin/create
+        recaptcha_secret_key: "YOUR_RECAPTCHA_SECRET_KEY"
     - role: 'pglister'
       vars:
         pgauth_key: 'YOUR_KEY'
