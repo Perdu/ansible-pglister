@@ -7,3 +7,4 @@ external_url: 'https://{{ service_vhost_name }}'
 
 confirm_sender_address: 'confirmsender@{{ domain }}'
 django_secret_key: 'changemechangeme!-ansible'
+service_vhost_name: '{{ service_vhost_name_pglister }}'
