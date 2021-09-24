@@ -125,9 +125,15 @@ DATE_FORMAT = "Y-m-d"
 
 # Configure recaptcha. Most details contain keys and are thus handled
 # in settings_local.py. Override NOCAPTCHA to actually use them.
+{% if recaptcha_site_key is defined %}
+NOCAPTCHA = False
+RECAPTCHA_SITE_KEY = "{{ recaptcha_site_key }}"
+RECAPTCHA_SECRET_KEY = "{{ recaptcha_secret_key }}"
+{% else %}
 NOCAPTCHA = True
 RECAPTCHA_SITE_KEY = ""
 RECAPTCHA_SECRET_KEY = ""
+{% endif %}
 
 ###
 # Application specific settings, likely overridden in settings_local.py.
