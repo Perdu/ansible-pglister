@@ -16,7 +16,7 @@
 
         # Redirect all URLs not related to account, admin or media to /account
         RewriteEngine on
-        RewriteCond %{REQUEST_URI} "^/(?!account|media|admin|favicon.ico)"
+        RewriteCond %{REQUEST_URI} "^/(?!account(?!/edit)|media|admin|favicon.ico)"
         RewriteRule ^ "/account" [L,R=301]
 
         WSGIScriptAlias / {{ web_path }}/wsgi.py
