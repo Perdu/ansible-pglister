@@ -66,6 +66,20 @@
   become: true
   become_user: 'postgres'
 
+- name: 'Run necessary operations to run eximintegration migrations'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name }}'
+  loop:
+    - 'CREATE EXTENSION IF NOT EXISTS file_fdw;'
+    - 'CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
+    - 'CREATE SCHEMA IF NOT EXISTS eximintegration;'
+    - 'GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};'
+    - "CREATE FOREIGN TABLE eximintegration._raw_eximqueue(jdata jsonb NOT NULL) SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');"
+    - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
+  become: true
+  become_user: 'postgres'
+
 - name: 'Copy pglister config'
   template:
     src: 'pglister.ini.j2'
