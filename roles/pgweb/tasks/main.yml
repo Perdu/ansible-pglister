@@ -127,6 +127,20 @@
     django_user: list
     django_virtualenv: '{{ service_base_path }}'
 
+# To run this manually, simply run
+# python manage.py createsuperuser
+# into pgweb's virtualenv.
+- name: 'Create django superuser'
+  command:
+    cmd: 'sh -c "cd {{ service_base_path }} && {{ service_base_path }}/bin/python {{ service_base_path }}/manage.py shell"'
+    stdin: |
+      from django.contrib.auth import get_user_model
+      User = get_user_model()
+      User.objects.filter(username='admin').exists() or \
+      User.objects.create_superuser('admin', '{{ django_superuser_address }}', '{{ django_superuser_pass }}')
+  become: true
+  become_user: 'list'
+
 - name: 'Drop make-dyncss.sh'
   template:
     src: 'make_dyncss.sh.j2'
