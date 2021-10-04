@@ -28,7 +28,7 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
         recaptcha_secret_key: "YOUR_RECAPTCHA_SECRET_KEY"
     - role: 'pglister'
       vars:
-        pgauth_key: 'YOUR_KEY'
+        pgauth_key: 'YOUR_KEY' # will be generated if not defined
         dc_smarthost: 'smtp.gmail.com::587'
         smtp_relay_password: 'smtp.gmail.com:address@yourdomain.com:YOUR_PASSWORD'
 ```

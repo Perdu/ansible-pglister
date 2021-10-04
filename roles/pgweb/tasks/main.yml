@@ -163,3 +163,39 @@
     minute: '*/5'
     hour: '*'
     job: '{{ service_base_path }}/bin/python {{ service_base_path }}/manage.py send_queued_mail'
+
+- name: 'Generate cryptkey to link pgweb and pglister'
+  command:
+    cmd: "sh -c '{{ service_base_path }}/bin/python {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1'"
+  become: true
+  become_user: 'list'
+  register: 'pgauth_key_stdout'
+  when: pgauth_key is not defined
+
+- set_fact:
+    pgauth_key={{ pgauth_key_stdout.stdout }}
+  when: pgauth_key is not defined
+
+# To do this manually, add a community auth org and site in /admin/
+- name: 'Create community auth site to link pgweb and pglister'
+  command:
+    cmd: 'sh -c "cd {{ service_base_path }} && {{ service_base_path }}/bin/python {{ service_base_path }}/manage.py shell"'
+    stdin: |
+      from pgweb.account.models import *
+      if len(CommunityAuthOrg.objects.filter(orgname="pglister")) == 0:
+        Org = CommunityAuthOrg()
+        Org.orgname = "pglister"
+        Org.save()
+
+        if len(CommunityAuthSite.objects.filter(name="pglister")) == 0:
+          Site = CommunityAuthSite()
+          Site.id = 1
+          Site.name = "pglister"
+          Site.redirecturl = "https://{{ service_vhost_name_pglister }}/auth_receive/"
+          Site.apiurl = "https://{{ service_vhost_name_pgweb }}/account/auth/1/"
+          Site.cryptkey = "{{ pgauth_key }}"
+          Site.org = Org
+          Site.push_changes = True
+          Site.save()
+  become: true
+  become_user: 'list'
