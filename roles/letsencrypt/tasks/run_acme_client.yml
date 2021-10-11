@@ -18,4 +18,4 @@
     certbot certonly
       --config /etc/letsencrypt/{{ ansible_host }}.ini
       --deploy-hook /usr/local/bin/le-deploy-hook.sh
-      {{ additional_options }}
+      {%if additional_options is defined %}{{ additional_options }}{% endif %}
