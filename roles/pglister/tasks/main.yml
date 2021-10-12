@@ -166,7 +166,7 @@
   lineinfile:
     path: '{{ service_base_path }}/systemd/pglister_{{ item }}.template'
     regexp: '^ExecStart=_ROOT_'
-    line: 'ExecStart={{ venv_python }} _ROOT_/{{ item }}.py'
+    line: 'ExecStart={{ venv_python }} _ROOT_/bin/{{ item }}.py'
   loop:
     - 'bounceprocessor'
     - 'cleanup'
