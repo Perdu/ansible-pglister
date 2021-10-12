@@ -162,6 +162,20 @@
   become: true
   become_user: 'list'
 
+- name: 'Add link to venv to systemd services'
+  lineinfile:
+    path: '{{ service_base_path }}/systemd/pglister_{{ item }}.template'
+    regexp: '^ExecStart=_ROOT_'
+    line: 'ExecStart={{ venv_python }} _ROOT_/{{ item }}.py'
+  loop:
+    - 'bounceprocessor'
+    - 'cleanup'
+    - 'eximcleaner'
+    - 'mailprocessor'
+    - 'mailsender'
+    - 'moderationprocessor'
+  when: repo.changed
+
 - name: 'Install systemd services'
   command:
     cmd: './install.sh -install'
