@@ -30,7 +30,7 @@
     line: '{{ smtp_relay_password }}'
   when: smtp_relay_password is defined
 
-- name: Insert config for pglister (1/3)
+- name: Insert config for pglister (1/4)
   blockinfile:
     path: '{{ exim_configuration_file }}'
     insertafter: 'begin transports'
@@ -51,17 +51,29 @@
         user = Debian-exim
         message_prefix =
 
-- name: Insert config for pglister (2/3)
+- name: Insert config for pglister (2/4)
   lineinfile:
     path: '{{ exim_configuration_file }}'
     regex: 'domainlist local_domains ='
-    line: "domainlist local_domains = @ : ${lookup pgsql{select domain from domains where domain='${quote_pgsql:$domain}'} {$value}}"
+    line: "domainlist local_domains = @ : ${lookup pgsql{select name from lists_domain where name='${quote_pgsql:$domain}'} {$value}}"
 
-- name: Insert config for pglister (3/3)
+- name: Insert config for pglister (3/4)
   lineinfile:
     path: '{{ exim_configuration_file }}'
     insertafter: 'hostlist relay_from_hosts ='
     line: 'hide pgsql_servers = localhost/{{ database_name }}/{{ database_user }}/{{ database_password }}'
+
+- name: Insert config for pglister (4/4)
+  blockinfile:
+    path: '{{ exim_configuration_file }}'
+    insertbefore: 'begin transports'
+    block: |
+      pglister:
+        debug_print = "R: pglister for $local_part@$domain"
+        driver = accept
+        transport = pglister_pipe
+        domains = +local_domains
+        local_parts = mailer-daemon : ${lookup pgsql{select lists_list.name from lists_list, lists_domain WHERE lists_list.name='${quote_pgsql:$local_part}' and lists_domain.name='${quote_pgsql:$domain}' AND lists_list.domain_id=lists_domain.id} {$value}}
 
 - name: Restart exim.
   service:
