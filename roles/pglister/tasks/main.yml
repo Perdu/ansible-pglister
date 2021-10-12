@@ -174,3 +174,9 @@
     cmd: './install.sh -start'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
+
+- name: 'Enable systemd services'
+  command:
+    cmd: './install.sh -enable'
+    chdir: '{{ service_base_path }}/systemd/'
+  become: true
