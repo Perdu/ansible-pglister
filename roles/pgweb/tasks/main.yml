@@ -132,7 +132,7 @@
 # into pgweb's virtualenv.
 - name: 'Create django superuser'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ service_base_path }}/bin/python {{ service_base_path }}/manage.py shell"'
+    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
     stdin: |
       from django.contrib.auth import get_user_model
       User = get_user_model()
@@ -162,11 +162,11 @@
     user: 'list'
     minute: '*/5'
     hour: '*'
-    job: '{{ service_base_path }}/bin/python {{ service_base_path }}/manage.py send_queued_mail'
+    job: '{{ venv_python }} {{ service_base_path }}/manage.py send_queued_mail'
 
 - name: 'Generate cryptkey to link pgweb and pglister'
   command:
-    cmd: "sh -c '{{ service_base_path }}/bin/python {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1'"
+    cmd: "sh -c '{{ venv_python }} {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1'"
   become: true
   become_user: 'list'
   register: 'pgauth_key_stdout'
@@ -179,7 +179,7 @@
 # To do this manually, add a community auth org and site in /admin/
 - name: 'Create community auth site to link pgweb and pglister'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ service_base_path }}/bin/python {{ service_base_path }}/manage.py shell"'
+    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
     stdin: |
       from pgweb.account.models import *
       if len(CommunityAuthOrg.objects.filter(orgname="pglister")) == 0:
