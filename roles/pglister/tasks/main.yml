@@ -49,6 +49,23 @@
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
 
+- name: 'Create a postgres user for Debian-exim'
+  postgresql_user:
+    name: 'Debian-exim'
+  become: true
+  become_user: 'postgres'
+
+- name: 'Grant permissions to database to Debian-exim'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name }} TO "Debian-exim";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
+  become: true
+  become_user: 'postgres'
+
 - name: 'Install postgresql pgcrypto schema'
   postgresql_schema:
     name: 'pgcrypto'
