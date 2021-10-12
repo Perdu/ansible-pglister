@@ -37,7 +37,7 @@
     block: |
       pglister_pipe:
         driver = pipe
-        command = /srv/pglister/local/web/pglister/bin/python /srv/pglister/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix(at)$domain -m $header_message-id:
+        command = /srv/pglister/local/web/pglister/bin/python /srv/pglister/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix@$domain -m $header_message-id:
         #ignore_status
         temp_errors = *
         return_output = false
