@@ -103,7 +103,7 @@
     dest: '{{ service_base_path }}/pglister.ini'
     owner: 'list'
     group: 'www-data'
-    mode: '0660'
+    mode: '0664'
 
 - include_role:
     name: 'http_vhost'
@@ -120,7 +120,7 @@
     dest: '{{ service_base_path }}/web/pglister/settings.py'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '0640'
 
 - name: 'install virtualenv via pip'
   pip:
