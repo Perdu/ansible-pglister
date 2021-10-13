@@ -67,6 +67,7 @@
   blockinfile:
     path: '{{ exim_configuration_file }}'
     insertbefore: 'begin transports'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK 2'
     block: |
       pglister:
         debug_print = "R: pglister for $local_part@$domain"
