@@ -127,6 +127,14 @@
     django_user: list
     django_virtualenv: '{{ service_base_path }}'
 
+- name: 'Run varnish_local.sql to disable Varnish functions'
+  postgresql_query:
+    db: '{{ database_name }}'
+    path_to_script: '{{ service_base_path }}/sql/varnish_local.sql'
+    as_single_query: false
+  become: true
+  become_user: 'postgres'
+
 # To run this manually, simply run
 # python manage.py createsuperuser
 # into pgweb's virtualenv.
