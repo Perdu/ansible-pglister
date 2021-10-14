@@ -104,3 +104,11 @@
         user.save()
   become: true
   become_user: 'list'
+
+- name: 'Drop archives.ini'
+  template:
+    src: 'archives.ini.j2'
+    dest: '{{ service_base_path }}/loader/archives.ini'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0640'
