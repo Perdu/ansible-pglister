@@ -129,7 +129,7 @@
 
 - name: 'Run varnish_local.sql to disable Varnish functions'
   postgresql_query:
-    db: '{{ database_name }}'
+    db: '{{ database_name_pgweb }}'
     path_to_script: '{{ service_base_path }}/sql/varnish_local.sql'
     as_single_query: false
   become: true
