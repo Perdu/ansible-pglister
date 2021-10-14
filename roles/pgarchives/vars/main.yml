@@ -1,0 +1,12 @@
+---
+service_vhost_name: '{{ service_vhost_name_pgarchives }}'
+repo_name: 'pgarchives.git'
+repo_uri: 'https://github.com/postgres/{{ repo_name }}'
+base_path: '/srv/pgarchives'
+service_base_path: '{{ base_path }}/local'
+web_path: '{{ base_path }}/local/django/archives'
+repo_path: '{{ base_path }}/{{ repo_name }}'
+venv_python: '{{ service_base_path }}/django/bin/python'
+
+admin_email_address: 'webmaster@{{ domain }}'
+django_secret_key: 'changemechangeme!-ansible'
