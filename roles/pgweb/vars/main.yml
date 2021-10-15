@@ -2,7 +2,7 @@
 service_vhost_name: '{{ service_vhost_name_pgweb }}'
 repo_name: 'pgweb.git'
 repo_uri: 'https://github.com/postgres/{{ repo_name }}'
-base_path: '/srv/pgweb'
+base_path: '{{ base_path_pgweb }}'
 service_base_path: '{{ base_path }}/local'
 web_path: '{{ base_path }}/local/pgweb'
 repo_path: '{{ base_path }}/{{ repo_name }}'

@@ -2,7 +2,7 @@
 service_vhost_name: '{{ service_vhost_name_pgarchives }}'
 repo_name: 'pgarchives.git'
 repo_uri: 'https://github.com/postgres/{{ repo_name }}'
-base_path: '/srv/pgarchives'
+base_path: '{{ base_path_pgarchives }}'
 service_base_path: '{{ base_path }}/local'
 web_path: '{{ base_path }}/local/django/archives'
 repo_path: '{{ base_path }}/{{ repo_name }}'
