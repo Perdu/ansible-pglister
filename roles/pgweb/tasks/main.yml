@@ -6,6 +6,7 @@
       - 'python3'
       - 'libapache2-mod-wsgi-py3'
       - 'python3-pip'
+      - 'python3-psycopg2'
       - 'python-psycopg2'
       - 'python-virtualenv'
 
@@ -127,6 +128,7 @@
     django_user: list
     django_virtualenv: '{{ service_base_path }}'
 
+# Todo: it will be better to run this inside the venv
 - name: 'Run varnish_local.sql to disable Varnish functions'
   postgresql_query:
     db: '{{ database_name_pgweb }}'
