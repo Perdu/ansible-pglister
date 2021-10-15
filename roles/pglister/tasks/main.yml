@@ -43,7 +43,7 @@
     cmd: psql -v ON_ERROR_STOP=0 --no-password
     stdin: |
       CREATE USER {{ database_user }};
-      CREATE DATABASE {{ database_name }};
+      CREATE DATABASE {{ database_name_pglister }};
   become: true
   become_user: 'postgres'
   register: result
@@ -58,9 +58,9 @@
 - name: 'Grant permissions to database to Debian-exim'
   postgresql_query:
     query: '{{ item }}'
-    db: '{{ database_name }}'
+    db: '{{ database_name_pglister }}'
   loop:
-    - 'GRANT ALL ON DATABASE {{ database_name }} TO "Debian-exim";'
+    - 'GRANT ALL ON DATABASE {{ database_name_pglister }} TO "Debian-exim";'
     - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
     - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
   become: true
@@ -69,14 +69,14 @@
 - name: 'Install postgresql pgcrypto schema'
   postgresql_schema:
     name: 'pgcrypto'
-    database: '{{ database_name }}'
+    database: '{{ database_name_pglister }}'
   become: true
   become_user: 'postgres'
 
 - name: 'Install postgresql crypto extension and grant usage'
   postgresql_query:
     query: '{{ item }}'
-    db: '{{ database_name }}'
+    db: '{{ database_name_pglister }}'
   loop:
     - 'CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA pgcrypto;'
     - 'GRANT USAGE ON SCHEMA pgcrypto TO {{ database_user }}'
@@ -86,7 +86,7 @@
 - name: 'Run necessary operations to run eximintegration migrations'
   postgresql_query:
     query: '{{ item }}'
-    db: '{{ database_name }}'
+    db: '{{ database_name_pglister }}'
   loop:
     - 'CREATE EXTENSION IF NOT EXISTS file_fdw;'
     - 'CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'

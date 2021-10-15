@@ -61,7 +61,7 @@
   lineinfile:
     path: '{{ exim_configuration_file }}'
     insertafter: 'hostlist relay_from_hosts ='
-    line: 'hide pgsql_servers = localhost/{{ database_name }}/{{ database_user }}/{{ database_password }}'
+    line: 'hide pgsql_servers = localhost/{{ database_name_pglister }}/{{ database_user }}/{{ database_password }}'
 
 - name: Insert config for pglister (4/4)
   blockinfile:
