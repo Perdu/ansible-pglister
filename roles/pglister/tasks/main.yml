@@ -205,14 +205,12 @@
     - 'mailprocessor'
     - 'mailsender'
     - 'moderationprocessor'
-  when: repo.changed
 
 - name: 'Install systemd services'
   command:
     cmd: './install.sh -install'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
-  when: repo.changed
 
 - name: 'Start systemd services'
   command:
