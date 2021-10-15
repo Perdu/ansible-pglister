@@ -76,6 +76,38 @@
         domains = +local_domains
         local_parts = mailer-daemon : ${lookup pgsql{select lists_list.name from lists_list, lists_domain WHERE lists_list.name='${quote_pgsql:$local_part}' and lists_domain.name='${quote_pgsql:$domain}' AND lists_list.domain_id=lists_domain.id} {$value}}
 
+- name: Insert config for pgarchives (1/2)
+  blockinfile:
+    path: '{{ exim_configuration_file }}'
+    insertbefore: 'begin transports'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK 3'
+    block: |
+      archive_router:
+        driver = accept
+        domains = +local_domains
+        local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}'} {$value}fail}
+        transport = archive_pipe
+
+- name: Insert config for pgarchives (2/2)
+  blockinfile:
+    path: '{{ exim_configuration_file }}'
+    insertafter: 'begin transports'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK 4'
+    block: |
+      archive_pipe:
+        driver = pipe
+        command = /srv/pgarchives/local/django/bin/python /srv/pgarchives/local/loader/load_message.py -l $local_part
+        #ignore_status
+        temp_errors = *
+        return_output = false
+        freeze_exec_fail = true
+        log_defer_output = true
+        log_output = true
+        #log_fail_output = true
+        umask = 022
+        user = Debian-exim
+        environment =
+
 - name: Restart exim.
   service:
     name: '{{ exim_daemon }}'
