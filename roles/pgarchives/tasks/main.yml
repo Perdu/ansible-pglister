@@ -113,7 +113,7 @@
   become: true
   become_user: 'list'
 
-- name: 'Fix schema.sql to avoid conflicts with django'
+- name: 'Drop fixed schema.sql to avoid conflicts with django'
   copy:
     src: 'schema.sql'
     dest: '{{ service_base_path }}/loader/sql/schema.sql'
