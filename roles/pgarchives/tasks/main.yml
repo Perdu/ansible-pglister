@@ -124,7 +124,7 @@
   command:
     cmd: sh -c 'psql {{ database_name_pgarchives }} < {{ service_base_path }}/loader/sql/schema.sql'
   become: true
-  become_user: 'postgres'
+  become_user: 'list'
 
 - name: 'Drop fixed pglister_sync.py'
   copy:
