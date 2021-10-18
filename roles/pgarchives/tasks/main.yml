@@ -86,6 +86,8 @@
       - django==2.2.24
       - psycopg2-binary
       - requests
+      - python-dateutil
+      - pytidylib
     virtualenv: '{{ service_base_path }}/django'
     virtualenv_python: python3
   become: true
