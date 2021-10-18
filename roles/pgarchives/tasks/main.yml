@@ -126,6 +126,13 @@
   become: true
   become_user: 'postgres'
 
+- name: 'Drop fixed pglister_sync.py'
+  copy:
+    src: 'pglister_sync.py'
+    dest: '{{ service_base_path }}/loader/pglister_sync.py'
+    owner: 'list'
+    group: 'www-data'
+
 - name: 'Drop archives.ini'
   template:
     src: 'archives.ini.j2'
