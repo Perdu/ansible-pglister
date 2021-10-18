@@ -113,6 +113,19 @@
   become: true
   become_user: 'list'
 
+- name: 'Fix schema.sql to avoid conflicts with django'
+  copy:
+    src: 'schema.sql'
+    dest: '{{ service_base_path }}/loader/sql/schema.sql'
+    owner: 'list'
+    group: 'www-data'
+
+- name: 'Execute loader/sql/schema.sql to complete the database'
+  command:
+    cmd: sh -c 'psql {{ database_name_pgarchives }} < {{ service_base_path }}/loader/sql/schema.sql'
+  become: true
+  become_user: 'postgres'
+
 - name: 'Drop archives.ini'
   template:
     src: 'archives.ini.j2'
