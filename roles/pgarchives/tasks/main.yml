@@ -8,6 +8,7 @@
       - 'python3-pip'
       - 'python-psycopg2'
       - 'python-virtualenv'
+      - 'hunspell-en-us'
 
 - name: 'Create folder tree'
   file:
