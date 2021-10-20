@@ -143,3 +143,14 @@
     owner: 'list'
     group: 'Debian-exim'
     mode: '0640'
+
+- name: 'Grant permissions to database to Debian-exim'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pgarchives }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
+  become: true
+  become_user: 'postgres'
