@@ -55,7 +55,7 @@
   lineinfile:
     path: '{{ exim_configuration_file }}'
     regex: 'domainlist local_domains ='
-    line: "domainlist local_domains = @ : ${lookup pgsql{select name from lists_domain where name='${quote_pgsql:$domain}'} {$value}}"
+    line: "domainlist local_domains = @ : ${lookup pgsql{select name from lists_domain where name='${quote_pgsql:$domain}'} {$value}} : MAIN_LOCAL_DOMAINS"
 
 - name: Insert config for pglister (3/4)
   lineinfile:
@@ -84,9 +84,8 @@
     block: |
       archive_router:
         driver = accept
-        domains = +local_domains
+        domains = {{ service_vhost_name_pgarchives }}
         local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}'} {$value}fail}
-        local_part_suffix = -owner+archive
         transport = archive_pipe
 
 - name: Insert config for pgarchives (2/2)
