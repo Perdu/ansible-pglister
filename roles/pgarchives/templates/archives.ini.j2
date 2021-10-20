@@ -6,3 +6,9 @@ server=localhost:9911
 heloname=localhost
 resender=noreply@example.com
 
+[pglister]
+# synchronize subscribers between pgarchives and pglister
+subscribers=0
+root=https://{{ service_vhost_name_pglister }}
+myname=pgarchives
+apikey={{ pgarchives_secret_key }}
