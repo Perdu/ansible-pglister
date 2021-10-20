@@ -116,6 +116,17 @@
   become: true
   become_user: 'list'
 
+- name: 'Drop make-dyncss.sh'
+  template:
+    src: 'make_dyncss.sh.j2'
+    dest: '{{ service_base_path }}/make_dyncss.sh'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0660'
+
+- name: 'Run make_dyncss.sh'
+  command: sh '{{ service_base_path }}/make_dyncss.sh'
+
 - name: 'Drop fixed schema.sql to avoid conflicts with django'
   copy:
     src: 'schema.sql'
