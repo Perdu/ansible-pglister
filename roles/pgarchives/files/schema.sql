@@ -51,6 +51,12 @@ CREATE TABLE apiclients(
    postback varchar(500) NOT NULL
 );
 
+CREATE TABLE threadsubscriptions(
+   id SERIAL NOT NULL PRIMARY KEY,
+   apiclient_id integer NOT NULL REFERENCES apiclients(id),
+   threadid integer NOT NULL
+);
+
 CREATE TABLE threadnotifications(
    apiclient_id integer NOT NULL REFERENCES apiclients(id),
    threadid integer NOT NULL,
