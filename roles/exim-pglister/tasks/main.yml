@@ -86,6 +86,7 @@
         driver = accept
         domains = +local_domains
         local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}'} {$value}fail}
+        local_part_suffix = -owner+archive
         transport = archive_pipe
 
 - name: Insert config for pgarchives (2/2)
