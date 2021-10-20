@@ -141,5 +141,5 @@
     src: 'archives.ini.j2'
     dest: '{{ service_base_path }}/loader/archives.ini'
     owner: 'list'
-    group: 'www-data'
+    group: 'Debian-exim'
     mode: '0640'
