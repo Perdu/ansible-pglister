@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sudo mkdir -p {{ service_base_path }}/django/media/dyncss/
+sudo cat {{ service_base_path }}/django/media/css/main.css > {{ service_base_path }}/django/media/dyncss/base.css
+sudo cat {{ service_base_path }}/django/media/css/normalize.css >> {{ service_base_path }}/django/media/dyncss/base.css
+sudo chown list:www-data {{ service_base_path }}/django/media/dyncss/base.css
