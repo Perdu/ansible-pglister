@@ -3,67 +3,67 @@
 BEGIN;
 
 ALTER TABLE messages
-   ADD COLUMN rawtxt bytea NOT NULL,
-   ADD COLUMN fti tsvector NOT NULL;
+   ADD COLUMN IF NOT EXISTS rawtxt bytea NOT NULL,
+   ADD COLUMN IF NOT EXISTS fti tsvector NOT NULL;
 
-CREATE INDEX idx_messages_threadid ON messages(threadid);
-CREATE UNIQUE INDEX idx_messages_msgid ON messages(messageid);
-CREATE INDEX idx_messages_date ON messages(date);
-CREATE INDEX idx_messages_parentid ON messages(parentid);
+CREATE INDEX IF NOT EXISTS idx_messages_threadid ON messages(threadid);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_messages_msgid ON messages(messageid);
+CREATE INDEX IF NOT EXISTS idx_messages_date ON messages(date);
+CREATE INDEX IF NOT EXISTS idx_messages_parentid ON messages(parentid);
 
-CREATE TABLE message_hide_reasons (
+CREATE TABLE IF NOT EXISTS message_hide_reasons (
    message int NOT NULL PRIMARY KEY REFERENCES messages,
    dt timestamptz,
    reason text,
    by text
 );
 
-CREATE SEQUENCE threadid_seq;
+CREATE SEQUENCE IF NOT EXISTS threadid_seq;
 
-CREATE TABLE unresolved_messages(
+CREATE TABLE IF NOT EXISTS unresolved_messages(
    message int NOT NULL REFERENCES messages,
    priority int NOT NULL,
    msgid text NOT NULL,
    CONSTRAINT unresolved_messages_pkey PRIMARY KEY (message, priority)
 );
 
-CREATE UNIQUE INDEX idx_unresolved_msgid_message ON unresolved_messages(msgid, message);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unresolved_msgid_message ON unresolved_messages(msgid, message);
 
-CREATE TABLE list_months(
+CREATE TABLE IF NOT EXISTS list_months(
    listid int NOT NULL REFERENCES lists(listid),
    year int NOT NULL,
    month int NOT NULL,
    CONSTRAINT list_months_pk PRIMARY KEY (listid, year, month)
 );
 
-CREATE TABLE list_threads(
+CREATE TABLE IF NOT EXISTS list_threads(
    threadid int NOT NULL, /* comes from threadid_seq */
    listid int NOT NULL REFERENCES lists(listid),
    CONSTRAINT pg_list_threads PRIMARY KEY (threadid, listid)
 );
-CREATE INDEX list_threads_listid_idx ON list_threads(listid);
+CREATE INDEX IF NOT EXISTS list_threads_listid_idx ON list_threads(listid);
 
-CREATE INDEX idx_attachments_msg ON attachments(message);
+CREATE INDEX IF NOT EXISTS idx_attachments_msg ON attachments(message);
 
-CREATE TABLE apiclients(
+CREATE TABLE IF NOT EXISTS apiclients(
    id SERIAL NOT NULL PRIMARY KEY,
    apikey varchar(100) NOT NULL,
    postback varchar(500) NOT NULL
 );
 
-CREATE TABLE threadsubscriptions(
+CREATE TABLE IF NOT EXISTS threadsubscriptions(
    id SERIAL NOT NULL PRIMARY KEY,
    apiclient_id integer NOT NULL REFERENCES apiclients(id),
    threadid integer NOT NULL
 );
 
-CREATE TABLE threadnotifications(
+CREATE TABLE IF NOT EXISTS threadnotifications(
    apiclient_id integer NOT NULL REFERENCES apiclients(id),
    threadid integer NOT NULL,
    CONSTRAINT threadnotifications_pkey PRIMARY KEY (apiclient_id, threadid)
 );
 
-CREATE TABLE loaderrors(
+CREATE TABLE IF NOT EXISTS loaderrors(
    id SERIAL NOT NULL PRIMARY KEY,
    listid int NOT NULL,
    dat timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -74,30 +74,36 @@ CREATE TABLE loaderrors(
 );
 
 /* textsearch configs */
-CREATE TEXT SEARCH CONFIGURATION pg (COPY = pg_catalog.english);
+DO
+$$BEGIN
+   CREATE TEXT SEARCH CONFIGURATION pg (COPY = pg_catalog.english);
 
-CREATE TEXT SEARCH DICTIONARY english_ispell (
-   TEMPLATE = ispell,
-   DictFile = en_us,
-   AffFile = en_us,
-   StopWords = english
-);
-CREATE TEXT SEARCH DICTIONARY pg_dict (
-   TEMPLATE = synonym,
-   SYNONYMS = pg_dict
-);
-CREATE TEXT SEARCH DICTIONARY pg_stop (
-   TEMPLATE = simple,
-   StopWords = pg_dict
-);
-ALTER TEXT SEARCH CONFIGURATION pg
-   ALTER MAPPING FOR asciiword, asciihword, hword_asciipart,
-                     word, hword, hword_part
-    WITH pg_stop, pg_dict, english_ispell, english_stem;
-ALTER TEXT SEARCH CONFIGURATION pg
-   DROP MAPPING FOR email, url, url_path, sfloat, float;
+   CREATE TEXT SEARCH DICTIONARY english_ispell (
+      TEMPLATE = ispell,
+      DictFile = en_us,
+      AffFile = en_us,
+      StopWords = english
+   );
+   CREATE TEXT SEARCH DICTIONARY pg_dict (
+      TEMPLATE = synonym,
+      SYNONYMS = pg_dict
+   );
+   CREATE TEXT SEARCH DICTIONARY  pg_stop (
+      TEMPLATE = simple,
+      StopWords = pg_dict
+   );
+   ALTER TEXT SEARCH CONFIGURATION pg
+      ALTER MAPPING FOR asciiword, asciihword, hword_asciipart,
+                        word, hword, hword_part
+       WITH pg_stop, pg_dict, english_ispell, english_stem;
+   ALTER TEXT SEARCH CONFIGURATION pg
+      DROP MAPPING FOR email, url, url_path, sfloat, float;
+EXCEPTION
+   WHEN unique_violation THEN
+      NULL;  -- ignore error
+END;$$;
 
-CREATE FUNCTION messages_fti_trigger_func() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION messages_fti_trigger_func() RETURNS trigger AS $$
 BEGIN
    NEW.fti = setweight(to_tsvector('public.pg', coalesce(new.subject, '')), 'A') ||
              setweight(to_tsvector('public.pg', coalesce(new.bodytxt, '')), 'D');
@@ -105,10 +111,11 @@ BEGIN
 END
 $$ LANGUAGE 'plpgsql';
 
+DROP TRIGGER IF EXISTS messages_fti_trigger on messages;
 CREATE TRIGGER messages_fti_trigger
  BEFORE INSERT OR UPDATE OF subject, bodytxt ON  messages
  FOR EACH ROW EXECUTE PROCEDURE messages_fti_trigger_func();
-CREATE INDEX messages_fti_idx ON messages USING gin(fti);
+CREATE INDEX IF NOT EXISTS messages_fti_idx ON messages USING gin(fti);
 
 CREATE OR REPLACE FUNCTION messages_notify_threads_trg_func() RETURNS trigger AS $$
 BEGIN
@@ -123,11 +130,12 @@ BEGIN
    RETURN NEW;
 END
 $$ LANGUAGE 'plpgsql';
+DROP TRIGGER IF EXISTS messages_notify_trigger ON messages;
 CREATE TRIGGER messages_notify_trigger
  AFTER INSERT ON messages
  FOR EACH ROW EXECUTE PROCEDURE messages_notify_threads_trg_func();
 
-CREATE TABLE legacymap(
+CREATE TABLE IF NOT EXISTS legacymap(
        listid int not null,
        year int not null,
        month int not null,
