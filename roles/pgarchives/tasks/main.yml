@@ -24,7 +24,7 @@
     dest: '{{ base_path }}/{{ repo_name }}'
     clone: true
     update: true
-    version: 'a4b24b88cb343f778cac5ab66cc6117dac68bf21'
+    version: '{{ pgarchives_version }}'
   register: repo
 
 - name: 'Copy repository content to local folder'

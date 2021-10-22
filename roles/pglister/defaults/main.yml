@@ -1,3 +1,4 @@
 ---
 database_user: 'list'
 database_name_pglister: 'pglister'
+pglister_version: 'master'

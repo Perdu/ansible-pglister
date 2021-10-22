@@ -24,6 +24,7 @@
     dest: '{{ base_path }}/{{ repo_name }}'
     clone: true
     update: true
+    version: '{{ pglister_version }}'
   register: repo
 
 - name: 'Copy repository content to local folder'
