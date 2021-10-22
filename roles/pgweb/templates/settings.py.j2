@@ -187,8 +187,9 @@ FTP_MASTERS = ()                                            # A tuple containing
                                                             # trusted to upload ftp structure data
 VARNISH_PURGERS = ()                                        # Extra servers that can do varnish purges through our queue
 DO_ESI = False                                              # Generate ESI tags
-ARCHIVES_SEARCH_SERVER = ""                                 # Where to post REST request for archives search
+ARCHIVES_SEARCH_SERVER = "{{ service_vhost_name_pgarchives }}" # Where to post REST request for archives search
 ARCHIVES_SEARCH_PLAINTEXT = False                           # Contact ARCHIVES_SEARCH_SERVER with http instead of https
+SEARCH_DSN = "dbname={{ database_search }}"
 FRONTEND_SMTP_RELAY = "magus.postgresql.org"                # Where to relay user generated email
 OAUTH = {}                                                  # OAuth providers and keys
 PGDG_ORG_ID = -1                                            # id of the PGDG organisation entry
