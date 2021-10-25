@@ -127,6 +127,9 @@
 - name: 'Run make_dyncss.sh'
   command: sh '{{ service_base_path }}/make_dyncss.sh'
 
+# Fixed schema.sql uses default parser instead of tsparser
+# Other possibility is to install the latter, which can be found here
+# https://github.com/postgrespro/pg_tsparser
 - name: 'Drop fixed schema.sql to avoid conflicts with django'
   copy:
     src: 'schema.sql'
