@@ -155,6 +155,25 @@
   become: true
   become_user: 'list'
 
+- name: 'Drop archives.ini'
+  template:
+    src: 'archives.ini.j2'
+    dest: '{{ service_base_path }}/loader/archives.ini'
+    owner: 'list'
+    group: 'Debian-exim'
+    mode: '0640'
+
+- name: 'Grant permissions to database to Debian-exim'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pgarchives }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
+  become: true
+  become_user: 'postgres'
+
 - name: 'Drop fixed pglister_sync.py'
   copy:
     src: 'pglister_sync.py'
@@ -175,22 +194,3 @@
     minute: '0'
     hour: '4'
     job: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
-
-- name: 'Drop archives.ini'
-  template:
-    src: 'archives.ini.j2'
-    dest: '{{ service_base_path }}/loader/archives.ini'
-    owner: 'list'
-    group: 'Debian-exim'
-    mode: '0640'
-
-- name: 'Grant permissions to database to Debian-exim'
-  postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pgarchives }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
-  become: true
-  become_user: 'postgres'
