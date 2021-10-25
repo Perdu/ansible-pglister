@@ -45,24 +45,6 @@ CREATE INDEX IF NOT EXISTS list_threads_listid_idx ON list_threads(listid);
 
 CREATE INDEX IF NOT EXISTS idx_attachments_msg ON attachments(message);
 
-CREATE TABLE IF NOT EXISTS apiclients(
-   id SERIAL NOT NULL PRIMARY KEY,
-   apikey varchar(100) NOT NULL,
-   postback varchar(500) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS threadsubscriptions(
-   id SERIAL NOT NULL PRIMARY KEY,
-   apiclient_id integer NOT NULL REFERENCES apiclients(id),
-   threadid integer NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS threadnotifications(
-   apiclient_id integer NOT NULL REFERENCES apiclients(id),
-   threadid integer NOT NULL,
-   CONSTRAINT threadnotifications_pkey PRIMARY KEY (apiclient_id, threadid)
-);
-
 CREATE TABLE IF NOT EXISTS loaderrors(
    id SERIAL NOT NULL PRIMARY KEY,
    listid int NOT NULL,
@@ -116,24 +98,6 @@ CREATE TRIGGER messages_fti_trigger
  BEFORE INSERT OR UPDATE OF subject, bodytxt ON  messages
  FOR EACH ROW EXECUTE PROCEDURE messages_fti_trigger_func();
 CREATE INDEX IF NOT EXISTS messages_fti_idx ON messages USING gin(fti);
-
-CREATE OR REPLACE FUNCTION messages_notify_threads_trg_func() RETURNS trigger AS $$
-BEGIN
-   INSERT INTO threadnotifications (apiclient_id, threadid)
-     SELECT apiclient_id, threadid
-      FROM threadsubscriptions
-      WHERE threadsubscriptions.threadid=NEW.threadid
-     ON CONFLICT DO NOTHING;
-   IF FOUND THEN
-      NOTIFY thread_updated;
-   END IF;
-   RETURN NEW;
-END
-$$ LANGUAGE 'plpgsql';
-DROP TRIGGER IF EXISTS messages_notify_trigger ON messages;
-CREATE TRIGGER messages_notify_trigger
- AFTER INSERT ON messages
- FOR EACH ROW EXECUTE PROCEDURE messages_notify_threads_trg_func();
 
 CREATE TABLE IF NOT EXISTS legacymap(
        listid int not null,
