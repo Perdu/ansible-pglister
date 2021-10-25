@@ -108,6 +108,13 @@
         user = Debian-exim
         environment =
 
+- name: Add cron emails destination for list
+  cronvar:
+    name: "MAILTO"
+    value: "{{ cron_emails_destination }}"
+  become: true
+  become_user: 'list'
+
 - name: Restart exim.
   service:
     name: '{{ exim_daemon }}'
