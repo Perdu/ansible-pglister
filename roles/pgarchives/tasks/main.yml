@@ -167,6 +167,15 @@
   become: true
   become_user: 'list'
 
+- name: 'Add crontab to run pglister_sync'
+  cron:
+    state: 'present'
+    name: 'Add new lists to pgarchives'
+    user: 'list'
+    minute: '0'
+    hour: '4'
+    job: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
+
 - name: 'Drop archives.ini'
   template:
     src: 'archives.ini.j2'
