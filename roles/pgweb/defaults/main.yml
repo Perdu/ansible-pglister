@@ -1,5 +1,4 @@
 ---
 database_user_pgweb: 'list'
 database_name_pgweb: 'spi_pgweb'
-database_search: 'spi_pgsearch'
 pgweb_version: '1adaab8955ccf022b1c22b23d62a383854eb0e9e'
