@@ -216,37 +216,3 @@
           Site.save()
   become: true
   become_user: 'list'
-
-## Search
-- name: 'Create search database'
-  command:
-    cmd: psql -v ON_ERROR_STOP=0 --no-password
-    stdin: |
-      CREATE DATABASE {{ database_search }};
-  become: true
-  become_user: 'postgres'
-  register: result
-  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-
-- name: 'Grant permissions to search database to Debian-exim'
-  postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_search }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_search }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
-  become: true
-  become_user: 'postgres'
-
-- name: 'Execute sql scripts to create search database'
-  command:
-    cmd: sh -c 'psql {{ database_search }} < {{ service_base_path }}/tools/search/sql/{{ item }}'
-  loop:
-    - 'schema.sql'
-    - 'tsearch.sql'
-    - 'functions.sql'
-    - 'data.sql'
-    - 'indexes.sql'
-  become: true
-  become_user: 'list'
