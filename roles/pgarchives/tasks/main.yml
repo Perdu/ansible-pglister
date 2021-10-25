@@ -162,6 +162,11 @@
     owner: 'list'
     group: 'www-data'
 
+- name: 'Run pglister_sync.py'
+  command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
+  become: true
+  become_user: 'list'
+
 - name: 'Drop archives.ini'
   template:
     src: 'archives.ini.j2'
