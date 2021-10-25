@@ -166,5 +166,3 @@ $BODY$
   COST 100;
 
 \echo Dont forget to commit!
-
-COMMIT;
