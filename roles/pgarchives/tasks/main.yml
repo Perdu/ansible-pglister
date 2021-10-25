@@ -127,6 +127,18 @@
 - name: 'Run make_dyncss.sh'
   command: sh '{{ service_base_path }}/make_dyncss.sh'
 
+# These file is necessary to install schema
+- name: 'Drop pg_dict.*'
+  copy:
+    src: '{{ item }}'
+    dest: '/usr/share/postgresql/12/tsearch_data/'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+  loop:
+    - 'pg_dict.stop'
+    - 'pg_dict.syn' # this file comes from the pgweb repository
+
 # Fixed schema.sql uses default parser instead of tsparser
 # Other possibility is to install the latter, which can be found here
 # https://github.com/postgrespro/pg_tsparser
