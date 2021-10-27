@@ -39,6 +39,14 @@
     group: 'www-data'
     recurse: 'yes'
 
+- name: 'Override home.html to remove mentions of postgresql.org'
+  template:
+    src: 'home.html.j2'
+    dest: '{{ service_base_path }}/web/pglister/lists/templates/home.html'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0644'
+
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
   command:

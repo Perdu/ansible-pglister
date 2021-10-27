@@ -1,0 +1,41 @@
+{% raw %}
+{%extends "base.html"%}
+{%block content%}
+{% endraw %}
+<h1>{{ org_name }} mailing lists</h1>
+<p>
+  <a class="btn btn-lg btn-primary" href="/manage/">Manage subscriptions</a>
+  <a class="btn btn-lg btn-primary" href="/unsubscribe/">Unsubscribe</a>
+  <br/><br/>
+</p>
+<p>
+  From this site you can manage all your {{ org_name }} mailing list
+  subscriptions.  To manage them, click on the link above.
+</p>
+
+<p>
+  If you are not already logged into your {{ org_name }} Community account,
+  you will be redirected and asked to log in first.  Once you're logged
+  in, you can see all of the lists which you are subscribed to with the
+  email address associated with your community account.
+</p>
+<p>
+  If you have other email addresses, at the link above you'll be able to
+  go through a short process to verify you have control over those other
+  email addresses and then you'll be able to see the lists subscribed
+  using those addresses as well.
+</p>
+<p>
+  If you are a moderator of {{ org_name }} mailing lists, you'll have a link
+  at the bottom of the page which says "Manage/Moderate lists".
+</p>
+
+<h2>Unsubscribe</h2>
+<p>
+  Do you need help to unsubscribe? Please follow the instructions on
+  <a href="/unsubscribe/">this page</a>.
+</p>
+
+{% raw %}
+{%endblock%}
+{% endraw %}
