@@ -144,6 +144,8 @@ API_CLIENTS = ('{{ ip_address_pgweb }}',)
 PUBLIC_ARCHIVES = True
 ALLOW_RESEND = False
 
+PGWEB_ADDRESS = '{{ service_vhost_name_pgweb }}'
+
 try:
     from .settings_local import *
 except ImportError:
