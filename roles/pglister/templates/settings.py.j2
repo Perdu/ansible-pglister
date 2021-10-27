@@ -171,3 +171,6 @@ if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS.append('debug_toolbar')
 
 STATIC_ROOT = os.path.join(BASE_DIR, "../media/")
+
+# Load local settings overrides
+from .settings_local import *
