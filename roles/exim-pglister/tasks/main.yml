@@ -115,6 +115,15 @@
   become: true
   become_user: 'list'
 
+- name: Add mailname to /etc/mailname
+  template:
+    src: 'mailname.j2'
+    dest: '/etc/mailname'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  when: mailname is defined
+
 - name: Restart exim.
   service:
     name: '{{ exim_daemon }}'
