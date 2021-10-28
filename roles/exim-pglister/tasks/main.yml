@@ -85,7 +85,7 @@
       archive_router:
         driver = accept
         domains = {{ service_vhost_name_pgarchives }}
-        local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}'} {$value}fail}
+        local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}' and subscription_policy <> 2} {$value}fail}
         transport = archive_pipe
 
 - name: Insert config for pgarchives (2/2)
@@ -97,6 +97,38 @@
       archive_pipe:
         driver = pipe
         command = {{ base_path_pgarchives }}/local/django/bin/python {{ base_path_pgarchives }}/local/loader/load_message.py -l $local_part
+        #ignore_status
+        temp_errors = *
+        return_output = false
+        freeze_exec_fail = true
+        log_defer_output = true
+        log_output = true
+        #log_fail_output = true
+        umask = 022
+        user = Debian-exim
+        environment =
+
+- name: Insert config for pgarchives-private (1/2)
+  blockinfile:
+    path: '{{ exim_configuration_file }}'
+    insertbefore: 'archive_router:' # this router must be placed before pglister's generic one
+    marker: '# {mark} ANSIBLE MANAGED BLOCK 5'
+    block: |
+      archive_private_router:
+        driver = accept
+        domains = {{ service_vhost_name_pgarchives }}
+        local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}' and subscription_policy = 2} {$value}fail}
+        transport = archive_private_pipe
+
+- name: Insert config for pgarchives-private (2/2)
+  blockinfile:
+    path: '{{ exim_configuration_file }}'
+    insertbefore: 'archive_pipe:'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK 6'
+    block: |
+      archive_private_pipe:
+        driver = pipe
+        command = {{ base_path_pgarchives_private }}/local/django/bin/python {{ base_path_pgarchives_private }}/local/loader/load_message.py -l $local_part
         #ignore_status
         temp_errors = *
         return_output = false
