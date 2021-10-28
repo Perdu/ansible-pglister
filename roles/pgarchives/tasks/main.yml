@@ -88,6 +88,8 @@
       - requests
       - python-dateutil
       - pytidylib
+      - pycryptodome # for private
+      - pycryptodomex # for private
     virtualenv: '{{ service_base_path }}/django'
     virtualenv_python: python3
   become: true
@@ -189,7 +191,7 @@
 - name: 'Add crontab to run pglister_sync'
   cron:
     state: 'present'
-    name: 'Add new lists to pgarchives'
+    name: 'Add new lists to {{ role_path|basename }}'
     user: 'list'
     minute: '0'
     hour: '4'

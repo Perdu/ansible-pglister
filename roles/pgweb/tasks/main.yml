@@ -217,6 +217,29 @@
   become: true
   become_user: 'list'
 
+- name: 'Create community auth site to link pgweb and pgarchives_private'
+  command:
+    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ servbice_base_path }}/manage.py shell"'
+    stdin: |
+      from pgweb.account.models import *
+      if len(CommunityAuthOrg.objects.filter(orgname="pgarchives_private")) == 0:
+        Org = CommunityAuthOrg()
+        Org.orgname = "pgarchives_private"
+        Org.save()
+
+        if len(CommunityAuthSite.objects.filter(name="pgarchives_private")) == 0:
+          Site = CommunityAuthSite()
+          Site.id = 2
+          Site.name = "pgarchives_private"
+          Site.redirecturl = "https://{{ service_vhost_name_pgarchives_private }}/auth_receive/"
+          Site.apiurl = "https://{{ service_vhost_name_pgweb }}/account/auth/2/"
+          Site.cryptkey = "{{ pgauth_key }}"
+          Site.org = Org
+          Site.push_changes = True
+          Site.save()
+  become: true
+  become_user: 'list'
+
 # Synchronize with lists in archives for search
 - name: 'Add crontab to run sync_lists'
   cron:

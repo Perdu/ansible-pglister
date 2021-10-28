@@ -141,31 +141,15 @@ RESEND_RATE_LIMIT_SECONDS = 30
 # Always override!
 SEARCH_CLIENTS = ('{{ ip_address_pgweb }}',)
 API_CLIENTS = ('{{ ip_address_pgweb }}',)
+{% if pgarchives_private is defined and pgarchives_private == 'True' %}
+PUBLIC_ARCHIVES = False
+PGAUTH_REDIRECT = "https://{{ service_vhost_name_pgweb }}/account/auth/2/"
+PGAUTH_KEY = "{{ pgauth_key }}"
+{% else %}
 PUBLIC_ARCHIVES = True
+{% endif %}
 ALLOW_RESEND = False
 
 PGWEB_ADDRESS = '{{ service_vhost_name_pgweb }}'
-
-try:
-    from .settings_local import *
-except ImportError:
-    pass
-
-# If this is a non-public site, enable middleware for handling logins etc
-if ALLOW_RESEND or not PUBLIC_ARCHIVES:
-    MIDDLEWARE = [
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-    ] + MIDDLEWARE
-    MIDDLEWARE.append('archives.mailarchives.redirecthandler.RedirectMiddleware')
-
-    INSTALLED_APPS = [
-        'django.contrib.sessions',
-    ] + INSTALLED_APPS
-
-    if not PUBLIC_ARCHIVES:
-        from archives.util import validate_new_user
-        PGAUTH_CREATEUSER_CALLBACK = validate_new_user
 
 ALLOWED_HOSTS = [ '{{ service_vhost_name }}' ]
