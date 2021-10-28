@@ -227,6 +227,22 @@
   become: true
   become_user: 'list'
 
+- name: 'Create archives-private server in pglister'
+  command:
+    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/web/manage.py shell"'
+    stdin: |
+      from pglister.lists.models import *
+      if len(ArchiveServer.objects.filter(name="pgarchives-private")) == 0:
+        arch = ArchiveServer()
+        arch.name = "pgarchives-private"
+        arch.urlpattern = "https://{{ service_vhost_name_pgarchives_private }}/list/%"
+        arch.mailurlpattern = "https://{{ service_vhost_name_pgarchives_private }}/message-id/%"
+        arch.maildomain = "{{ service_vhost_name_pgarchives }}"
+        arch.apikey = "{{ pgarchives_secret_key }}"
+        arch.save()
+  become: true
+  become_user: 'list'
+
 - name: 'Add link to venv to systemd services'
   lineinfile:
     path: '{{ service_base_path }}/systemd/pglister_{{ item }}.template'
