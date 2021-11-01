@@ -191,8 +191,7 @@
 - name: 'Add crontab to run pglister_sync'
   cron:
     state: 'present'
-    name: 'Add new lists to pgarchives{% if pgarchives_private is defined %}-private{% endif %}'
+    name: 'Add new lists and subscribers to pgarchives{% if pgarchives_private is defined %}-private{% endif %}'
     user: 'list'
-    minute: '0'
-    hour: '4'
+    minute: '*/5'
     job: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
