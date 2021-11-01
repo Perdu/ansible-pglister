@@ -7,12 +7,12 @@ heloname=localhost
 resender=noreply@example.com
 
 [pglister]
-# synchronize subscribers between pgarchives and pglister
-subscribers=0
 root=https://{{ service_vhost_name_pglister }}
 {% if pgarchives_private is defined and pgarchives_private == 'True' %}
 myname=pgarchivesprivate
+subscribers=1
 {% else %}
 myname=pgarchives
+subscribers=0
 {% endif %}
 apikey={{ pgarchives_secret_key }}
