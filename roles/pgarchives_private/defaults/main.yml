@@ -1,3 +1,0 @@
----
-database_name_pgarchives: 'pgarchives_private'
-base_path_pgarchives_private: '/srv/pgarchives_private'
