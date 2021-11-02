@@ -1,0 +1,28 @@
+{% raw %}
+{%extends "base.html" %}
+{%block layoutblock%}
+<div class="container-fluid margin archive">
+  <div class="row">
+    <div class="col-lg-2">
+      <div id="pgSideWrap">
+       <div id="pgSideNav">
+         <h2>Quick Links</h2>
+         <ul>
+            <li><a href="/list/">Home</a></li>
+{% endraw %}
+            <li><a href="https://{{ service_vhost_name_pglister }}">Manage lists</a></li>
+            <li><a href="https://{{ service_vhost_name_pgweb }}">Configure account</a></li>
+{% raw %}
+         </ul>
+       </div>
+      </div> <!-- pgSideWrap -->
+    </div>
+    <div class="col-lg-10">
+      <div id="pgContentWrap">
+        {%block contents%}{%endblock%}
+      </div> <!-- pgContentWrap -->
+    </div>
+  </div>
+</div>
+{%endblock%}
+{% endraw %}

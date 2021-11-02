@@ -1,0 +1,84 @@
+{% raw %}
+<!doctype html>
+<html lang="en">
+ <head>
+  <title>PostgreSQL: {%block title%}{%endblock%}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="Content-Type" content="text/xhtml; charset=utf-8" />{%if og%}
+  <meta property="og:url" content="https://www.postgresql.org/{{og.url}}" />
+  <meta property="og:type" content="article" />
+  <meta property="article:author" content="{{og.author}}" />
+  <meta property="article:published_time" content="{{og.time|date:"c"}}" />
+  <meta property="og:image" content="/media-archives/img/about/press/elephant.png" />
+  <meta property="og:title" content="{{og.title}}" />
+  <meta property="og:description" content="{{og.description|truncatewords:"20"}}" />
+  <meta property="og:site_name" content="Mailing List Archives" />{%endif%}
+  {%block meta%}{%endblock%} {# used for custom meta tags such as description which we don't want for every page #}
+  <meta name="theme-color" content="#336791"/>
+  <meta name="copyright" content="The PostgreSQL Global Development Group" />
+  <link href="/media-archives/css/fontawesome.css?{{gitrev}}" rel="stylesheet">
+  <link rel="stylesheet" href="/media-archives/css/bootstrap.min.css?{{gitrev}}">
+  <link rel="shortcut icon" href="/favicon.ico" />
+  {%if newstags %}
+    {%comment%}Default RSS links are only shown on pages that have newstags set{%endcomment%}
+    <link rel="alternate" type="application/rss+xml" title="All PostgreSQL News" href="/news.rss" />
+    {%for t in newstags%}
+      <link rel="alternate" type="application/rss+xml" title="PostgreSQL News about {{t.name}}" href="/news/{{t.urlname}}.rss" />
+    {%endfor%}
+    <link rel="alternate" type="application/rss+xml" title="PostgreSQL Events" href="/events.rss" />
+  {%endif%}
+  <link rel="stylesheet" type="text/css" href="/dyncss/base.css?{{gitrev}}">
+  {%block extrahead%}{%endblock%}
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row justify-content-md-center">
+        <div class="col">
+          <!-- Header -->
+          <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand p-0" href="/">
+              <img class="logo" src="/media-archives/img/about/press/elephant.png" alt="PostgreSQL Elephant Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#pgNavbar" aria-controls="pgNavbar" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="pgNavbar">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item p-2"><a href="/" title="Home">Home</a></li>
+{% endraw %}
+                <li class="nav-item p-2"><a href="https://{{ service_vhost_name_pglister }}" title="Manage lists">Manage lists</a></li>
+                <li class="nav-item p-2"><a href="https://{{ service_vhost_name_pgweb }}" title="Your account">Your account</a></li>
+{% raw %}
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </div>
+      {% comment %}
+      <!-- NOTE: This content is currently hard coded, which makes some challenges
+      when updating deploys.  A future iteration will enable us to load this content
+      dynamically from the pgweb database, amd this we can uncomment this line.
+      This also would make base.html in pgarchives equivalent to base.html in pgweb
+      -->
+      <div class="row justify-content-center pg-shout-box">
+        <div class="col text-white text-center">
+          1st March 2018: <a href="/about/news/1834/">PostgreSQL 10.3 Released</a>!
+        </div>
+      </div>
+      {% endcomment %}
+    </div>
+    {%block layoutblock%}{%endblock%}
+    <!-- Footer -->
+    <footer id="footer">
+      <!-- Copyright -->
+      <div class="container">
+        <p>Copyright &copy; 1996-{% now "Y" %} The PostgreSQL Global Development Group</p>
+      </div>
+    </footer>
+    <script src="/media-archives/js/jquery-3.2.1.slim.min.js?{{gitrev}}"></script>
+    <script src="/media-archives/js/popper.min.js?{{gitrev}}"></script>
+    <script src="/media-archives/js/bootstrap.min.js?{{gitrev}}"></script>
+    <script src="/media-archives/js/main.js?{{gitrev}}"></script>
+  </body>
+</html>
+{% endraw %}
