@@ -1,20 +1,21 @@
 {% raw %}
 {%extends "base.html"%}
+{%load pglister%}
 {%block content%}
 {% endraw %}
-<h1>{{ org_name }} mailing lists</h1>
+<h1>{% orgname %} mailing lists</h1>
 <p>
   <a class="btn btn-lg btn-primary" href="/manage/">Manage subscriptions</a>
   <a class="btn btn-lg btn-primary" href="/unsubscribe/">Unsubscribe</a>
   <br/><br/>
 </p>
 <p>
-  From this site you can manage all your {{ org_name }} mailing list
+  From this site you can manage all your {% orgname %} mailing list
   subscriptions.  To manage them, click on the link above.
 </p>
 
 <p>
-  If you are not already logged into your {{ org_name }} Community account,
+  If you are not already logged into your {% orgname %} Community account,
   you will be redirected and asked to log in first.  Once you're logged
   in, you can see all of the lists which you are subscribed to with the
   email address associated with your community account.
@@ -26,7 +27,7 @@
   using those addresses as well.
 </p>
 <p>
-  If you are a moderator of {{ org_name }} mailing lists, you'll have a link
+  If you are a moderator of {% orgname %} mailing lists, you'll have a link
   at the bottom of the page which says "Manage/Moderate lists".
 </p>
 
