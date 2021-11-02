@@ -219,7 +219,7 @@
 
 - name: 'Create community auth site to link pgweb and pgarchives_private'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ servbice_base_path }}/manage.py shell"'
+    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
     stdin: |
       from pgweb.account.models import *
       if len(CommunityAuthOrg.objects.filter(orgname="pgarchives_private")) == 0:
