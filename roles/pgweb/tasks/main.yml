@@ -246,6 +246,6 @@
     state: 'present'
     name: 'Add new lists to pgweb'
     user: 'list'
-    minute: '10' # after pglister_sync, see roles/pgarchives
+    minute: '10'
     hour: '4'
     job: '{{ venv_python }} {{ service_base_path }}/manage.py sync_lists'
