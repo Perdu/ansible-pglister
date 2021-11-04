@@ -28,7 +28,7 @@ sys.path.append(os.path.abspath(os.path.join(BASE_DIR, '../')))
 SECRET_KEY = "{{ django_secret_key }}"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = {{ debug }}
 
 ALLOWED_HOSTS = ['*']
 

@@ -3,3 +3,4 @@ database_user_pgarchives: 'list'
 database_name_pgarchives: 'spi_pgarchives'
 pgarchives_version: 'a4b24b88cb343f778cac5ab66cc6117dac68bf21'
 ip_address_pgweb: '0.0.0.0/0' # used to restrict access to the search API
+debug: 'False'
