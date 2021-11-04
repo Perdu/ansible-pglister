@@ -17,13 +17,7 @@
 </p>
 
 {% endraw %}
-<p>
-  <b>
-  Migration from mailman has been performed in November 2021. To manage your
-  subscriptions, <a href="https://{{ service_vhost_name_pgweb }}/account/signup/">Create an account</a>
-  with the same email address.
-  </b>
-</p>
+{% if pglister_home_message is defined %}{{ pglister_home_message }}{% endif %}
 {% raw %}
 <p>
   If you are not already logged into your {% org "name" %} Community account,
