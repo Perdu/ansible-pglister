@@ -15,12 +15,12 @@
     group: 'root'
     mode: 0755
 
-- name: 'Create necessary folders'
+- name: 'Create log folder'
   file:
-    path: '{{ service_base_path }}/log'
+    path: '{{ log_path }}'
     state: 'directory'
-    owner: 'root'
-    group: 'root'
+    owner: 'list'
+    group: 'www-data'
     mode: 0755
   notify: 'reload httpd'
 

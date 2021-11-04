@@ -90,7 +90,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+            'filename': '{{ base_path_pgweb }}/log/debug_pgweb.log',
         },
     },
     'loggers': {
