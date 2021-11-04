@@ -116,7 +116,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': '{{ logging_level }}',
             'class': 'logging.FileHandler',
             'filename': '{{ base_path_pgarchives }}/log/debug_pgarchives.log',
         },
@@ -124,7 +124,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': '{{ logging_level }}',
             'propagate': True,
         },
     },
