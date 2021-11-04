@@ -17,14 +17,11 @@
 
 - name: 'Create necessary folders'
   file:
-    path: '{{ item }}'
+    path: '{{ service_base_path }}/log'
     state: 'directory'
     owner: 'root'
     group: 'root'
     mode: 0755
-  loop:
-    - '{{ service_document_root }}'
-    - '{{ service_log_root }}'
   notify: 'reload httpd'
 
 - name: 'Drop vhost template for {{ service_vhost_name }}'
