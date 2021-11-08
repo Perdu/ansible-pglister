@@ -132,13 +132,6 @@
     group: 'www-data'
     mode: '0640'
 
-- name: 'Give correct permissions to /var/list for logging'
-  file:
-    path: '/var/list'
-    owner: 'list'
-    group: 'www-data'
-    state: 'directory'
-
 - name: 'install virtualenv via pip'
   pip:
     name: virtualenv

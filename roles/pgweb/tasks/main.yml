@@ -91,13 +91,6 @@
     group: 'www-data'
     mode: '0660'
 
-- name: 'Give correct permissions to /var/list for logging'
-  file:
-    path: '/var/list'
-    owner: 'list'
-    group: 'www-data'
-    state: 'directory'
-
 - name: 'install virtualenv via pip'
   pip:
     name: virtualenv
@@ -122,11 +115,6 @@
     virtualenv: '{{ service_base_path }}/'
     virtualenv_python: python3
   become: true
-
-- name: 'Create /var/list'
-  file:
-    path: '/var/list'
-    state: 'directory'
 
 - include_role:
     name: cchurch.django
