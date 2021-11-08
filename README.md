@@ -2,7 +2,7 @@
 
 Ansible script to install [pglister](https://gitlab.com/pglister/pglister).
 
-Status: the script is finished, but necessary patches are still in the process of being integrated upstream. In the meeantime, please use:
+Status: the script is finished, but necessary patches are still in the process of being integrated upstream. In the meantime, repositories are still pointing to my own forks. Please use:
 - `pgweb_version: 'test'`.
 - `pglister_version: 'master'`.
 - `pgarchives_version: 'master'`.
