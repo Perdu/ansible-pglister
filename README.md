@@ -1,6 +1,6 @@
 # ansible-pglister
 
-Ansible script to install [pglister](https://gitlab.com/pglister/pglister) (work in progress)
+Ansible script to install [pglister](https://gitlab.com/pglister/pglister).
 
 # Install
 
