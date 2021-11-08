@@ -2,6 +2,11 @@
 
 Ansible script to install [pglister](https://gitlab.com/pglister/pglister).
 
+Status: the script is finished, but necessary patches are still in the process of being integrated upstream. In the meeantime, please use:
+- `pgweb_version: 'test'`.
+- `pglister_version: 'master'`.
+- `pgarchives_version: 'master'`.
+
 # Install
 
 ```
