@@ -2,14 +2,19 @@
 # DO NOT run update-exim4.conf to regenerate exim4.conf, because it is modified
 # after running this script
 
+{% if dc_smarthost is defined and dc_smarthost != '' %}
 dc_eximconfig_configtype='smarthost'
+dc_smarthost='{{ dc_smarthost }}'
+{% else %}
+dc_eximconfig_configtype='internet'
+dc_smarthost=''
+{% endif %}
 dc_other_hostnames='{{ service_vhost_name_pglister }}:{{ service_vhost_name_pgarchives }}'
 dc_local_interfaces=''
 dc_readhost=''
 dc_relay_domains=''
 dc_minimaldns='false'
 dc_relay_nets=''
-dc_smarthost='{{ dc_smarthost }}'
 CFILEMODE='644'
 dc_use_split_config='false'
 dc_hide_mailname=''
