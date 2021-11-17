@@ -289,3 +289,21 @@
     cmd: './install.sh -enable'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
+
+- name: 'Add pglister commands to nagios'
+  block:
+  - name: 'Add pglister commands to nrpe config'
+    lineinfile:
+      line: '{{ item }}'
+      path: '/etc/nagios/nrpe_ansible.cfg'
+      state: 'present'
+    loop:
+      - 'command[pglister_log]={{ venv_python }} {{ service_base_path }}/nagios/pglister_log.py'
+      - 'command[pglister_processes]={{ venv_python }} {{ service_base_path }}/nagios/pglister_processes.py'
+      - 'command[pglister_queues]={{ venv_python }} {{ service_base_path }}/nagios/pglister_queues.py'
+
+  - name: 'Restart nagios-nrpe-server'
+    service:
+      name: 'nagios-nrpe-server.service'
+      state: 'restarted'
+  when: use_nagios is true
