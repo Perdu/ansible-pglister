@@ -22,8 +22,22 @@ address='notify@{{ ansible_host }}'
 name='Notification Receiver'
 
 [nagios]
-incoming_failed_crit=3
-incoming_failed_warn=3
+incoming_ok_warn={{ nagios_incoming_ok_warn }}
+incoming_ok_crit={{ nagios_incoming_ok_crit }}
+incoming_failed_warn={{ nagios_incoming_failed_warn }}
+incoming_failed_crit={{ nagios_incoming_failed_crit }}
+admin_total_warn={{ nagios_admin_total_warn }}
+admin_total_crit={{ nagios_admin_total_crit }}
+raw_total_warn={{ nagios_raw_total_warn }}
+raw_total_crit={{ nagios_raw_total_crit }}
+outgoing_total_warn={{ nagios_outgoing_total_warn }}
+outgoing_total_crit={{ nagios_outgoing_total_crit }}
+bounces_ok_warn={{ nagios_bounces_ok_warn }}
+bounces_ok_crit={{ nagios_bounces_ok_crit }}
+bounces_failed_warn={{ nagios_bounces_failed_warn }}
+bounces_failed_crit={{ nagios_bounces_failed_crit }}
+moderation_approved_warn={{ nagios_moderation_approved_warn }}
+moderation_approved_crit={{ nagios_moderation_approved_crit }}
 
 [cleanup]
 whitelist_expire_days=365

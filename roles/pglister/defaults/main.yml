@@ -5,3 +5,21 @@ pglister_version: 'master'
 debug: 'False'
 logging_level: 'ERROR'
 use_nagios: false
+
+# nagios
+nagios_incoming_ok_warn: 3
+nagios_incoming_ok_crit: 7
+nagios_incoming_failed_warn: 1
+nagios_incoming_failed_crit: 1
+nagios_admin_total_warn: 1
+nagios_admin_total_crit: 5
+nagios_raw_total_warn: 1
+nagios_raw_total_crit: 5
+nagios_outgoing_total_warn: 5
+nagios_outgoing_total_crit: 10
+nagios_bounces_ok_warn: 3
+nagios_bounces_ok_crit: 7
+nagios_bounces_failed_warn: 1
+nagios_bounces_failed_crit: 1
+nagios_moderation_approved_warn: 1
+nagios_moderation_approved_crit: 1
