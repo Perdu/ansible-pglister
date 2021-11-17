@@ -76,6 +76,29 @@
   become: true
   become_user: 'postgres'
 
+- name: 'Create nagios role for postgres'
+  command:
+    cmd: psql -v ON_ERROR_STOP=0 --no-password
+    stdin: |
+      CREATE USER "nagios";
+  become: true
+  become_user: 'postgres'
+  register: result
+  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
+  when: use_nagios is true
+
+- name: 'Grant permissions to database to nagios'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pglister }}'
+  loop:
+    - 'GRANT CONNECT ON DATABASE {{ database_name_pglister }} TO "nagios";'
+    - 'GRANT USAGE ON SCHEMA public TO "nagios";'
+    - 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";'
+  become: true
+  become_user: 'postgres'
+  when: use_nagios is true
+
 - name: 'Install postgresql pgcrypto schema'
   postgresql_schema:
     name: 'pgcrypto'
