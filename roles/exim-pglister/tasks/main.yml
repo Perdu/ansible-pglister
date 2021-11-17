@@ -12,6 +12,14 @@
     group: 'root'
     mode: '644'
 
+- name: Add .localmacros file for SMTPS
+  template:
+    src: 'exim4.conf.localmacros.j2'
+    dest: '/etc/exim4/exim4.conf.localmacros'
+    owner: root
+    group: Debian-exim
+    mode: 0640
+
 - name: generate exim4 config
   command:
     cmd: '/usr/sbin/update-exim4.conf -o /etc/exim4/exim4.conf'
@@ -155,6 +163,12 @@
     group: 'root'
     mode: '0644'
   when: mailname is defined
+
+- name: Add Debian-exim user to ssl-cert group to be able to read cert files
+  user:
+    name: 'Debian-exim'
+    groups: 'ssl-cert'
+    append: 'yes'
 
 - name: Restart exim.
   service:
