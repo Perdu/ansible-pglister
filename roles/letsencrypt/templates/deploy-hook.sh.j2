@@ -21,6 +21,7 @@ chown root:ssl-cert -R "${ARCHIVE_PATH}"
 rm "{{ le_cert_path }}" "{{ le_key_path }}"
 cp "${LIVE_PATH}/fullchain.pem" "{{ le_cert_path }}"
 cp "${LIVE_PATH}/privkey.pem" "{{ le_key_path }}"
+sudo chown root:ssl-cert "{{ le_cert_path }}" "{{ le_key_path }}"
 
 for hook in "{{ le_deploy_hooks_path }}"/*; do
   $hook
