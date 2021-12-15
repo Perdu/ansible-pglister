@@ -48,6 +48,7 @@
   notify: 'restart postgresql'
 
 - include: "pgbackrest.yml"
+  when: install_pgbackrest is defined and install_pgbackrest == True
 
 - name: 'Ensure postgresql is enabled/started'
   service:
