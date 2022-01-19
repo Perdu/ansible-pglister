@@ -2,7 +2,7 @@
 {%extends "base.html"%}
 {%load pglister%}
 {%block content%}
-<h1>{% org "name" %} mailing lists</h1>
+<h1>{{organization_info.name}} mailing lists</h1>
 <p>
   <a class="btn btn-lg btn-primary" href="/manage/">Manage subscriptions</a>
   <a class="btn btn-lg btn-primary" href="/unsubscribe/">Unsubscribe</a>
@@ -12,7 +12,7 @@
   <br/><br/>
 </p>
 <p>
-  From this site you can manage all your {% org "name" %} mailing list
+  From this site you can manage all your {{organization_info.name}} mailing list
   subscriptions.  To manage them, click on the link above.
 </p>
 
@@ -20,7 +20,7 @@
 {% if pglister_home_message is defined %}{{ pglister_home_message }}{% endif %}
 {% raw %}
 <p>
-  If you are not already logged into your {% org "name" %} Community account,
+  If you are not already logged into your {{organization_info.name}} Community account,
   you will be redirected and asked to log in first.  Once you're logged
   in, you can see all of the lists which you are subscribed to with the
   email address associated with your community account.
@@ -32,7 +32,7 @@
   using those addresses as well.
 </p>
 <p>
-  If you are a moderator of {% org "name" %} mailing lists, you'll have a link
+  If you are a moderator of {{organization_info.name}} mailing lists, you'll have a link
   at the bottom of the page which says "Manage/Moderate lists".
 </p>
 

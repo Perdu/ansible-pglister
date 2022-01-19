@@ -72,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'pglister.contexts.PGListerContextProcessor',
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
@@ -134,7 +135,16 @@ LOGGING = {
 
 STATIC_URL = '/media/'
 
-ORGANIZATION_NAME = 'SPI'
+ORGANIZATION_INFO = {
+    'name': 'SPI',
+    'motto': "",
+    # To use a different banner, change file names here and place images
+    # in /media/img/.
+    # You can use hdr_left_generic.png and hdr_right_generic.png to remove
+    # mentions of PostgreSQL
+    'banner_left': 'hdr_left_generic.png',
+    'banner_right': 'hdr_right_generic.png',
+}
 
 # Override in local settings
 USE_PG_COMMUNITY_AUTH = True  # Right now we *always* do, but this is used to turn on/off some local features
