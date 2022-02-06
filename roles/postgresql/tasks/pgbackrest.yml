@@ -22,6 +22,15 @@
   become_user: 'postgres'
   when: config is changed
 
+- name: 'Drop pgbackrest specific configuration for postgresql'
+  copy:
+    src: 'postgres_pgbackrest.conf'
+    dest: '/etc/postgresql/12/main/conf.d/postgres_pgbackrest.conf'
+    owner: 'postgres'
+    group: 'postgres'
+    mode: 0640
+#  notify: 'restart postgresql'
+
 - name: 'Adapt postgres configuration'
   lineinfile:
     path: '/etc/postgresql/12/main/conf.d/spi-pg.conf'

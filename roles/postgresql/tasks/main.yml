@@ -29,15 +29,6 @@
       - 'postgresql-client'
     state: 'latest'
 
-- name: 'Drop SPI specific configuration for Postgresql'
-  copy:
-    src: 'spi-pg.conf'
-    dest: '/etc/postgresql/12/main/conf.d/spi-pg.conf'
-    owner: 'postgres'
-    group: 'postgres'
-    mode: 0640
-#  notify: 'restart postgresql'
-
 - name: 'Copy connection file for postgresql'
   copy:
     src: 'pg_hba.conf'
