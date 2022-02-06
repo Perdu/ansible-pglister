@@ -150,7 +150,7 @@
 - name: 'Drop settings.py for django'
   template:
     src: 'settings.py.j2'
-    dest: '{{ service_base_path }}/web/pglister/settings_local.py'
+    dest: '{{ service_base_path }}/web/pglister/local_settings.py'
     owner: 'list'
     group: 'www-data'
     mode: '0640'
