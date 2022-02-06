@@ -33,7 +33,7 @@
 
 - name: 'Adapt postgres configuration'
   lineinfile:
-    path: '/etc/postgresql/12/main/conf.d/spi-pg.conf'
+    path: '/etc/postgresql/12/main/conf.d/postgres_pgbackrest.conf'
     line: '{{ item.line }}'
     regex: '{{ item.regex }}'
   loop:
