@@ -8,6 +8,9 @@ sitenav = {
         {'title': 'Your account', 'link': '/account'},
         {'title': 'Profile', 'link': '/account/profile'},
         {'title': 'Mailing List Subscriptions', 'link': 'https://{{ service_vhost_name_pglister }}'},
+{% if members_url is defined %}
+        {'title': 'Members', 'link': '{{ members_url }}'},
+{% endif %}
         {'title': 'Change password', 'link': '/account/changepwd/'},
         {'title': 'Logout', 'link': '/account/logout'},
     ],
