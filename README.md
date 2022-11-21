@@ -2,8 +2,6 @@
 
 Ansible script to install [pglister](https://gitlab.com/pglister/pglister).
 
-/!\ Copy of the [Gitlab repository](https://gitlab.com/cmatte/ansible-pglister), may not be up-to-date. Please use Gitlab /!\
-
 Status: the script is finished, but necessary patches are still in the process of being integrated upstream. In the meantime, repositories are still pointing to my own forks. Please use:
 - `pgweb_version: 'test'`.
 - `pglister_version: 'master'`.
