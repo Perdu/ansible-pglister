@@ -62,6 +62,14 @@
     group: 'www-data'
     mode: '0644'
 
+- name: 'override userprofileform.html to disable unused fields'
+  copy:
+    src: 'userprofileform.html'
+    dest: '{{ service_base_path }}/templates/account/'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0644'
+
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
   command:
