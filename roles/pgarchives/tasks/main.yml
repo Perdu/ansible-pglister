@@ -9,6 +9,7 @@
       - 'python-psycopg2'
       - 'python-virtualenv'
       - 'hunspell-en-us'
+      - 'tidy'
 
 - name: 'Create folder tree'
   file:
