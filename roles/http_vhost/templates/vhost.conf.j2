@@ -21,8 +21,8 @@
 
 	Include "{{ httpd_ssl_conf }}"
 
-	ErrorLog {{ log_path }}/error.log
-	CustomLog {{ log_path }}/access.log combined
+        ErrorLog {{ log_path }}/{{ service_log_prefix }}{% if service_log_prefix %}-{% endif %}error.log
+        CustomLog {{ log_path }}/{{ service_log_prefix }}{% if service_log_prefix %}-{% endif %}access.log combined
 
 {% if service_vhost_extra %}{% include 'vhost-partial.conf.j2' %}{% endif %}
 

@@ -5,6 +5,7 @@ pglister_version: 'master'
 debug: 'False'
 logging_level: 'ERROR'
 use_nagios: false
+log_path: '/var/log/apache2'
 
 # nagios
 nagios_incoming_ok_warn: 3
