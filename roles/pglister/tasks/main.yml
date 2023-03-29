@@ -198,13 +198,6 @@
     django_user: list
     django_virtualenv: '{{ service_base_path }}/web/pglister'
 
-- name: 'chmod o-r list:www-data on debug log file'
-  file:
-    path: '{{ log_path }}/debug_pglister.log'
-    owner: 'list'
-    group: 'root'
-    mode: '640'
-
 # To run this manually, simply run
 # python manage.py createsuperuser
 # into pglister's virtualenv.
