@@ -145,12 +145,15 @@ API_CLIENTS = ('{{ ip_address_pgweb }}',)
 {% if pgarchives_private is defined and pgarchives_private == 'True' %}
 PUBLIC_ARCHIVES = False
 PGAUTH_REDIRECT = "https://{{ service_vhost_name_pgweb }}/account/auth/2/"
-PGAUTH_KEY = "{{ pgauth_key }}"
 {% else %}
 PUBLIC_ARCHIVES = True
+PGAUTH_REDIRECT = "https://{{ service_vhost_name_pgweb }}/account/auth/3/"
 {% endif %}
+PGAUTH_KEY = "{{ pgauth_key }}"
+
+
 ALLOW_RESEND = False
 
-PGWEB_ADDRESS = '{{ service_vhost_name_pgweb }}'
+PGWEB_ADDRESS = 'https://{{ service_vhost_name_pgweb }}'
 
 ALLOWED_HOSTS = [ '{{ service_vhost_name }}' ]
