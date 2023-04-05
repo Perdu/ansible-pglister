@@ -142,6 +142,7 @@
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
+    vhost_extra: '{{ vhost_extra_pglister }}'
 
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'
