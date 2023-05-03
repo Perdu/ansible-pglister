@@ -66,7 +66,7 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
         database_name: 'pgarchives'
         pgarchives_secret_key: 'CHANGEME3'
         pgarchives_version: 'a4b24b88cb343f778cac5ab66cc6117dac68bf21'
-    - role: 'pgarchives-private'
+    - role: 'pgarchives_private'
       vars:
         database_name_pgarchives_private: 'pgarchives_private'
 ```
