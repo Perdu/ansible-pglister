@@ -3,7 +3,9 @@ service_vhost_name: ''
 service_vhost_aliases: []
 service_vhost_priority: '000'
 base_path: '/srv/{{ service_vhost_name }}'
-log_path: '{{ base_path }}/log'
+log_path: '/var/log/apache2/'
+debug_log_path: '{{ base_path }}/log'
+service_log_prefix: '{{ service_vhost_name }}'
 
 # Allows for vhosts to add extra content in the template. boolean variable
 service_needs_document_root: true

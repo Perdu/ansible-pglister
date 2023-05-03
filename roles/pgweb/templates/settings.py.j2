@@ -43,7 +43,7 @@ MEDIA_ROOT = '{{ service_base_path }}/media_assets/'
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/media/'
 STATIC_URL = '/'
 
 STATICFILES_DIRS = (
@@ -72,6 +72,7 @@ TEMPLATES = [{
         'context_processors': [
             'django.contrib.auth.context_processors.auth',
             'django.contrib.messages.context_processors.messages',
+            'django.template.context_processors.request',
             'django.template.context_processors.media',
             'pgweb.util.contexts.PGWebContextProcessor',
         ],

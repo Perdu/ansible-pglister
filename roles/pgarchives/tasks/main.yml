@@ -9,6 +9,7 @@
       - 'python-psycopg2'
       - 'python-virtualenv'
       - 'hunspell-en-us'
+      - 'tidy'
 
 - name: 'Create folder tree'
   file:
@@ -78,6 +79,7 @@
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
+    vhost_extra: '{{ vhost_extra_pgarchives }}'
 
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'
@@ -158,21 +160,7 @@
     - 'pg_dict.stop'
     - 'pg_dict.syn' # this file comes from the pgweb repository
 
-# Fixed schema.sql uses default parser instead of tsparser
-# Other possibility is to install the latter, which can be found here
-# https://github.com/postgrespro/pg_tsparser
-- name: 'Drop fixed schema.sql to avoid conflicts with django'
-  copy:
-    src: 'schema.sql'
-    dest: '{{ service_base_path }}/loader/sql/schema.sql'
-    owner: 'list'
-    group: 'www-data'
-
-- name: 'Execute loader/sql/schema.sql to complete the database'
-  command:
-    cmd: bash -c 'psql {{ database_name_pgarchives }} < <(cat {{ service_base_path }}/loader/sql/schema.sql && echo "COMMIT;")'
-  become: true
-  become_user: 'list'
+# Todo: s/tsparser/other/
 
 - name: 'Drop archives.ini'
   template:

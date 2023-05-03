@@ -54,6 +54,9 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
         recaptcha_site_key: "YOUR_RECAPTCHA_SITE_KEY" # https://www.google.com/recaptcha/admin/create
         recaptcha_secret_key: "YOUR_RECAPTCHA_SECRET_KEY"
         pgweb_version: '1adaab8955ccf022b1c22b23d62a383854eb0e9e'
+        # Example of adding extra vhost definition
+        vhost_extra_pglister: |
+          Redirect permanent /somewhere https://somewhere_else
     - role: 'pglister'
       vars:
         pgauth_key: 'YOUR_KEY' # will be generated if not defined

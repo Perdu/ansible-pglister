@@ -52,7 +52,7 @@
   command:
     cmd: psql -v ON_ERROR_STOP=0 --no-password
     stdin: |
-      CREATE USER {{ database_user }};
+      CREATE USER {{ database_user }} WITH PASSWORD '{{ database_password }}';
       CREATE DATABASE {{ database_name_pglister }};
   become: true
   become_user: 'postgres'
@@ -142,6 +142,7 @@
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
+    vhost_extra: '{{ vhost_extra_pglister }}'
 
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'

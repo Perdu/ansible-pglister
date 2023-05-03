@@ -62,6 +62,14 @@
     group: 'www-data'
     mode: '0644'
 
+- name: 'override userprofileform.html to disable unused fields'
+  copy:
+    src: 'userprofileform.html'
+    dest: '{{ service_base_path }}/templates/account/'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0644'
+
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
   command:
@@ -78,6 +86,7 @@
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
+    vhost_extra: '{{ vhost_extra_pgweb }}'
 
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'
@@ -227,13 +236,3 @@
           Site.save()
   become: true
   become_user: 'list'
-
-# Synchronize with lists in archives for search
-- name: 'Add crontab to run sync_lists'
-  cron:
-    state: 'present'
-    name: 'Add new lists to pgweb'
-    user: 'list'
-    minute: '10'
-    hour: '4'
-    job: '{{ venv_python }} {{ service_base_path }}/manage.py sync_lists'
