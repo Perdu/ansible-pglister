@@ -148,6 +148,55 @@
         user = Debian-exim
         environment =
 
+- name: install spamassassin
+  package:
+    name: spamassassin
+    state: present
+  when: use_spamassassin is defined and use_spamassassin == True
+
+- name: Check if sockets option for spamassassin is already present
+  command: 'grep -q "socketpath" /lib/systemd/system/spamassassin.service'
+  register: option_check
+  ignore_errors: true
+
+- name: Modify SpamAssassin service file to use sockets
+  replace:
+    path: /lib/systemd/system/spamassassin.service
+    regexp: '^(ExecStart=.+)$'
+    replace: '\1 --socketpath=/var/run/spamd.socket'
+  when: not option_check.rc == 0 and use_spamassassin is defined and use_spamassassin == True
+
+- name: Reload systemd and start SpamAssassin service
+  systemd:
+    name: spamassassin
+    state: reloaded
+    daemon_reload: yes
+  when: use_spamassassin is defined and use_spamassassin == True
+
+- name: Insert config for spamassassin (1/2)
+  blockinfile:
+    path: '{{ exim_configuration_file }}'
+    insertbefore: 'begin acl'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK 7'
+    block: |
+      spamd_address = {{ exim_spamd_address }}
+  when: use_spamassassin is defined and use_spamassassin == True
+
+- name: Insert a marker before the end of acl_checks using multi-line pattern matching
+  replace:
+    path: '{{ exim_configuration_file }}'
+    regexp: '(?s)(accept\s*begin routers)'
+    replace: '# Marker for ansible\n\1'
+  when: use_spamassassin is defined and use_spamassassin == True
+
+- name: Insert config for spamassassin (2/2)
+  blockinfile:
+    path: '{{ exim_configuration_file }}'
+    insertbefore: '# Marker for ansible'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK 8'
+    block: '{{ lookup("template", "exim_spamassassin.j2") }}'
+  when: use_spamassassin is defined and use_spamassassin == True
+
 - name: Add cron emails destination for list
   cronvar:
     name: "MAILTO"

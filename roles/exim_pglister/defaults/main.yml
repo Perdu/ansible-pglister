@@ -5,3 +5,9 @@ le_cert_dir: '/etc/ssl/certs'
 le_key_dir: '/etc/ssl/private'
 le_cert_path: '{{ le_cert_dir }}/{{ ansible_host }}.pem'
 le_key_path: '{{ le_key_dir }}/{{ ansible_host }}.key'
+
+exim_spamcheck_max_size: 4000000
+exim_spamd_address: "/var/run/spamd.socket"
+exim_spamassassin_greylist_score: 20
+exim_spamassassin_warn_score: 49
+exim_spamassassin_reject_score: 59
