@@ -1,0 +1,30 @@
+  # Bypass SpamAssassin checks if the message is too large (4 million).
+  warn    condition   = ${if >={$message_size}{ {{ exim_spamcheck_max_size }} } {1}}
+          add_header  = X-Spam-Note: SpamAssassin run bypassed due to message size
+          add_header  = Subject: [L] $h_Subject:
+
+  # Run SpamAssassin, but allow for it to fail or time out. Add a warning message
+  # and accept the mail if that happens. Add an X-Spam-Flag: header if the SA
+  # score exceeds the SA system threshold.
+  warn    spam        = nobody/defer_ok
+          add_header  = X-Spam-Flag: YES
+
+  warn    condition   = ${if !def:spam_score_int {1}}
+          add_header  = X-Spam-Note: SpamAssassin invocation failed
+
+  # Unconditionally add score and report headers
+  warn    add_header  = X-Spam-Score: $primary_hostname: $spam_score ($spam_bar)\n\
+                        X-Spam-Report: $spam_report
+
+  # And reject if the SpamAssassin score is greater than reject score.
+  deny    condition   = ${if >{ $spam_score_int }{ {{ exim_spamassassin_reject_score }} } {1}}
+          message     = Your message scored $spam_score SpamAssassin points. Report follows:\n\
+          $spam_report
+
+  # Trigger greylisting (if enabled) if the SpamAssassin score is greater than greylist score.
+  warn    condition   = ${if >{ $spam_score_int }{ {{ exim_spamassassin_greylist_score }} } {1}}
+          set acl_m_greylistreasons = Message has $spam_score SpamAssassin points\n$acl_m_greylistreasons
+
+  # Tag the subject if the SpamAssassin score is greater than the warn score
+  warn    condition   = ${if >{ $spam_score_int }{ {{ exim_spamassassin_warn_score }} } {1}}
+          add_header  = Subject: *SPAM* $h_Subject:

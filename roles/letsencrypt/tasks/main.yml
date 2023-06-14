@@ -68,7 +68,7 @@
     user: 'root'
     minute: '0'
     hour: '1'  # Every day at night
-    job: 'certbot renew --quiet'
+    job: 'certbot renew --quiet --webroot-path /srv/letsencrypt/'
 
 - name: 'Find existing files in {{ le_deploy_hooks_path }}'
   find:
