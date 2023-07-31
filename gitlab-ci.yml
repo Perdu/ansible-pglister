@@ -36,4 +36,3 @@
     - {role: 'pglister', tags: 'pglister'}
     - {role: 'pgarchives', tags: 'pgarchives'}
     - {role: 'pgarchives_private', tags: 'pgarchives_private'}
-    - {role: 'nagios_agent_pglister', tags: 'nagios_agent_pglister'}
