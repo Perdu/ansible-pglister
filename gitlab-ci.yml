@@ -1,0 +1,39 @@
+---
+- hosts: all
+  become: true
+  vars:
+    le_domains: []
+    domain: 'beta.lists.spi-inc.org'
+    service_vhost_name_pgweb: 'pgweb.localhost'
+    service_vhost_name_pglister: 'pglister.localhost'
+    service_vhost_name_pgarchives: 'pgarchives.localhost'
+    service_vhost_name_pgarchives_private: 'pgarchives-private.localhost'
+    database_name_pglister: 'pglister'
+    database_user: 'list'
+    django_superuser_address: "root@localhost"
+    base_path_pglister: '/srv/pglister'
+    base_path_pgarchives: '/srv/pgarchives'
+    base_path_pgarchives_private: '/srv/pgarchives-private'
+    org_name: 'gitlab CI'
+    ip_address_pgweb: '127.0.0.1'
+    debug: 'False'
+    logging_level: 'DEBUG'
+    # must not be a string
+    install_pgbackrest: False
+    # exim-pglister
+    mailname: 'localhost'
+    use_spamassassin: False
+    # pglister
+    pglister_version: 'master'
+    use_nagios: False
+    # pgarchives
+    database_name_pgarchives: 'pgarchives'
+    pgarchives_version: 'master'
+    # pgarchives_private
+    database_name_pgarchives_private: 'pgarchives_private'
+  roles:
+    - {role: 'exim_pglister', tags: 'exim_pglister'}
+    - {role: 'pglister', tags: 'pglister'}
+    - {role: 'pgarchives', tags: 'pgarchives'}
+    - {role: 'pgarchives_private', tags: 'pgarchives_private'}
+    - {role: 'nagios_agent_pglister', tags: 'nagios_agent_pglister'}
