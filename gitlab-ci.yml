@@ -31,6 +31,11 @@
     pgarchives_version: 'master'
     # pgarchives_private
     database_name_pgarchives_private: 'pgarchives_private'
+    # credentials
+    database_password: 'CHANGEME'
+    django_superuser_pass: 'CHANGEME'
+    pgarchives_secret_key: 'CHANGEME'
+    pgauth_key: 'CHANGEME'
   roles:
     - {role: 'exim_pglister', tags: 'exim_pglister'}
     - {role: 'pglister', tags: 'pglister'}
