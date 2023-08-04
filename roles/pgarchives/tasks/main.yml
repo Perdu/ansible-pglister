@@ -11,57 +11,8 @@
       - 'hunspell-en-us'
       - 'tidy'
 
-- name: 'Create folder tree'
-  file:
-    path: '{{ service_base_path }}'
-    state: 'directory'
-    owner: 'list'
-    group: 'www-data'
-    mode: 0755
-
-- name: 'Clone pgarchives repository'
-  git:
-    repo: '{{ repo_uri }}'
-    dest: '{{ base_path }}/{{ repo_name }}'
-    clone: true
-    update: true
-    version: '{{ pgarchives_version }}'
-  register: repo
-
-- name: 'Copy repository content to local folder'
-  command:
-    cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
-
-- name: 'chown list:www-data pgarchives directory'
-  file:
-    path: '{{ service_base_path }}'
-    owner: 'list'
-    group: 'www-data'
-    recurse: 'yes'
-
-- name: 'Override page.html to disable non-pglister-related links'
-  template:
-    src: 'page.html.j2'
-    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/page.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
-
-- name: 'Override index.html to disable PostreSQL-related information'
-  template:
-    src: 'index.html.j2'
-    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/index.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
-
-- name: 'Override base.html to disable PostreSQL-related information'
-  template:
-    src: 'base.html.j2'
-    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/base.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
+- name: 'Clone repository'
+  include: clone_repository.yml
 
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'

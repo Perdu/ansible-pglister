@@ -11,41 +11,8 @@
       - 'postgresql-contrib'
       - 'procmail' # to import mbox, not mandatory
 
-- name: 'Create folder tree'
-  file:
-    path: '{{ service_base_path }}'
-    state: 'directory'
-    owner: 'list'
-    group: 'www-data'
-    mode: 0755
-
-- name: 'Clone pglister repository'
-  git:
-    repo: '{{ repo_uri }}'
-    dest: '{{ base_path }}/{{ repo_name }}'
-    clone: true
-    update: true
-    version: '{{ pglister_version }}'
-  register: repo
-
-- name: 'Copy repository content to local folder'
-  command:
-    cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
-
-- name: 'chown list:www-data pglister directory'
-  file:
-    path: '{{ service_base_path }}'
-    owner: 'list'
-    group: 'www-data'
-    recurse: 'yes'
-
-- name: 'Override home.html to remove mentions of postgresql.org'
-  template:
-    src: 'home.html.j2'
-    dest: '{{ service_base_path }}/web/pglister/lists/templates/home.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
+- name: 'Clone repository'
+  include: clone_repository.yml
 
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
