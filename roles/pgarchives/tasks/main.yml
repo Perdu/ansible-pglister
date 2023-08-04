@@ -12,6 +12,12 @@
       - 'tidy'
   when: redeploy == False
 
+- name: 'Delete repository for redeployment'
+  file:
+    path: '{{ service_base_path }}/'
+    state: absent
+  when: redeploy == True
+
 - name: 'Clone repository'
   include: clone_repository.yml
 
