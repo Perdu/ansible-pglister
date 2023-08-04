@@ -49,3 +49,30 @@
     owner: 'list'
     group: 'www-data'
     mode: '0644'
+
+- name: 'Drop settings.py for django'
+  template:
+    src: 'settings.py.j2'
+    dest: '{{ web_path }}/settings_local.py'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0660'
+
+- name: 'Drop make-dyncss.sh'
+  template:
+    src: 'make_dyncss.sh.j2'
+    dest: '{{ service_base_path }}/make_dyncss.sh'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0660'
+
+- name: 'Run make_dyncss.sh'
+  command: sh '{{ service_base_path }}/make_dyncss.sh'
+
+- name: 'Drop archives.ini'
+  template:
+    src: 'archives.ini.j2'
+    dest: '{{ service_base_path }}/loader/archives.ini'
+    owner: 'list'
+    group: 'Debian-exim'
+    mode: '0640'
