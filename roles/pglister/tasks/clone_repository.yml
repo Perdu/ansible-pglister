@@ -34,3 +34,32 @@
     owner: 'list'
     group: 'www-data'
     mode: '0644'
+
+- name: 'Copy pglister config'
+  template:
+    src: 'pglister.ini.j2'
+    dest: '{{ service_base_path }}/pglister.ini'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0664'
+
+- name: 'Drop settings.py for django'
+  template:
+    src: 'settings.py.j2'
+    dest: '{{ service_base_path }}/web/pglister/local_settings.py'
+    owner: 'list'
+    group: 'www-data'
+    mode: '0640'
+
+- name: 'Add link to venv to systemd services'
+  lineinfile:
+    path: '{{ service_base_path }}/systemd/pglister_{{ item }}.template'
+    regexp: '^ExecStart=_ROOT_'
+    line: 'ExecStart={{ venv_python }} _ROOT_/bin/{{ item }}.py'
+  loop:
+    - 'bounceprocessor'
+    - 'cleanup'
+    - 'eximcleaner'
+    - 'mailprocessor'
+    - 'mailsender'
+    - 'moderationprocessor'
