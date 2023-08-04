@@ -71,6 +71,10 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
         database_name_pgarchives_private: 'pgarchives_private'
 ```
 
+# Redeployment
+
+You can reduce the tasks to repository and related files redeployment using the `redeploy` option, e.g. using `-e "{redeploy: True}"` from the command line.
+
 # Authors
 
 - Célestin Matte
