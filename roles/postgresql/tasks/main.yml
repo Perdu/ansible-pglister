@@ -25,7 +25,7 @@
 - name: 'Install postgresl'
   apt:
     name:
-      - 'postgresql-12'
+      - 'postgresql'
       - 'postgresql-client'
     state: 'latest'
 
