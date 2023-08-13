@@ -105,6 +105,14 @@
     group: 'root'
     mode: '0755'
 
+- name: 'Create LE hooks path'
+  file:
+    path: '/etc/letsencrypt/renewal-hooks/deploy/'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
 - name: 'Ensure hooks work after renewal'
   file:
     state: 'link'
