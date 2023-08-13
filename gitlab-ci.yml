@@ -18,6 +18,7 @@
     ip_address_pgweb: '127.0.0.1'
     debug: 'False'
     logging_level: 'DEBUG'
+    use_letsencrypt: False
     # must not be a string
     install_pgbackrest: False
     # exim-pglister
