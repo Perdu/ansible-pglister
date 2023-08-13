@@ -42,6 +42,7 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
     ip_address_pgweb: '0.0.0.0/0'  # pgweb IP address, to restrict access to the API
     debug: 'False'
     logging_level: 'WARNING'
+    use_letsencrypt: True
     # If using an SMTP relay, otherwise leave empty
     # dc_smarthost: 'smtp.gmail.com::587'
     # smtp_relay_password: 'smtp.gmail.com:address@yourdomain.com:YOUR_PASSWORD'
