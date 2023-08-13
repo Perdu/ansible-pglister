@@ -152,7 +152,7 @@
 - name: 'Drop pg_dict.*'
   copy:
     src: '{{ item }}'
-    dest: '/usr/share/postgresql/12/tsearch_data/'
+    dest: '/usr/share/postgresql/{{ postgresql_version }}/tsearch_data/'
     owner: 'root'
     group: 'root'
     mode: 0644
