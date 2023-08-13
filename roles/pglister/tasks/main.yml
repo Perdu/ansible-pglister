@@ -188,10 +188,20 @@
     groups: 'Debian-exim'
     append: 'yes'
 
-- name: 'Restart postgres to make new group perms effective'
+- name: 'Restart postgres to make new group perms effective (systemd)'
   service:
-    name: 'postgresql@12-main'
+    name: 'postgresql@{{ postgresql_version }}-main'
     state: 'restarted'
+    enabled: true
+  ignore_errors: yes
+  register: systemd
+
+- name: 'Restart postgres to make new group perms effective (sysvinit)'
+  service:
+    name: 'postgresql'
+    state: 'restarted'
+    enabled: true
+  when: systemd.failed
 
 - include_role:
     name: cchurch.django
