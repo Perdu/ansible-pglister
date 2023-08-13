@@ -14,6 +14,7 @@
     owner: 'root'
     group: 'root'
     mode: 0755
+  when: 'use_letsencrypt is defined and use_letsencrypt == True'
 
 - name: 'Create log folder'
   file:
