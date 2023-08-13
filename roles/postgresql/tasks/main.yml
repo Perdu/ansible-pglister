@@ -23,7 +23,7 @@
     mode: 0640
 
 - name: 'Install postgresl'
-  apt:
+  package:
     name:
       - 'postgresql'
       - 'postgresql-client'
