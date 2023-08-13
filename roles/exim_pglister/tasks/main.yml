@@ -1,8 +1,10 @@
 ---
-- name: Ensure exim is installed.
+- name: 'Install required packages'
   package:
-    name: '{{ exim_package }}'
-    state: 'present'
+    state: 'latest'
+    name:
+      - '{{ exim_package }}'
+      - 'python-psycopg2'
 
 - name: Copy exim configuration file
   template:
