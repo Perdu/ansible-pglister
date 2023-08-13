@@ -32,7 +32,7 @@
 - name: 'Copy connection file for postgresql'
   copy:
     src: 'pg_hba.conf'
-    dest: '/etc/postgresql/12/main/pg_hba.conf'
+    dest: '/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf'
     owner: 'postgres'
     group: 'postgres'
     mode: 0640
@@ -43,6 +43,6 @@
 
 - name: 'Ensure postgresql is enabled/started'
   service:
-    name: 'postgresql'
+    name: 'postgresql@{{ postgresql_version }}-main'
     state: 'started'
     enabled: true
