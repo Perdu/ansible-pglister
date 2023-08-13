@@ -35,7 +35,8 @@
     owner: 'postgres'
     group: 'postgres'
     mode: 0640
-  notify: 'restart postgresql'
+
+- include: "restart.yml"
 
 - include: "pgbackrest.yml"
   when: install_pgbackrest is defined and install_pgbackrest == True
