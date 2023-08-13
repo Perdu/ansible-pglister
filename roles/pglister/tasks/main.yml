@@ -59,6 +59,13 @@
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
 
+- name: 'Add password for list user in postgres, to allow login from exim'
+  postgresql_query:
+    query: "ALTER USER list WITH password '{{ database_password }}';"
+    db: '{{ database_name_pglister }}'
+  become: true
+  become_user: 'postgres'
+
 - name: 'Create a postgres user for Debian-exim'
   postgresql_user:
     name: 'Debian-exim'

@@ -229,13 +229,6 @@
     groups: 'ssl-cert'
     append: 'yes'
 
-- name: 'Add password for list user in postgres, to allow login from exim'
-  postgresql_query:
-    query: "ALTER USER list WITH password '{{ database_password }}';"
-    db: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
-
 - name: Restart exim.
   service:
     name: '{{ exim_daemon }}'
