@@ -296,23 +296,31 @@
     - 'mailsender'
     - 'moderationprocessor'
 
+- name: 'Check if systemctl is available'
+  command: 'which systemctl'
+  register: 'systemctl_available'
+  ignore_errors: yes
+
 - name: 'Install systemd services'
   command:
     cmd: './install.sh -install'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
+  when: 'systemctl_available.rc == 0'
 
 - name: 'Start systemd services'
   command:
     cmd: './install.sh -start'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
+  when: 'systemctl_available.rc == 0'
 
 - name: 'Enable systemd services'
   command:
     cmd: './install.sh -enable'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
+  when: 'systemctl_available.rc == 0'
 
 - name: 'Add pglister commands to nagios'
   block:
