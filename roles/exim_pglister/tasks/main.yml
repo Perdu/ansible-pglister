@@ -4,7 +4,7 @@
     state: 'latest'
     name:
       - '{{ exim_package }}'
-      - 'python-psycopg2'
+      - 'python3-psycopg2'
 
 - name: Copy exim configuration file
   template:
