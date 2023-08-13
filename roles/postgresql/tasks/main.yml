@@ -39,18 +39,3 @@
 
 - include: "pgbackrest.yml"
   when: install_pgbackrest is defined and install_pgbackrest == True
-
-- name: 'Ensure postgresql is enabled/started (systemd)'
-  service:
-    name: 'postgresql@{{ postgresql_version }}-main'
-    state: 'started'
-    enabled: true
-  ignore_errors: yes
-  register: systemd
-
-- name: 'Ensure postgresql is enabled/started (sysvinit)'
-  service:
-    name: 'postgresql'
-    state: 'started'
-    enabled: true
-  when: systemd.failed
