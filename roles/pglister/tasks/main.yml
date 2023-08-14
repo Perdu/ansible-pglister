@@ -1,4 +1,11 @@
 ---
+- include_role:
+    name: '{{ item }}'
+  loop:
+    - 'postgresql'
+    - 'exim_pglister'
+  when: redeploy == False
+
 - name: 'Install required packages'
   package:
     state: 'latest'
@@ -145,13 +152,6 @@
     virtualenv: '{{ service_base_path }}/web/pglister/'
     virtualenv_python: python3
   become: true
-
-- include_role:
-    name: '{{ item }}'
-  loop:
-    - 'postgresql'
-    - 'exim_pglister'
-  when: redeploy == False
 
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
