@@ -52,6 +52,18 @@
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
   when: redeploy == False
 
+- name: 'Grant permissions to database'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pgarchives }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "{{ database_user }}";'
+    - 'GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
+  become: true
+  become_user: 'postgres'
+
 - include_role:
     name: 'http_vhost'
   vars:
