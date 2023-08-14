@@ -1,1 +1,4 @@
 ---
+dependencies:
+  - { role: 'postgresql', when: redeploy == False }
+  - { role: 'exim_pglister', when: redeploy == False }
