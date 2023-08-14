@@ -1,5 +1,4 @@
 ---
-
 - name: 'Add PGDG signing key'
   apt_key:
     url: 'https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc'
@@ -7,7 +6,7 @@
 
 - name: 'Configure pgdg repositories'
   apt_repository:
-    repo: 'deb https://apt.postgresql.org/pub/repos/apt buster-pgdg main'
+    repo: 'deb https://apt.postgresql.org/pub/repos/apt {{ debian_version }}-pgdg main'
     state: 'present'
     filename: 'pgdg'
 
@@ -23,26 +22,21 @@
     mode: 0640
 
 - name: 'Install postgresl'
-  apt:
+  package:
     name:
-      - 'postgresql-12'
+      - 'postgresql'
       - 'postgresql-client'
     state: 'latest'
 
 - name: 'Copy connection file for postgresql'
   copy:
     src: 'pg_hba.conf'
-    dest: '/etc/postgresql/12/main/pg_hba.conf'
+    dest: '/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf'
     owner: 'postgres'
     group: 'postgres'
     mode: 0640
-  notify: 'restart postgresql'
+
+- include: "restart.yml"
 
 - include: "pgbackrest.yml"
   when: install_pgbackrest is defined and install_pgbackrest == True
-
-- name: 'Ensure postgresql is enabled/started'
-  service:
-    name: 'postgresql'
-    state: 'started'
-    enabled: true

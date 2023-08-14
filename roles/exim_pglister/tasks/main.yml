@@ -1,8 +1,10 @@
 ---
-- name: Ensure exim is installed.
+- name: 'Install required packages'
   package:
-    name: '{{ exim_package }}'
-    state: 'present'
+    state: 'latest'
+    name:
+      - '{{ exim_package }}'
+      - 'python3-psycopg2'
 
 - name: Copy exim configuration file
   template:
@@ -226,13 +228,6 @@
     name: 'Debian-exim'
     groups: 'ssl-cert'
     append: 'yes'
-
-- name: 'Add password for list user in postgres, to allow login from exim'
-  postgresql_query:
-    query: "ALTER USER list WITH password '{{ database_password }}';"
-    db: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
 
 - name: Restart exim.
   service:

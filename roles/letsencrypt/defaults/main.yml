@@ -4,6 +4,8 @@ le_domains: []
 
 le_email: 'postmaster@{{ domain }}'
 le_webroot: '/srv/letsencrypt/'
+# Also defined in http_vhost role. We have to define it here as well since
+# including role does not import variables
 le_deploy_hooks_path: '/srv/letsencrypt/hooks'
 le_cert_dir: '/etc/ssl/certs'
 le_key_dir: '/etc/ssl/private'

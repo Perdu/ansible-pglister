@@ -1,4 +1,7 @@
 ---
+- include_role:
+    name: 'letsencrypt'
+  when: 'use_letsencrypt is defined and use_letsencrypt == True'
 
 - name: 'Install httpd'
   package:

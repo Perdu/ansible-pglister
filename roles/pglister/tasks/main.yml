@@ -6,8 +6,8 @@
       - 'python3'
       - 'libapache2-mod-wsgi-py3'
       - 'python3-pip'
-      - 'python-psycopg2'
-      - 'python-virtualenv'
+      - 'python3-psycopg2'
+      - 'python3-virtualenv'
       - 'postgresql-contrib'
       - 'procmail' # to import mbox, not mandatory
   when: redeploy == False
@@ -21,11 +21,117 @@
 - name: 'Clone repository'
   include: clone_repository.yml
 
-- name: 'install virtualenv via pip'
-  pip:
-    name: virtualenv
-    executable: pip3
+# Todo: fix issue: this fails silently on error
+- name: 'Create role and database'
+  command:
+    cmd: psql -v ON_ERROR_STOP=0 --no-password
+    stdin: |
+      CREATE USER {{ database_user }} WITH PASSWORD '{{ database_password }}';
+      CREATE DATABASE {{ database_name_pglister }};
   become: true
+  become_user: 'postgres'
+  register: result
+  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
+
+- name: 'Grant permissions to database'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pglister }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name_pglister }} TO "{{ database_user }}";'
+    - 'GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
+  become: true
+  become_user: 'postgres'
+
+- name: 'Add password for list user in postgres, to allow login from exim'
+  postgresql_query:
+    query: "ALTER USER list WITH password '{{ database_password }}';"
+    db: '{{ database_name_pglister }}'
+  become: true
+  become_user: 'postgres'
+
+- name: 'Create a postgres user for Debian-exim'
+  postgresql_user:
+    name: 'Debian-exim'
+  become: true
+  become_user: 'postgres'
+
+- name: 'Grant permissions to database to Debian-exim'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pglister }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name_pglister }} TO "Debian-exim";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
+  become: true
+  become_user: 'postgres'
+
+- name: 'Create nagios role for postgres'
+  command:
+    cmd: psql -v ON_ERROR_STOP=0 --no-password
+    stdin: |
+      CREATE USER "nagios";
+  become: true
+  become_user: 'postgres'
+  register: result
+  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
+  when: use_nagios is true
+
+- name: 'Grant permissions to database to nagios'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pglister }}'
+  loop:
+    - 'GRANT CONNECT ON DATABASE {{ database_name_pglister }} TO "nagios";'
+    - 'GRANT USAGE ON SCHEMA public TO "nagios";'
+    - 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";'
+  become: true
+  become_user: 'postgres'
+  when: use_nagios is true
+
+- name: 'Install postgresql pgcrypto schema'
+  postgresql_schema:
+    name: 'pgcrypto'
+    database: '{{ database_name_pglister }}'
+  become: true
+  become_user: 'postgres'
+
+- name: 'Install postgresql crypto extension and grant usage'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pglister }}'
+  loop:
+    - 'CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA pgcrypto;'
+    - 'GRANT USAGE ON SCHEMA pgcrypto TO {{ database_user }}'
+  become: true
+  become_user: 'postgres'
+
+- name: 'Run necessary operations to run eximintegration migrations'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pglister }}'
+  loop:
+    - 'CREATE EXTENSION IF NOT EXISTS file_fdw;'
+    - 'CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
+    - 'CREATE SCHEMA IF NOT EXISTS eximintegration;'
+    - 'GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};'
+    - "CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL) SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');"
+    - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
+  become: true
+  become_user: 'postgres'
+
+- include_role:
+    name: 'http_vhost'
+  vars:
+    service_vhost_extra: true
+    vhost_extra: '{{ vhost_extra_pglister }}'
+
+- name: 'Activate mod_wsgi on apache2'
+  command: '/usr/sbin/a2enmod wsgi'
+  notify: 'reload httpd'
 
 - name: 'install required packages for django using pip'
   pip:
@@ -162,10 +268,10 @@
     append: 'yes'
   when: redeploy == False
 
-- name: 'Restart postgres to make new group perms effective'
-  service:
-    name: 'postgresql@12-main'
-    state: 'restarted'
+- name: 'Restart postgresql to make new group perms effective'
+  include_role:
+    name: 'postgresql'
+    tasks_from: 'restart.yml'
   when: redeploy == False
 
 - include_role:
@@ -239,26 +345,31 @@
   become_user: 'list'
   when: redeploy == False
 
+- name: 'Check if systemctl is available'
+  command: 'which systemctl'
+  register: 'systemctl_available'
+  ignore_errors: yes
+
 - name: 'Install systemd services'
   command:
     cmd: './install.sh -install'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
-  when: redeploy == False
+  when: 'redeploy == False and systemctl_available.rc == 0'
 
 - name: 'Start systemd services'
   command:
     cmd: './install.sh -start'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
-  when: redeploy == False
+  when: 'redeploy == False and systemctl_available.rc == 0'
 
 - name: 'Enable systemd services'
   command:
     cmd: './install.sh -enable'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
-  when: redeploy == False
+  when: 'redeploy == False and systemctl_available.rc == 0'
 
 - name: 'Add pglister commands to nagios'
   block:
