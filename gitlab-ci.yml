@@ -25,6 +25,7 @@
     mailname: 'localhost'
     use_spamassassin: False
     # pglister
+    repo_base: 'pglister'
     pglister_version: 'master'
     use_nagios: False
     # pgarchives
