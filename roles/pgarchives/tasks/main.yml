@@ -140,7 +140,7 @@
   command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
   become: true
   become_user: 'list'
-  when: redeploy == False
+  when: redeploy == False and test_only == False
 
 - name: 'Add crontab to run pglister_sync'
   cron:

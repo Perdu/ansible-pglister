@@ -19,6 +19,7 @@
     debug: 'False'
     logging_level: 'DEBUG'
     use_letsencrypt: False
+    test_only: True
     # must not be a string
     install_pgbackrest: False
     # exim-pglister
