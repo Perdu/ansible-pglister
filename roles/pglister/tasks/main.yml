@@ -52,12 +52,6 @@
   become: true
   become_user: 'postgres'
 
-- name: 'Create a postgres user for Debian-exim'
-  postgresql_user:
-    name: 'Debian-exim'
-  become: true
-  become_user: 'postgres'
-
 - name: 'Grant permissions to database to Debian-exim'
   postgresql_query:
     query: '{{ item }}'
