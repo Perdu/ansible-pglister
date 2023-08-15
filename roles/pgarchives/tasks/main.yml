@@ -35,10 +35,6 @@
     virtualenv_python: python3
   become: true
 
-- include_role:
-    name: 'postgresql'
-  when: redeploy == False
-
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
   command:
