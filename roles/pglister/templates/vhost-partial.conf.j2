@@ -1,7 +1,7 @@
-        <Directory {{ service_base_path }}/web/pglister/lib/python3.7/site-packages/django/contrib/admin/static/admin/>
+        <Directory {{ service_base_path }}/web/pglister/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin/>
            Require all granted
         </Directory>
-        Alias /media/admin {{ service_base_path }}/web/pglister/lib/python3.7/site-packages/django/contrib/admin/static/admin
+        Alias /media/admin {{ service_base_path }}/web/pglister/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin
 
 
         Alias /media {{ service_base_path }}/web/media
