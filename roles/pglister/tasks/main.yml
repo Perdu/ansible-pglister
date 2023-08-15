@@ -32,6 +32,14 @@
   become_user: 'postgres'
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
+  when: redeploy == False
+
+- name: 'Create a postgres user for Debian-exim'
+  postgresql_user:
+    name: 'Debian-exim'
+  become: true
+  become_user: 'postgres'
+  when: redeploy == False
 
 - name: 'Grant permissions to database'
   postgresql_query:
@@ -44,6 +52,7 @@
     - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
   become: true
   become_user: 'postgres'
+  when: redeploy == False
 
 - name: 'Add password for list user in postgres, to allow login from exim'
   postgresql_query:
@@ -51,6 +60,7 @@
     db: '{{ database_name_pglister }}'
   become: true
   become_user: 'postgres'
+  when: redeploy == False
 
 - name: 'Grant permissions to database to Debian-exim'
   postgresql_query:
@@ -62,6 +72,7 @@
     - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
   become: true
   become_user: 'postgres'
+  when: redeploy == False
 
 - name: 'Create nagios role for postgres'
   command:
@@ -72,7 +83,8 @@
   become_user: 'postgres'
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-  when: use_nagios is true
+  when: 'use_nagios is true and redeploy == False'
+  when: redeploy == False
 
 - name: 'Grant permissions to database to nagios'
   postgresql_query:
@@ -84,7 +96,8 @@
     - 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";'
   become: true
   become_user: 'postgres'
-  when: use_nagios is true
+  when: 'use_nagios is true and redeploy == False'
+  when: redeploy == False
 
 - name: 'Install postgresql pgcrypto schema'
   postgresql_schema:
@@ -92,6 +105,7 @@
     database: '{{ database_name_pglister }}'
   become: true
   become_user: 'postgres'
+  when: redeploy == False
 
 - name: 'Install postgresql crypto extension and grant usage'
   postgresql_query:
@@ -102,6 +116,7 @@
     - 'GRANT USAGE ON SCHEMA pgcrypto TO {{ database_user }}'
   become: true
   become_user: 'postgres'
+  when: redeploy == False
 
 - name: 'Run necessary operations to run eximintegration migrations'
   postgresql_query:
@@ -116,16 +131,19 @@
     - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
   become: true
   become_user: 'postgres'
+  when: redeploy == False
 
 - include_role:
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
     vhost_extra: '{{ vhost_extra_pglister }}'
+  when: redeploy == False
 
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'
   notify: 'reload httpd'
+  when: redeploy == False
 
 - name: 'install required packages for django using pip'
   pip:
@@ -139,106 +157,6 @@
     virtualenv: '{{ service_base_path }}/web/pglister/'
     virtualenv_python: python3
   become: true
-
-# Todo: fix issue: this fails silently on error
-- name: 'Create role and database'
-  command:
-    cmd: psql -v ON_ERROR_STOP=0 --no-password
-    stdin: |
-      CREATE USER {{ database_user }} WITH PASSWORD '{{ database_password }}';
-      CREATE DATABASE {{ database_name_pglister }};
-  become: true
-  become_user: 'postgres'
-  register: result
-  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-  when: redeploy == False
-
-- name: 'Create a postgres user for Debian-exim'
-  postgresql_user:
-    name: 'Debian-exim'
-  become: true
-  become_user: 'postgres'
-  when: redeploy == False
-
-- name: 'Grant permissions to database to Debian-exim'
-  postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pglister }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
-  become: true
-  become_user: 'postgres'
-  when: redeploy == False
-
-- name: 'Create nagios role for postgres'
-  command:
-    cmd: psql -v ON_ERROR_STOP=0 --no-password
-    stdin: |
-      CREATE USER "nagios";
-  become: true
-  become_user: 'postgres'
-  register: result
-  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-  when: use_nagios is true and redeploy == False
-
-- name: 'Grant permissions to database to nagios'
-  postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'GRANT CONNECT ON DATABASE {{ database_name_pglister }} TO "nagios";'
-    - 'GRANT USAGE ON SCHEMA public TO "nagios";'
-    - 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";'
-  become: true
-  become_user: 'postgres'
-  when: use_nagios is true and redeploy == True
-
-- name: 'Install postgresql pgcrypto schema'
-  postgresql_schema:
-    name: 'pgcrypto'
-    database: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
-  when: redeploy == False
-
-- name: 'Install postgresql crypto extension and grant usage'
-  postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA pgcrypto;'
-    - 'GRANT USAGE ON SCHEMA pgcrypto TO {{ database_user }}'
-  become: true
-  become_user: 'postgres'
-  when: redeploy == False
-
-- name: 'Run necessary operations to run eximintegration migrations'
-  postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'CREATE EXTENSION IF NOT EXISTS file_fdw;'
-    - 'CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
-    - 'CREATE SCHEMA IF NOT EXISTS eximintegration;'
-    - 'GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};'
-    - "CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL) SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');"
-    - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
-  become: true
-  become_user: 'postgres'
-  when: redeploy == False
-
-- include_role:
-    name: 'http_vhost'
-  vars:
-    service_vhost_extra: true
-    vhost_extra: '{{ vhost_extra_pglister }}'
-  when: redeploy == False
-
-- name: 'Activate mod_wsgi on apache2'
-  command: '/usr/sbin/a2enmod wsgi'
-  notify: 'reload httpd'
   when: redeploy == False
 
 - name: 'Give exim permissions to list user (add list to Debian-exim group)'
