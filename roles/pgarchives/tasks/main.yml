@@ -24,7 +24,7 @@
 - name: 'install required packages for django using pip'
   pip:
     name:
-      - django==2.2.24
+      - django==3.2.6
       - psycopg2-binary
       - requests
       - python-dateutil
