@@ -76,6 +76,30 @@
   notify: 'reload httpd'
   when: redeploy == False
 
+- name: 'Ensure the path to drop pg_dict exists'
+  file:
+    path: '/usr/share/postgresql/{{ postgresql_version }}/tsearch_data/'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: 0755
+  when: redeploy == False
+
+# These file is necessary to install schema
+- name: 'Drop pg_dict.*'
+  copy:
+    src: '{{ item }}'
+    dest: '/usr/share/postgresql/{{ postgresql_version }}/tsearch_data/'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+  loop:
+    - 'pg_dict.stop'
+    - 'pg_dict.syn' # this file comes from the pgweb repository
+  when: redeploy == False
+
+# Todo: s/tsparser/other/
+
 - include_role:
     name: cchurch.django
   vars:
@@ -99,21 +123,6 @@
         user.save()
   become: true
   become_user: 'list'
-
-# These file is necessary to install schema
-- name: 'Drop pg_dict.*'
-  copy:
-    src: '{{ item }}'
-    dest: '/usr/share/postgresql/{{ postgresql_version }}/tsearch_data/'
-    owner: 'root'
-    group: 'root'
-    mode: 0644
-  loop:
-    - 'pg_dict.stop'
-    - 'pg_dict.syn' # this file comes from the pgweb repository
-  when: redeploy == False
-
-# Todo: s/tsparser/other/
 
 - name: 'Grant permissions to database to Debian-exim'
   postgresql_query:
