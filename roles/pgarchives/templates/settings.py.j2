@@ -156,4 +156,4 @@ ALLOW_RESEND = False
 
 PGWEB_ADDRESS = 'https://{{ service_vhost_name_pgweb }}'
 
-ALLOWED_HOSTS = [ '{{ service_vhost_name }}' ]
+ALLOWED_HOSTS = [ '{{ service_vhost_name }}' {% if test_only is defined and test_only == True %}, 'localhost' {% endif %} ]
