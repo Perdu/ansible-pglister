@@ -21,20 +21,6 @@
 - name: 'Clone repository'
   include: clone_repository.yml
 
-- name: 'install required packages for django using pip'
-  pip:
-    name:
-      - django==3.2.6
-      - psycopg2-binary
-      - requests
-      - python-dateutil
-      - pytidylib
-      - pycryptodome # for private
-      - pycryptodomex # for private
-    virtualenv: '{{ service_base_path }}/django'
-    virtualenv_python: python3
-  become: true
-
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
   command:
@@ -59,6 +45,25 @@
     - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
   become: true
   become_user: 'postgres'
+  when: redeploy == False
+
+- name: 'Grant permissions to database to Debian-exim'
+  postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pgarchives }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
+  become: true
+  become_user: 'postgres'
+  when: redeploy == False
+
+- name: 'Restart postgresql to make new group perms effective'
+  include_role:
+    name: 'postgresql'
+    tasks_from: 'restart.yml'
+  when: redeploy == False
 
 - include_role:
     name: 'http_vhost'
@@ -70,6 +75,21 @@
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'
   notify: 'reload httpd'
+  when: redeploy == False
+
+- name: 'install required packages for django using pip'
+  pip:
+    name:
+      - django==3.2.6
+      - psycopg2-binary
+      - requests
+      - python-dateutil
+      - pytidylib
+      - pycryptodome # for private
+      - pycryptodomex # for private
+    virtualenv: '{{ service_base_path }}/django'
+    virtualenv_python: python3
+  become: true
   when: redeploy == False
 
 - name: 'Ensure the path to drop pg_dict exists'
@@ -119,18 +139,6 @@
         user.save()
   become: true
   become_user: 'list'
-
-- name: 'Grant permissions to database to Debian-exim'
-  postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pgarchives }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
-  become: true
-  become_user: 'postgres'
-  when: redeploy == False
 
 - name: 'Run pglister_sync.py'
   command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
