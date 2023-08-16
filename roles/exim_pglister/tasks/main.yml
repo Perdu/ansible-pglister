@@ -240,3 +240,8 @@
     name: '{{ exim_daemon }}'
     state: 'restarted'
     enabled: 'yes'
+
+- name: 'Ensure /var/list exists (for wsgi)'
+  file:
+    path: '/var/list'
+    state: 'directory'
