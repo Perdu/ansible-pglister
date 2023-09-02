@@ -24,7 +24,7 @@
     path: '{{ service_base_path }}'
     owner: 'list'
     group: 'www-data'
-    recurse: 'yes'
+    recurse: true
 
 - name: 'Override page.html to disable non-pglister-related links'
   template:

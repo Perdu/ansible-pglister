@@ -180,7 +180,7 @@
   systemd:
     name: spamassassin
     state: reloaded
-    daemon_reload: yes
+    daemon_reload: true
   when: use_spamassassin is defined and use_spamassassin == True
 
 - name: Insert config for spamassassin (1/2)
@@ -233,13 +233,13 @@
   user:
     name: 'Debian-exim'
     groups: 'ssl-cert'
-    append: 'yes'
+    append: true
 
 - name: Restart exim.
   service:
     name: '{{ exim_daemon }}'
     state: 'restarted'
-    enabled: 'yes'
+    enabled: true
 
 - name: 'Ensure /var/list exists (for wsgi)'
   file:

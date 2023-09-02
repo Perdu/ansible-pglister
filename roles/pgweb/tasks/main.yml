@@ -36,7 +36,7 @@
     path: '{{ service_base_path }}'
     owner: 'list'
     group: 'www-data'
-    recurse: 'yes'
+    recurse: true
 
 - name: 'Override contexts.py to disable non-account-related links'
   template:

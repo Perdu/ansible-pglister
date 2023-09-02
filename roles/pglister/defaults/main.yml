@@ -2,7 +2,7 @@
 database_user: 'list'
 database_name_pglister: 'pglister'
 pglister_version: 'master'
-debug: 'False'
+debug: false
 logging_level: 'ERROR'
 use_nagios: false
 log_path: '/var/log/apache2'

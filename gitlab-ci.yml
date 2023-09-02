@@ -16,19 +16,19 @@
     base_path_pgarchives_private: '/srv/pgarchives-private'
     org_name: 'gitlab CI'
     ip_address_pgweb: '127.0.0.1'
-    debug: 'False'
+    debug: false
     logging_level: 'DEBUG'
-    use_letsencrypt: False
-    test_only: True
+    use_letsencrypt: false
+    test_only: true
     # must not be a string
-    install_pgbackrest: False
+    install_pgbackrest: false
     # exim-pglister
     mailname: 'localhost'
-    use_spamassassin: False
+    use_spamassassin: false
     # pglister
     repo_base: 'pglister'
     pglister_version: 'master'
-    use_nagios: False
+    use_nagios: false
     # pgarchives
     database_name_pgarchives: 'pgarchives'
     pgarchives_version: 'master'

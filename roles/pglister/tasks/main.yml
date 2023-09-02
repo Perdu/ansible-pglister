@@ -162,14 +162,14 @@
   user:
     name: '{{ database_user }}'
     groups: 'Debian-exim'
-    append: 'yes'
+    append: true
   when: redeploy == False
 
 - name: 'Give exim permissions to postgres user (add postgres to Debian-exim group)'
   user:
     name: 'postgres'
     groups: 'Debian-exim'
-    append: 'yes'
+    append: true
   when: redeploy == False
 
 - name: 'Restart postgresql to make new group perms effective'
@@ -252,7 +252,7 @@
 - name: 'Check if systemctl is available'
   command: 'which systemctl'
   register: 'systemctl_available'
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: 'Install systemd services'
   command:

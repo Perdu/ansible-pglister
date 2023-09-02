@@ -25,7 +25,7 @@
     path: '{{ service_base_path }}'
     owner: 'list'
     group: 'www-data'
-    recurse: 'yes'
+    recurse: true
 
 - name: 'Override home.html to remove mentions of postgresql.org'
   template:
