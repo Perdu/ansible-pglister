@@ -41,7 +41,7 @@
     - {line: "archive_command = 'pgbackrest --stanza=main archive-push %p'", regex: '^archive_command'}
   register: config_archive
 
-- name: 'restart postgresql'
+- name: 'Restart postgresql'
   block:
   - name: 'Ensure postgresql is enabled/started (systemd)'
     service:

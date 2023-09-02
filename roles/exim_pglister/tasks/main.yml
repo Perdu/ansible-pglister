@@ -22,7 +22,7 @@
     group: Debian-exim
     mode: 0640
 
-- name: generate exim4 config
+- name: Generate exim4 config
   command:
     cmd: '/usr/sbin/update-exim4.conf -o /etc/exim4/exim4.conf'
   become: true
@@ -34,7 +34,7 @@
     owner: 'root'
     group: 'Debian-exim'
 
-- name: add password for smarthost, if exists
+- name: Add password for smarthost, if exists
   lineinfile:
     path: '/etc/exim4/passwd.client'
     line: '{{ smtp_relay_password }}'
@@ -150,7 +150,7 @@
         user = Debian-exim
         environment =
 
-- name: install spamassassin
+- name: Install spamassassin
   package:
     name: spamassassin
     state: present

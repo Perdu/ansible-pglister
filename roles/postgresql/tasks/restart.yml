@@ -1,6 +1,6 @@
 ---
 
-- name: 'restart postgresql'
+- name: 'Restart postgresql'
   block:
   - name: 'Ensure postgresql is enabled/started (systemd)'
     service:

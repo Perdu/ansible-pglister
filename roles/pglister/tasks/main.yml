@@ -144,7 +144,7 @@
   notify: 'reload httpd'
   when: redeploy == False
 
-- name: 'install required packages for django using pip'
+- name: 'Install required packages for django using pip'
   pip:
     name:
       - django==3.2.6

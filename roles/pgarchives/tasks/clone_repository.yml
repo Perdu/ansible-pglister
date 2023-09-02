@@ -19,7 +19,7 @@
   command:
     cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
 
-- name: 'chown list:www-data pgarchives directory'
+- name: 'Chown list:www-data pgarchives directory'
   file:
     path: '{{ service_base_path }}'
     owner: 'list'

@@ -31,14 +31,14 @@
   command:
     cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
 
-- name: 'chown list:www-data pgweb directory'
+- name: 'Chown list:www-data pgweb directory'
   file:
     path: '{{ service_base_path }}'
     owner: 'list'
     group: 'www-data'
     recurse: 'yes'
 
-- name: 'override contexts.py to disable non-account-related links'
+- name: 'Override contexts.py to disable non-account-related links'
   template:
     src: 'contexts.py.j2'
     dest: '{{ service_base_path }}/pgweb/util/contexts.py'
@@ -46,7 +46,7 @@
     group: 'www-data'
     mode: '0644'
 
-- name: 'override base.html to disable non-account-related links'
+- name: 'Override base.html to disable non-account-related links'
   copy:
     src: 'base.html'
     dest: '{{ service_base_path }}/templates/base/base.html'
@@ -54,7 +54,7 @@
     group: 'www-data'
     mode: '0644'
 
-- name: 'override index.html to remove non-account-related information'
+- name: 'Override index.html to remove non-account-related information'
   copy:
     src: 'index.html'
     dest: '{{ service_base_path }}/templates/account/index.html'
@@ -62,7 +62,7 @@
     group: 'www-data'
     mode: '0644'
 
-- name: 'override userprofileform.html to disable unused fields'
+- name: 'Override userprofileform.html to disable unused fields'
   copy:
     src: 'userprofileform.html'
     dest: '{{ service_base_path }}/templates/account/'
@@ -100,25 +100,25 @@
     group: 'www-data'
     mode: '0660'
 
-- name: 'install virtualenv via pip'
+- name: 'Install virtualenv via pip'
   pip:
     name: virtualenv
     executable: pip3
   become: true
 
-- name: 'fix pycopg bug by installing -binary version'
+- name: 'Fix pycopg bug by installing -binary version'
   lineinfile:
     path: '{{ service_base_path }}/requirements.txt'
     regexp: '^psycopg2=='
     line: 'psycopg2-binary'
 
-- name: 'fix pycryptodomex bug by removing version condition'
+- name: 'Fix pycryptodomex bug by removing version condition'
   lineinfile:
     path: '{{ service_base_path }}/requirements.txt'
     regexp: '^pycryptodomex'
     line: 'pycryptodomex'
 
-- name: 'install required packages for django using pip'
+- name: 'Install required packages for django using pip'
   pip:
     requirements: '{{ service_base_path }}/requirements.txt'
     virtualenv: '{{ service_base_path }}/'
