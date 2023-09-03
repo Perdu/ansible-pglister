@@ -78,6 +78,18 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
 
 You can reduce the tasks to repository and related files redeployment using the `redeploy` option, e.g. using `-e "{redeploy: True}"` from the command line.
 
+# Testing
+
+Install the following dependencies:
+- molecule
+- molecule-plugins
+- docker
+
+Then run:
+```
+molecule test
+```
+
 # Authors
 
 - Célestin Matte
