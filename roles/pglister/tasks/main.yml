@@ -84,7 +84,6 @@
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
   when: 'use_nagios is true and redeploy == False'
-  when: redeploy == False
 
 - name: 'Grant permissions to database to nagios'
   postgresql_query:
@@ -97,7 +96,6 @@
   become: true
   become_user: 'postgres'
   when: 'use_nagios is true and redeploy == False'
-  when: redeploy == False
 
 - name: 'Install postgresql pgcrypto schema'
   postgresql_schema:
