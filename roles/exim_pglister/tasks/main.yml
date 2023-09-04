@@ -24,12 +24,12 @@
 
 - name: Generate exim4 config
   command:
-    cmd: '/usr/sbin/update-exim4.conf -o /etc/exim4/exim4.conf'
+    cmd: '/usr/sbin/update-exim4.conf -o {{ exim_configuration_file }}'
   become: true
 
 - name: Set permissions of exim4.conf
   file:
-    path: '/etc/exim4/exim4.conf'
+    path: '{{ exim_configuration_file }}'
     mode: '640'
     owner: 'root'
     group: 'Debian-exim'
