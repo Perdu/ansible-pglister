@@ -223,6 +223,12 @@
     mode: '0644'
   when: mailname is defined
 
+- name: Ensure SSL cert group exists
+  action: group
+  args:
+    name: ssl-cert
+    state: present
+
 - name: Add Debian-exim user to ssl-cert group to be able to read cert files
   user:
     name: 'Debian-exim'
