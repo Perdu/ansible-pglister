@@ -5,7 +5,7 @@ driver:
   name: docker
 platforms:
   - name: instance
-    image: "debian:buster"
+    image: "debian:bookworm"
 provisioner:
   name: ansible
 verifier:
