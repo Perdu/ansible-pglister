@@ -20,7 +20,7 @@
   when: redeploy
 
 - name: 'Clone repository'
-  include: clone_repository.yml
+  import_tasks: clone_repository.yml
 
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'

@@ -34,7 +34,7 @@
     state: 'present'
 
 - name: 'Include restart'
-  include: "restart.yml"
+  import_tasks: "restart.yml"
 
 - name: 'Create a postgres user for Debian-exim'
   community.postgresql.postgresql_user:
@@ -51,5 +51,5 @@
     mode: '640'
 
 - name: 'Include pgbackrest'
-  include: "pgbackrest.yml"
+  import_tasks: "pgbackrest.yml"
   when: install_pgbackrest is defined and install_pgbackrest
