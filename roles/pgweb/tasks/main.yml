@@ -90,7 +90,9 @@
     vhost_extra: '{{ vhost_extra_pgweb }}'
 
 - name: 'Activate mod_wsgi on apache2'
-  command: '/usr/sbin/a2enmod wsgi'
+  community.general.apache2_module:
+    name: wsgi
+    state: present
   notify: 'Reload httpd'
 
 - name: 'Drop settings.py for django'

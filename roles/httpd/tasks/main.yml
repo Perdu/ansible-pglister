@@ -30,7 +30,9 @@
     state: 'absent'
 
 - name: 'Enable modules'
-  command: '/usr/sbin/a2enmod {{ item }}'
+  community.general.apache2_module:
+    name: '{{ item }}'
+    state: present
   loop:
     - 'headers'
     - 'rewrite'
