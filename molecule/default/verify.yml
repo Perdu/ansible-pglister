@@ -2,7 +2,7 @@
 - name: Verify
   hosts: all
 
-  tasks:    
+  tasks:
     - name: Fetch pglister
       uri:
         url: https://pglister.localhost
