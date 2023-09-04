@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Main playbook to install pglister, pgarchives, pgarchives-private, configure exim4, httpd and postgresql
+  hosts: all
   become: true
   vars:
     le_domains: []
