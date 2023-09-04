@@ -82,7 +82,8 @@
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
 
-- include_role:
+- name: 'Include http_vhost role'
+  include_role:
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
@@ -125,7 +126,8 @@
     virtualenv_python: python3
   become: true
 
-- include_role:
+- name: 'Include Django role'
+  include_role:
     name: cchurch.django
   vars:
     django_app_path: '{{ service_base_path }}'
@@ -186,7 +188,8 @@
   register: 'pgauth_key_stdout'
   when: pgauth_key is not defined
 
-- set_fact:
+- name: 'Save result to pgauth_key variable'
+  set_fact:
     pgauth_key={{ pgauth_key_stdout.stdout }}
   when: pgauth_key is not defined
 

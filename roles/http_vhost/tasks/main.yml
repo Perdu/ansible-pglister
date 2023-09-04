@@ -1,10 +1,12 @@
 ---
 
-- fail:
+- name: 'Verify that service_host_name is set'
+  fail:
     msg: 'Please fill the service_vhost_name variable'
   when: service_vhost_name|length == 0
 
-- set_fact:
+- name: 'Construct le_domains variable'
+  set_fact:
     le_domains: '{{ le_domains + [service_vhost_name] + service_vhost_aliases }}'
 
 - name: 'Drop apache restart script'

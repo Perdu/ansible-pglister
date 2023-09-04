@@ -33,7 +33,8 @@
       - 'postgresql-client'
     state: 'latest'
 
-- include: "restart.yml"
+- name: 'Include restart'
+  include: "restart.yml"
 
 - name: 'Create a postgres user for Debian-exim'
   postgresql_user:
@@ -49,5 +50,6 @@
     group: 'postgres'
     mode: 0640
 
-- include: "pgbackrest.yml"
+- name: 'Include pgbackrest'
+  include: "pgbackrest.yml"
   when: install_pgbackrest is defined and install_pgbackrest

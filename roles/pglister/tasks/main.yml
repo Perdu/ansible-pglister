@@ -132,7 +132,8 @@
   become_user: 'postgres'
   when: not redeploy
 
-- include_role:
+- name: 'Include role http_vhost'
+  include_role:
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
@@ -178,7 +179,8 @@
     tasks_from: 'restart.yml'
   when: not redeploy
 
-- include_role:
+- name: 'Include Django role'
+  include_role:
     name: cchurch.django
   vars:
     django_app_path: '{{ service_base_path }}/web'
