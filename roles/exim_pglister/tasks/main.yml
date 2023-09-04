@@ -223,12 +223,6 @@
     mode: '0644'
   when: mailname is defined
 
-- name: 'Create a postgres user for Debian-exim'
-  postgresql_user:
-    name: 'Debian-exim'
-  become: true
-  become_user: 'postgres'
-
 - name: Add Debian-exim user to ssl-cert group to be able to read cert files
   user:
     name: 'Debian-exim'
