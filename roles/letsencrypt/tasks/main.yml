@@ -4,7 +4,7 @@
     name:
       - 'certbot'
       - 'ssl-cert'
-    state: 'latest'
+    state: 'present'
 
 # Ensure a cert is always present using the ssl-cert package so that
 # processes can start before a proper cert is generated.

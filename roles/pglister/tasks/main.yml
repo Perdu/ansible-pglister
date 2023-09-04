@@ -1,7 +1,7 @@
 ---
 - name: 'Install required packages'
   package:
-    state: 'latest'
+    state: 'present'
     name:
       - 'python3'
       - 'git'

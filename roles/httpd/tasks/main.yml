@@ -2,7 +2,7 @@
 - name: 'Install httpd'
   package:
     name: 'apache2'
-    state: 'latest'
+    state: 'present'
 
 - name: 'Disable "000-default" vhost'
   command: '/usr/sbin/a2dissite 000-default'

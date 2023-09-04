@@ -3,7 +3,7 @@
 - name: 'Install pgbackrest'
   apt:
     name: 'pgbackrest'
-    state: 'latest'
+    state: 'present'
 
 # Not using `notify: 'restart postgresql'` as we need it restarted right
 # after the task to then run `check`.

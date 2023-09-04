@@ -1,7 +1,7 @@
 ---
 - name: 'Install gpg to get signing keys for pgdg repositories'
   package:
-    state: 'latest'
+    state: 'present'
     name: 'gpg'
 
 - name: 'Add PGDG signing key'
@@ -31,7 +31,7 @@
     name:
       - 'postgresql'
       - 'postgresql-client'
-    state: 'latest'
+    state: 'present'
 
 - name: 'Include restart'
   include: "restart.yml"
