@@ -43,20 +43,20 @@
 
 - name: 'Restart postgresql'
   block:
-  - name: 'Ensure postgresql is enabled/started (systemd)'
-    service:
-      name: 'postgresql@{{ postgresql_version }}-main'
-      state: 'restarted'
-      enabled: true
-    ignore_errors: true
-    register: systemd
+    - name: 'Ensure postgresql is enabled/started (systemd)'
+      service:
+        name: 'postgresql@{{ postgresql_version }}-main'
+        state: 'restarted'
+        enabled: true
+      ignore_errors: true
+      register: systemd
 
-  - name: 'Ensure postgresql is enabled/started (sysvinit)'
-    service:
-      name: 'postgresql'
-      state: 'restarted'
-      enabled: true
-    when: systemd.failed
+    - name: 'Ensure postgresql is enabled/started (sysvinit)'
+      service:
+        name: 'postgresql'
+        state: 'restarted'
+        enabled: true
+      when: systemd.failed
   when: config is changed or config_archive is changed
 
 - name: 'Check first backup run is correct'

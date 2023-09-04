@@ -28,22 +28,22 @@
 
 - name: 'Update certificate if domains list has changed'
   block:
-  - name: 'Verify if LE domains list has changed'
-    shell: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ ansible_host }}.ini
-    loop: '{{ le_domains }}'
-    register: presence
-    failed_when: presence.rc == 1
+    - name: 'Verify if LE domains list has changed'
+      shell: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ ansible_host }}.ini
+      loop: '{{ le_domains }}'
+      register: presence
+      failed_when: presence.rc == 1
   rescue:
-  - name: 'Delete previous cert to force certbot to create one with the new set of domains'
-    command: >-
-      certbot delete
+    - name: 'Delete previous cert to force certbot to create one with the new set of domains'
+      command: >-
+        certbot delete
         --cert-name {{ ansible_host }}
-    ignore_errors: true
-  - name: 'Update LE certificate because domains list has changed'
-    # for some reason, "notify: 'ensure certificate'" doesn't work here
-    vars:
-      additional_options: '--expand --force-renewal'
-    include_tasks: 'run_acme_client.yml'
+      ignore_errors: true
+    - name: 'Update LE certificate because domains list has changed'
+      # for some reason, "notify: 'ensure certificate'" doesn't work here
+      vars:
+        additional_options: '--expand --force-renewal'
+      include_tasks: 'run_acme_client.yml'
 
 - name: 'Create LE webroot'
   file:
