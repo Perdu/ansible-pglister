@@ -162,17 +162,13 @@
     state: present
   when: use_spamassassin is defined and use_spamassassin
 
-- name: Check if sockets option for spamassassin is already present
-  command: 'grep -q "socketpath" /lib/systemd/system/spamassassin.service'
-  register: option_check
-  ignore_errors: true
-
 - name: Modify SpamAssassin service file to use sockets
-  replace:
+  lineinfile:
     path: /lib/systemd/system/spamassassin.service
-    regexp: '^(ExecStart=.+)$'
-    replace: '\1 --socketpath=/var/run/spamd.socket'
-  when: not option_check.rc == 0 and use_spamassassin is defined and use_spamassassin
+    regexp: '^(ExecStart=.+?)( --socketpath=/var/run/spamd.socket)?$'
+    line: '\1 --socketpath=/var/run/spamd.socket'
+    backrefs: true
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Add spamassassin rule for exim-spam jail to ban spammers
   lineinfile:
