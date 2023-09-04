@@ -142,7 +142,7 @@
 
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'
-  notify: 'reload httpd'
+  notify: 'Reload httpd'
   when: not redeploy
 
 - name: 'Install required packages for django using pip'

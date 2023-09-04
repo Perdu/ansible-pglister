@@ -25,7 +25,7 @@
     owner: 'list'
     group: 'www-data'
     mode: '755'
-  notify: 'reload httpd'
+  notify: 'Reload httpd'
 
 - name: 'Drop vhost template for {{ service_vhost_name }}'
   template:
@@ -34,9 +34,9 @@
     owner: 'root'
     group: 'root'
     mode: '644'
-  notify: 'reload httpd'
+  notify: 'Reload httpd'
 
 # TODO: Ensure unneeded vhosts are disabled.
 - name: 'Enable vhost {{ service_vhost_name }}'
   command: '/usr/sbin/a2ensite {{ service_vhost_priority }}-{{ service_vhost_name }}'
-  notify: 'reload httpd'
+  notify: 'Reload httpd'

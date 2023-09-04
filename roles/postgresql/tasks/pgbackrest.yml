@@ -29,7 +29,7 @@
     owner: 'postgres'
     group: 'postgres'
     mode: '640'
-#  notify: 'restart postgresql'
+#  notify: 'Restart postgresql'
 
 - name: 'Adapt postgres configuration'
   lineinfile:

@@ -24,7 +24,7 @@
     - { src: 'certs/ssl-cert-snakeoil.pem', dest: '{{ le_cert_path }}' }
     - { src: 'private/ssl-cert-snakeoil.key', dest: '{{ le_key_path }}' }
   when: le_cert.matched == 0
-  notify: 'ensure certificate'
+  notify: 'Ensure certificate'
 
 - name: 'Update certificate if domains list has changed'
   block:
