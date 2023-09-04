@@ -1,4 +1,9 @@
 ---
+- name: 'Install gpg to get signing keys for pgdg repositories'
+  package:
+    state: 'latest'
+    name: 'gpg'
+
 - name: 'Add PGDG signing key'
   apt_key:
     url: 'https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc'
