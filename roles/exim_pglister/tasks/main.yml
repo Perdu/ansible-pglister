@@ -251,3 +251,6 @@
   file:
     path: '/var/list'
     state: 'directory'
+    user: 'list'
+    group: 'www-data'
+    mode: '755'
