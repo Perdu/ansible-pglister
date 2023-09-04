@@ -33,12 +33,11 @@
   community.general.apache2_module:
     name: '{{ item }}'
     state: present
-  loop:
+  with_items:
     - 'headers'
     - 'rewrite'
     - 'ssl'
   register: result
-  changed_when: 'not "already enabled" in result.stdout'
   notify: 'Reload httpd'
 
 - name: 'Enable default vhost'
