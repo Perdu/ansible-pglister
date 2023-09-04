@@ -6,6 +6,10 @@ driver:
 platforms:
   - name: instance
     image: "debian:bookworm"
+    etc_hosts: >-
+      {
+      "pgweb.localhost pglister.localhost pgarchives.localhost pgarchives-private.localhost": "127.0.0.1"
+      }
 provisioner:
   name: ansible
 verifier:
