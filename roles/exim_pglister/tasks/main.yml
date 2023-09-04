@@ -154,7 +154,7 @@
   package:
     name: spamassassin
     state: present
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Check if sockets option for spamassassin is already present
   command: 'grep -q "socketpath" /lib/systemd/system/spamassassin.service'
@@ -166,7 +166,7 @@
     path: /lib/systemd/system/spamassassin.service
     regexp: '^(ExecStart=.+)$'
     replace: '\1 --socketpath=/var/run/spamd.socket'
-  when: not option_check.rc == 0 and use_spamassassin is defined and use_spamassassin == True
+  when: not option_check.rc == 0 and use_spamassassin is defined and use_spamassassin
 
 - name: Add spamassassin rule for exim-spam jail to ban spammers
   lineinfile:
@@ -174,14 +174,14 @@
     line: '             ^%(pid)s \S+ %(host_info)sF=(<>|[^@]+@\S+) rejected after DATA: Your message scored \d+.\d+ SpamAssassin points. Report follows:\s*$'
     insertafter: 'This message contains a virus'
     firstmatch: true
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Reload systemd and start SpamAssassin service
   systemd:
     name: spamassassin
     state: reloaded
     daemon_reload: true
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Insert config for spamassassin (1/2)
   blockinfile:
@@ -190,14 +190,14 @@
     marker: '# {mark} ANSIBLE MANAGED BLOCK 7'
     block: |
       spamd_address = {{ exim_spamd_address }}
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Insert a marker before the end of acl_checks using multi-line pattern matching
   replace:
     path: '{{ exim_configuration_file }}'
     regexp: '(?s)(accept\s*begin routers)'
     replace: '# Marker for ansible\n\1'
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Insert config for spamassassin (2/2)
   blockinfile:
@@ -205,7 +205,7 @@
     insertbefore: '# Marker for ansible'
     marker: '# {mark} ANSIBLE MANAGED BLOCK 8'
     block: '{{ lookup("template", "exim_spamassassin.j2") }}'
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Add cron emails destination for list
   cronvar:

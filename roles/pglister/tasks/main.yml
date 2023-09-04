@@ -11,13 +11,13 @@
       - 'python3-virtualenv'
       - 'postgresql-contrib'
       - 'procmail' # to import mbox, not mandatory
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Delete repository for redeployment'
   file:
     path: '{{ service_base_path }}/'
     state: absent
-  when: redeploy == True
+  when: redeploy
 
 - name: 'Clone repository'
   include: clone_repository.yml
@@ -33,14 +33,14 @@
   become_user: 'postgres'
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Create a postgres user for Debian-exim'
   postgresql_user:
     name: 'Debian-exim'
   become: true
   become_user: 'postgres'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Grant permissions to database'
   postgresql_query:
@@ -53,7 +53,7 @@
     - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
   become: true
   become_user: 'postgres'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Add password for list user in postgres, to allow login from exim'
   postgresql_query:
@@ -61,7 +61,7 @@
     db: '{{ database_name_pglister }}'
   become: true
   become_user: 'postgres'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Grant permissions to database to Debian-exim'
   postgresql_query:
@@ -73,7 +73,7 @@
     - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
   become: true
   become_user: 'postgres'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Create nagios role for postgres'
   command:
@@ -84,7 +84,7 @@
   become_user: 'postgres'
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-  when: 'use_nagios is true and redeploy == False'
+  when: 'use_nagios and not redeploy'
 
 - name: 'Grant permissions to database to nagios'
   postgresql_query:
@@ -96,7 +96,7 @@
     - 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";'
   become: true
   become_user: 'postgres'
-  when: 'use_nagios is true and redeploy == False'
+  when: 'use_nagios and not redeploy'
 
 - name: 'Install postgresql pgcrypto schema'
   postgresql_schema:
@@ -104,7 +104,7 @@
     database: '{{ database_name_pglister }}'
   become: true
   become_user: 'postgres'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Install postgresql crypto extension and grant usage'
   postgresql_query:
@@ -115,7 +115,7 @@
     - 'GRANT USAGE ON SCHEMA pgcrypto TO {{ database_user }}'
   become: true
   become_user: 'postgres'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Run necessary operations to run eximintegration migrations'
   postgresql_query:
@@ -130,19 +130,19 @@
     - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
   become: true
   become_user: 'postgres'
-  when: redeploy == False
+  when: not redeploy
 
 - include_role:
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
     vhost_extra: '{{ vhost_extra_pglister }}'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Activate mod_wsgi on apache2'
   command: '/usr/sbin/a2enmod wsgi'
   notify: 'reload httpd'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Install required packages for django using pip'
   pip:
@@ -156,27 +156,27 @@
     virtualenv: '{{ service_base_path }}/web/pglister/'
     virtualenv_python: python3
   become: true
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Give exim permissions to list user (add list to Debian-exim group)'
   user:
     name: '{{ database_user }}'
     groups: 'Debian-exim'
     append: true
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Give exim permissions to postgres user (add postgres to Debian-exim group)'
   user:
     name: 'postgres'
     groups: 'Debian-exim'
     append: true
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Restart postgresql to make new group perms effective'
   include_role:
     name: 'postgresql'
     tasks_from: 'restart.yml'
-  when: redeploy == False
+  when: not redeploy
 
 - include_role:
     name: cchurch.django
@@ -212,7 +212,7 @@
         dom.save()
   become: true
   become_user: 'list'
-  when: redeploy == False
+  when: not redeploy
 
 # To do this manually, add an archive server in /admin/
 - name: 'Create archives server in pglister'
@@ -230,7 +230,7 @@
         arch.save()
   become: true
   become_user: 'list'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Create archives-private server in pglister'
   command:
@@ -247,7 +247,7 @@
         arch.save()
   become: true
   become_user: 'list'
-  when: redeploy == False
+  when: not redeploy
 
 - name: 'Check if systemctl is available'
   command: 'which systemctl'
@@ -259,21 +259,21 @@
     cmd: './install.sh -install'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
-  when: 'redeploy == False and systemctl_available.rc == 0'
+  when: 'not redeploy and systemctl_available.rc == 0'
 
 - name: 'Start systemd services'
   command:
     cmd: './install.sh -start'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
-  when: 'redeploy == False and systemctl_available.rc == 0'
+  when: 'not redeploy and systemctl_available.rc == 0'
 
 - name: 'Enable systemd services'
   command:
     cmd: './install.sh -enable'
     chdir: '{{ service_base_path }}/systemd/'
   become: true
-  when: 'redeploy == False and systemctl_available.rc == 0'
+  when: 'not redeploy and systemctl_available.rc == 0'
 
 - name: 'Add pglister commands to nagios'
   block:
@@ -292,4 +292,4 @@
         name: 'nagios-nrpe-server.service'
         state: 'restarted'
 
-  when: use_nagios is true and redeploy == False
+  when: use_nagios and not redeploy
