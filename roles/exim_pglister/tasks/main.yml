@@ -208,7 +208,7 @@
   when: use_spamassassin is defined and use_spamassassin
 
 - name: Add cron emails destination for list
-  cronvar:
+  community.general.cronvar:
     name: "MAILTO"
     value: "{{ cron_emails_destination }}"
   become: true

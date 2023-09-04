@@ -36,7 +36,7 @@
   when: not redeploy
 
 - name: 'Grant permissions to database'
-  postgresql_query:
+  community.postgresql.postgresql_query:
     query: '{{ item }}'
     db: '{{ database_name_pgarchives }}'
   loop:
@@ -49,7 +49,7 @@
   when: not redeploy
 
 - name: 'Grant permissions to database to Debian-exim'
-  postgresql_query:
+  community.postgresql.postgresql_query:
     query: '{{ item }}'
     db: '{{ database_name_pgarchives }}'
   loop:

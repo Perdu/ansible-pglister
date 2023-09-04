@@ -37,7 +37,7 @@
   include: "restart.yml"
 
 - name: 'Create a postgres user for Debian-exim'
-  postgresql_user:
+  community.postgresql.postgresql_user:
     name: 'Debian-exim'
   become: true
   become_user: 'postgres'

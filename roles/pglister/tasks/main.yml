@@ -36,14 +36,14 @@
   when: not redeploy
 
 - name: 'Create a postgres user for Debian-exim'
-  postgresql_user:
+  community.postgresql.postgresql_user:
     name: 'Debian-exim'
   become: true
   become_user: 'postgres'
   when: not redeploy
 
 - name: 'Grant permissions to database'
-  postgresql_query:
+  community.postgresql.postgresql_query:
     query: '{{ item }}'
     db: '{{ database_name_pglister }}'
   loop:
@@ -56,7 +56,7 @@
   when: not redeploy
 
 - name: 'Add password for list user in postgres, to allow login from exim'
-  postgresql_query:
+  community.postgresql.postgresql_query:
     query: "ALTER USER list WITH password '{{ database_password }}';"
     db: '{{ database_name_pglister }}'
   become: true
@@ -64,7 +64,7 @@
   when: not redeploy
 
 - name: 'Grant permissions to database to Debian-exim'
-  postgresql_query:
+  community.postgresql.postgresql_query:
     query: '{{ item }}'
     db: '{{ database_name_pglister }}'
   loop:
@@ -87,7 +87,7 @@
   when: 'use_nagios and not redeploy'
 
 - name: 'Grant permissions to database to nagios'
-  postgresql_query:
+  community.postgresql.postgresql_query:
     query: '{{ item }}'
     db: '{{ database_name_pglister }}'
   loop:
@@ -99,7 +99,7 @@
   when: 'use_nagios and not redeploy'
 
 - name: 'Install postgresql pgcrypto schema'
-  postgresql_schema:
+  community.postgresql.postgresql_schema:
     name: 'pgcrypto'
     database: '{{ database_name_pglister }}'
   become: true
@@ -107,7 +107,7 @@
   when: not redeploy
 
 - name: 'Install postgresql crypto extension and grant usage'
-  postgresql_query:
+  community.postgresql.postgresql_query:
     query: '{{ item }}'
     db: '{{ database_name_pglister }}'
   loop:
@@ -118,7 +118,7 @@
   when: not redeploy
 
 - name: 'Run necessary operations to run eximintegration migrations'
-  postgresql_query:
+  community.postgresql.postgresql_query:
     query: '{{ item }}'
     db: '{{ database_name_pglister }}'
   loop:
