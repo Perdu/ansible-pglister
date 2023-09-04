@@ -15,7 +15,7 @@
     dest: '{{ le_deploy_hooks_path }}/apache2.sh'
     owner: 'root'
     group: 'root'
-    mode: 0755
+    mode: '755'
   when: 'use_letsencrypt is defined and use_letsencrypt'
 
 - name: 'Create log folder'
@@ -24,7 +24,7 @@
     state: 'directory'
     owner: 'list'
     group: 'www-data'
-    mode: 0755
+    mode: '755'
   notify: 'reload httpd'
 
 - name: 'Drop vhost template for {{ service_vhost_name }}'
@@ -33,7 +33,7 @@
     dest: '/etc/apache2/sites-available/{{ service_vhost_priority }}-{{ service_vhost_name }}.conf'
     owner: 'root'
     group: 'root'
-    mode: 0644
+    mode: '644'
   notify: 'reload httpd'
 
 # TODO: Ensure unneeded vhosts are disabled.

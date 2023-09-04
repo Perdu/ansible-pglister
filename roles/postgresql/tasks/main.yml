@@ -24,7 +24,7 @@
       Pin-Priority: 900
     owner: 'root'
     group: 'root'
-    mode: 0640
+    mode: '640'
 
 - name: 'Install postgresl'
   package:
@@ -48,7 +48,7 @@
     dest: '/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf'
     owner: 'postgres'
     group: 'postgres'
-    mode: 0640
+    mode: '640'
 
 - name: 'Include pgbackrest'
   include: "pgbackrest.yml"

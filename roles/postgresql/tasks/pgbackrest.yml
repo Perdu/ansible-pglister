@@ -13,7 +13,7 @@
     dest: '/etc/pgbackrest.conf'
     owner: 'postgres'
     group: 'postgres'
-    mode: 0640
+    mode: '640'
   register: config
 
 - name: 'Run first backup procedure'
@@ -28,7 +28,7 @@
     dest: '/etc/postgresql/{{ postgresql_version }}/main/conf.d/postgres_pgbackrest.conf'
     owner: 'postgres'
     group: 'postgres'
-    mode: 0640
+    mode: '640'
 #  notify: 'restart postgresql'
 
 - name: 'Adapt postgres configuration'

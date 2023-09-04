@@ -100,7 +100,7 @@
     state: 'directory'
     owner: 'root'
     group: 'root'
-    mode: 0755
+    mode: '755'
   when: not redeploy
 
 # These file is necessary to install schema
@@ -110,7 +110,7 @@
     dest: '/usr/share/postgresql/{{ postgresql_version }}/tsearch_data/'
     owner: 'root'
     group: 'root'
-    mode: 0644
+    mode: '644'
   loop:
     - 'pg_dict.stop'
     - 'pg_dict.syn' # this file comes from the pgweb repository

@@ -20,7 +20,7 @@
     dest: '/etc/exim4/exim4.conf.localmacros'
     owner: root
     group: Debian-exim
-    mode: 0640
+    mode: '640'
 
 - name: Generate exim4 config
   command:

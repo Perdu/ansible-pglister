@@ -4,7 +4,7 @@
     state: 'directory'
     owner: 'list'
     group: 'www-data'
-    mode: 0755
+    mode: '755'
 
 - name: 'Clone pgarchives repository'
   git:
@@ -32,7 +32,7 @@
     dest: '{{ service_base_path }}/django/archives/mailarchives/templates/page.html'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '644'
 
 - name: 'Override index.html to disable PostreSQL-related information'
   template:
@@ -40,7 +40,7 @@
     dest: '{{ service_base_path }}/django/archives/mailarchives/templates/index.html'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '644'
 
 - name: 'Override base.html to disable PostreSQL-related information'
   template:
@@ -48,7 +48,7 @@
     dest: '{{ service_base_path }}/django/archives/mailarchives/templates/base.html'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '644'
 
 - name: 'Drop settings.py for django'
   template:
@@ -56,7 +56,7 @@
     dest: '{{ web_path }}/settings_local.py'
     owner: 'list'
     group: 'www-data'
-    mode: '0660'
+    mode: '660'
 
 - name: 'Drop make-dyncss.sh'
   template:
@@ -64,7 +64,7 @@
     dest: '{{ service_base_path }}/make_dyncss.sh'
     owner: 'list'
     group: 'www-data'
-    mode: '0660'
+    mode: '660'
 
 - name: 'Run make_dyncss.sh'
   command: sh '{{ service_base_path }}/make_dyncss.sh'
@@ -75,4 +75,4 @@
     dest: '{{ service_base_path }}/loader/archives.ini'
     owner: 'list'
     group: 'Debian-exim'
-    mode: '0640'
+    mode: '640'

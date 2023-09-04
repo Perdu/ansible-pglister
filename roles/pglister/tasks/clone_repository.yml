@@ -5,7 +5,7 @@
     state: 'directory'
     owner: 'list'
     group: 'www-data'
-    mode: 0755
+    mode: '755'
 
 - name: 'Clone pglister repository'
   git:
@@ -33,7 +33,7 @@
     dest: '{{ service_base_path }}/web/pglister/lists/templates/home.html'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '644'
 
 - name: 'Copy pglister config'
   template:
@@ -41,7 +41,7 @@
     dest: '{{ service_base_path }}/pglister.ini'
     owner: 'list'
     group: 'www-data'
-    mode: '0664'
+    mode: '664'
 
 - name: 'Drop settings.py for django'
   template:
@@ -49,7 +49,7 @@
     dest: '{{ service_base_path }}/web/pglister/local_settings.py'
     owner: 'list'
     group: 'www-data'
-    mode: '0640'
+    mode: '640'
 
 - name: 'Add link to venv to systemd services'
   lineinfile:

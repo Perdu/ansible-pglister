@@ -16,7 +16,7 @@
     state: 'directory'
     owner: 'list'
     group: 'www-data'
-    mode: 0755
+    mode: '755'
 
 - name: 'Clone pgweb repository'
   git:
@@ -44,7 +44,7 @@
     dest: '{{ service_base_path }}/pgweb/util/contexts.py'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '644'
 
 - name: 'Override base.html to disable non-account-related links'
   copy:
@@ -52,7 +52,7 @@
     dest: '{{ service_base_path }}/templates/base/base.html'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '644'
 
 - name: 'Override index.html to remove non-account-related information'
   copy:
@@ -60,7 +60,7 @@
     dest: '{{ service_base_path }}/templates/account/index.html'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '644'
 
 - name: 'Override userprofileform.html to disable unused fields'
   copy:
@@ -68,7 +68,7 @@
     dest: '{{ service_base_path }}/templates/account/'
     owner: 'list'
     group: 'www-data'
-    mode: '0644'
+    mode: '644'
 
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
@@ -99,7 +99,7 @@
     dest: '{{ web_path }}/settings_local.py'
     owner: 'list'
     group: 'www-data'
-    mode: '0660'
+    mode: '660'
 
 - name: 'Install virtualenv via pip'
   pip:
@@ -166,7 +166,7 @@
     dest: '{{ service_base_path }}/make_dyncss.sh'
     owner: 'list'
     group: 'www-data'
-    mode: '0660'
+    mode: '660'
 
 - name: 'Run make_dyncss.sh'
   command: sh '{{ service_base_path }}/make_dyncss.sh'
