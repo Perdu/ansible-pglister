@@ -42,6 +42,7 @@
   register: config_archive
 
 - name: 'Restart postgresql'
+  when: config is changed or config_archive is changed
   block:
     - name: 'Ensure postgresql is enabled/started (systemd)'
       service:
@@ -57,7 +58,6 @@
         state: 'restarted'
         enabled: true
       when: systemd.failed
-  when: config is changed or config_archive is changed
 
 - name: 'Check first backup run is correct'
   command: pgbackrest --stanza=main check

@@ -278,6 +278,7 @@
   when: 'not redeploy and systemctl_available.rc == 0'
 
 - name: 'Add pglister commands to nagios'
+  when: use_nagios and not redeploy
   block:
     - name: 'Add pglister commands to nrpe config'
       lineinfile:
@@ -293,5 +294,3 @@
       service:
         name: 'nagios-nrpe-server.service'
         state: 'restarted'
-
-  when: use_nagios and not redeploy
