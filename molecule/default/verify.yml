@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+
+  tasks:    
+    - name: Fetch pglister
+      uri:
+        url: https://pglister.localhost
+        validate_certs: false
+        return_content: true
+      register: pglister_content
+
+    - name: Check if pglister is running
+      debug:
+        msg: "pglister is running."
+      when: "'From this site you can manage all your' in pglister_content.content"
+
+    - name: Fetch pgarchives
+      uri:
+        url: https://pgarchives.localhost
+        validate_certs: false
+        return_content: true
+      register: pgarchives_content
+
+    - name: Check if pgarchives is running
+      debug:
+        msg: "pgarchives is running."
+      when: "'View All Archives' in pgarchives_content.content"
+
+    - name: Fetch pgarchives_private
+      uri:
+        url: https://pgarchives-private.localhost
+        validate_certs: false
+        return_content: true
+      register: pgarchives_private_content
+
+    - name: Check if pgarchives_private is running
+      debug:
+        msg: "pgarchives_private is running."
+      when: "'View All Archives' in pgarchives_private_content.content"
