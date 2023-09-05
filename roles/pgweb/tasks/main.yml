@@ -73,10 +73,9 @@
 
 # Todo: it will be better to run this inside the venv
 - name: 'Run varnish_local.sql to disable Varnish functions'
-  community.postgresql.postgresql_query:
+  community.postgresql.postgresql_script:
     db: '{{ database_name_pgweb }}'
-    path_to_script: '{{ service_base_path }}/sql/varnish_local.sql'
-    as_single_query: false
+    path: '{{ service_base_path }}/sql/varnish_local.sql'
   become: true
   become_user: 'postgres'
 
