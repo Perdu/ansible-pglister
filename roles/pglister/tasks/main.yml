@@ -197,6 +197,9 @@
         user.first_name = "Admin"
         user.last_name = "Admin"
         user.save()
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
 
@@ -212,6 +215,9 @@
         dom.name = "{{ service_vhost_name }}"
         dom.lists_helppage = "{{ service_vhost_name }}"
         dom.save()
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
   when: not redeploy
@@ -231,6 +237,9 @@
         arch.maildomain = "{{ service_vhost_name_pgarchives }}"
         arch.apikey = "{{ pgarchives_secret_key }}"
         arch.save()
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
   when: not redeploy
@@ -249,6 +258,9 @@
         arch.maildomain = "{{ service_vhost_name_pgarchives }}"
         arch.apikey = "{{ pgarchives_secret_key }}"
         arch.save()
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
   when: not redeploy

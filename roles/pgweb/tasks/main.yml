@@ -95,6 +95,9 @@
         user.first_name = "Admin"
         user.last_name = "Admin"
         user.save()
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
 
@@ -154,6 +157,10 @@
           Site.org = Org
           Site.push_changes = True
           Site.save()
+
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
 
@@ -178,5 +185,9 @@
           Site.org = Org
           Site.push_changes = True
           Site.save()
+
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
