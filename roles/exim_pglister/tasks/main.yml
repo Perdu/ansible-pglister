@@ -247,6 +247,6 @@
   file:
     path: '/var/list'
     state: 'directory'
-    user: 'list'
+    owner: 'list'
     group: 'www-data'
     mode: '755'
