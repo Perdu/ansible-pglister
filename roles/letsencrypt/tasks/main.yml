@@ -38,7 +38,6 @@
       command: >-
         certbot delete
         --cert-name {{ ansible_host }}
-      ignore_errors: true
     - name: 'Update LE certificate because domains list has changed'
       # for some reason, "notify: 'ensure certificate'" doesn't work here
       vars:
