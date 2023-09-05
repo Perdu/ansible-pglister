@@ -10,15 +10,14 @@
 - name: 'Clone pglister repository'
   git:
     repo: '{{ repo_uri }}'
-    dest: '{{ base_path }}/{{ repo_name }}'
+    dest: '{{ service_base_path }}'
     clone: true
     update: true
     version: '{{ pglister_version }}'
+    force: true
+  become: true
+  become_user: 'list'
   register: repo
-
-- name: 'Copy repository content to local folder'
-  command:
-    cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
 
 - name: 'Chown list:www-data pglister directory'
   file:
