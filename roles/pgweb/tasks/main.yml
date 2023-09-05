@@ -192,7 +192,7 @@
 
 - name: 'Save result to pgauth_key variable'
   set_fact:
-    pgauth_key={{ pgauth_key_stdout.stdout }}
+    pgauth_key: '{{ pgauth_key_stdout.stdout }}'
   when: pgauth_key is not defined
 
 # To do this manually, add a community auth org and site in /admin/
