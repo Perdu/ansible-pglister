@@ -127,7 +127,8 @@
 # into pgarchives's virtualenv.
 - name: 'Create django superuser'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/django/manage.py shell"'
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/django/manage.py shell'
     stdin: |
       from django.contrib.auth import get_user_model
       User = get_user_model()

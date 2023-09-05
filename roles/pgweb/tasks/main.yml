@@ -150,7 +150,8 @@
 # into pgweb's virtualenv.
 - name: 'Create django superuser'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
     stdin: |
       from django.contrib.auth import get_user_model
       User = get_user_model()
@@ -198,7 +199,8 @@
 # To do this manually, add a community auth org and site in /admin/
 - name: 'Create community auth site to link pgweb and pglister'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
     stdin: |
       from pgweb.account.models import *
       if len(CommunityAuthOrg.objects.filter(orgname="pglister")) == 0:
@@ -221,7 +223,8 @@
 
 - name: 'Create community auth site to link pgweb and pgarchives_private'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
     stdin: |
       from pgweb.account.models import *
       if len(CommunityAuthOrg.objects.filter(orgname="pgarchives_private")) == 0:
