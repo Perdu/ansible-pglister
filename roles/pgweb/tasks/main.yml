@@ -10,65 +10,8 @@
       - 'python-psycopg2'
       - 'python-virtualenv'
 
-- name: 'Create folder tree'
-  file:
-    path: '{{ service_base_path }}'
-    state: 'directory'
-    owner: 'list'
-    group: 'www-data'
-    mode: '755'
-
-- name: 'Clone pgweb repository'
-  git:
-    repo: '{{ repo_uri }}'
-    dest: '{{ base_path }}/{{ repo_name }}'
-    clone: true
-    update: true
-    version: '{{ pgweb_version }}'
-  register: repo
-
-- name: 'Copy repository content to local folder'
-  command:
-    cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
-
-- name: 'Chown list:www-data pgweb directory'
-  file:
-    path: '{{ service_base_path }}'
-    owner: 'list'
-    group: 'www-data'
-    recurse: true
-
-- name: 'Override contexts.py to disable non-account-related links'
-  template:
-    src: 'contexts.py.j2'
-    dest: '{{ service_base_path }}/pgweb/util/contexts.py'
-    owner: 'list'
-    group: 'www-data'
-    mode: '644'
-
-- name: 'Override base.html to disable non-account-related links'
-  copy:
-    src: 'base.html'
-    dest: '{{ service_base_path }}/templates/base/base.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '644'
-
-- name: 'Override index.html to remove non-account-related information'
-  copy:
-    src: 'index.html'
-    dest: '{{ service_base_path }}/templates/account/index.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '644'
-
-- name: 'Override userprofileform.html to disable unused fields'
-  copy:
-    src: 'userprofileform.html'
-    dest: '{{ service_base_path }}/templates/account/'
-    owner: 'list'
-    group: 'www-data'
-    mode: '644'
+- name: 'Clone repository'
+  import_tasks: clone_repository.yml
 
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
@@ -94,14 +37,6 @@
     name: wsgi
     state: present
   notify: 'Reload httpd'
-
-- name: 'Drop settings.py for django'
-  template:
-    src: 'settings.py.j2'
-    dest: '{{ web_path }}/settings_local.py'
-    owner: 'list'
-    group: 'www-data'
-    mode: '660'
 
 - name: 'Install virtualenv via pip'
   pip:
