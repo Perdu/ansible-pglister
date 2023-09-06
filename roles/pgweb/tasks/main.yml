@@ -120,14 +120,32 @@
     hour: '*'
     job: '{{ venv_python }} {{ service_base_path }}/manage.py send_queued_mail'
 
-- name: 'Generate cryptkey to link pgweb and pglister'
+- name: 'Verify if a pgauth_key already exists'
+  command:
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
+    stdin: |
+      from pgweb.account.models import *
+      authsites = CommunityAuthSite.objects.all();
+      if len(authsites) > 0:
+        pgauth_key = authsites[0].cryptkey
+        print(pgauth_key)
+      else:
+        print("No key found")
+  become: true
+  become_user: 'list'
+  register: key
+  changed_when: false
+
+- name: 'Generate new cryptkey to link pgweb and pglister'
   shell: |
     set -o pipefail
     {{ venv_python }} {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1
   become: true
   become_user: 'list'
   register: 'pgauth_key_stdout'
-  when: pgauth_key is not defined
+  changed_when: true
+  when: pgauth_key is not defined or pgauth_key == '' or pgauth_key != key.stdout
 
 - name: 'Save result to pgauth_key variable'
   set_fact:
@@ -188,5 +206,21 @@
         print("changed")
   register: res
   changed_when: res.stdout == "changed"
+  become: true
+  become_user: 'list'
+
+- name: 'Ensure cryptkeys of all existing authsites match pgauth_key (for idempotence)'
+  command:
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
+    stdin: |
+      from pgweb.account.models import *
+      authsites = CommunityAuthSite.objects.all()
+      for site in authsites:
+        if site.cryptkey != "{{ pgauth_key }}":
+          site.cryptkey = "{{ pgauth_key }}";
+          print("changed")
+  register: res
+  changed_when: '"changed" in res.stdout'
   become: true
   become_user: 'list'
