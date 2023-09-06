@@ -154,7 +154,7 @@
   lineinfile:
     path: '/etc/exim4/passwd.client'
     line: '{{ smtp_relay_password }}'
-  when: smtp_relay_password is defined
+  when: smtp_relay_password is defined and smtp_relay_password != ''
 
 - name: Install spamassassin
   package:
