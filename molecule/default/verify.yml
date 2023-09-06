@@ -38,3 +38,15 @@
       debug:
         msg: "pgarchives_private is running."
       when: "'View All Archives' in pgarchives_private_content.content"
+
+    - name: Fetch pgweb
+      uri:
+        url: https://pgweb.localhost
+        validate_certs: false
+        return_content: true
+      register: pgweb_content
+
+    - name: Check if pgweb is running
+      debug:
+        msg: "pgweb is running."
+      when: "'Community account sign-in' in pgarchives_private_content.content"
