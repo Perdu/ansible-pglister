@@ -1,15 +1,14 @@
 ---
-
 - name: 'Install httpd'
   package:
     name: 'apache2'
-    state: 'latest'
+    state: 'present'
 
 - name: 'Disable "000-default" vhost'
   command: '/usr/sbin/a2dissite 000-default'
   register: result
   changed_when: 'not "already enabled" in result.stdout'
-  notify: 'reload httpd'
+  notify: 'Reload httpd'
   ignore_errors: true
 
 - name: 'Drop default templates'
@@ -23,7 +22,7 @@
     - { src: '090-default.conf', dest: '/etc/apache2/sites-available/090-default.conf' }
     - { src: 'ssl.conf', dest: '{{ httpd_ssl_conf }}' }
     - { src: 'mod_ssl.conf', dest: '/etc/apache2/mods-available/ssl.conf' }
-  notify: 'reload httpd'
+  notify: 'Reload httpd'
 
 - name: 'Remove ssl-cert vhost'
   file:
@@ -31,27 +30,28 @@
     state: 'absent'
 
 - name: 'Enable modules'
-  command: '/usr/sbin/a2enmod {{ item }}'
-  loop:
+  community.general.apache2_module:
+    name: '{{ item }}'
+    state: present
+  with_items:
     - 'headers'
     - 'rewrite'
     - 'ssl'
   register: result
-  changed_when: 'not "already enabled" in result.stdout'
-  notify: 'reload httpd'
+  notify: 'Reload httpd'
 
 - name: 'Enable default vhost'
   command: '/usr/sbin/a2ensite 090-default'
   register: result
   changed_when: 'not "already enabled" in result.stdout'
-  notify: 'reload httpd'
+  notify: 'Reload httpd'
 
 - name: 'Set ServerTokens'
   lineinfile:
     path: '/etc/apache2/conf-available/security.conf'
     regexp: '^ServerTokens'
     line: 'ServerTokens Prod'
-  notify: 'reload httpd'
+  notify: 'Reload httpd'
 
 # Ensure certificates are present before starting the server.
 

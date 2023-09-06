@@ -1,5 +1,6 @@
 ---
-- include_role:
+- name: 'Include pgarchives role with variables for _private'
+  include_role:
     name: pgarchives
   vars:
     database_name_pgarchives: '{{ database_name_pgarchives_private }}'

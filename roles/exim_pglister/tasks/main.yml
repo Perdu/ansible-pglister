@@ -1,8 +1,10 @@
 ---
-- name: Ensure exim is installed.
+- name: 'Install required packages'
   package:
-    name: '{{ exim_package }}'
     state: 'present'
+    name:
+      - '{{ exim_package }}'
+      - 'python3-psycopg2'
 
 - name: Copy exim configuration file
   template:
@@ -18,153 +20,155 @@
     dest: '/etc/exim4/exim4.conf.localmacros'
     owner: root
     group: Debian-exim
-    mode: 0640
+    mode: '640'
 
-- name: generate exim4 config
+- name: Generate exim4 config
   command:
-    cmd: '/usr/sbin/update-exim4.conf -o /etc/exim4/exim4.conf'
+    cmd: '/usr/sbin/update-exim4.conf -o {{ exim_configuration_file }}'
+    creates: '{{ exim_configuration_file }}'
   become: true
+  register: new_exim_config
 
 - name: Set permissions of exim4.conf
   file:
-    path: '/etc/exim4/exim4.conf'
+    path: '{{ exim_configuration_file }}'
     mode: '640'
     owner: 'root'
     group: 'Debian-exim'
+  when: not 'skipped' in new_exim_config.stdout
 
-- name: add password for smarthost, if exists
+- name: Edit configuration with parts for pglister, pgarchives and pgarchives_private
+  when: not 'skipped' in new_exim_config.stdout
+  block:
+    - name: Insert config for pglister (1/4)
+      blockinfile:
+        path: '{{ exim_configuration_file }}'
+        insertafter: 'begin transports'
+        block: |
+          pglister_pipe:
+            driver = pipe
+            command = {{ base_path_pglister }}/local/web/pglister/bin/python {{ base_path_pglister }}/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix@$domain -m $header_message-id:
+            #ignore_status
+            temp_errors = *
+            return_output = false
+            freeze_exec_fail = true
+            log_defer_output = true
+            log_output = true
+            headers_remove = List-Unsubscribe:List-Owner:List-Post:List-Subscribe:List-Help:List-Id:List-Archive
+            #log_fail_output = true
+            umask = 022
+            environment =
+            user = Debian-exim
+            message_prefix =
+
+    - name: Insert config for pglister (2/4)
+      lineinfile:
+        path: '{{ exim_configuration_file }}'
+        regex: 'domainlist local_domains ='
+        line: "domainlist local_domains = @ : ${lookup pgsql{select name from lists_domain where name='${quote_pgsql:$domain}'} {$value}} : MAIN_LOCAL_DOMAINS"
+
+    - name: Insert config for pglister (3/4)
+      lineinfile:
+        path: '{{ exim_configuration_file }}'
+        insertafter: 'hostlist relay_from_hosts ='
+        line: 'hide pgsql_servers = localhost/{{ database_name_pglister }}/{{ database_user }}/{{ database_password }}'
+
+    - name: Insert config for pglister (4/4)
+      blockinfile:
+        path: '{{ exim_configuration_file }}'
+        insertbefore: 'begin transports'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK 2'
+        block: |
+          pglister:
+            debug_print = "R: pglister for $local_part@$domain"
+            driver = accept
+            transport = pglister_pipe
+            domains = +local_domains
+            local_parts = mailer-daemon : ${lookup pgsql{select lists_list.name from lists_list, lists_domain WHERE lists_list.name='${quote_pgsql:$local_part}' and lists_domain.name='${quote_pgsql:$domain}' AND lists_list.domain_id=lists_domain.id} {$value}}
+
+    - name: Insert config for pgarchives (1/2)
+      blockinfile:
+        path: '{{ exim_configuration_file }}'
+        insertbefore: 'pglister:' # this router must be placed before pglister's generic one
+        marker: '# {mark} ANSIBLE MANAGED BLOCK 3'
+        block: |
+          archive_router:
+            driver = accept
+            domains = {{ service_vhost_name_pgarchives }}
+            local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}' and subscription_policy <> 2} {$value}fail}
+            transport = archive_pipe
+
+    - name: Insert config for pgarchives (2/2)
+      blockinfile:
+        path: '{{ exim_configuration_file }}'
+        insertafter: 'begin transports'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK 4'
+        block: |
+          archive_pipe:
+            driver = pipe
+            command = {{ base_path_pgarchives }}/local/django/bin/python {{ base_path_pgarchives }}/local/loader/load_message.py -l $local_part
+            #ignore_status
+            temp_errors = *
+            return_output = false
+            freeze_exec_fail = true
+            log_defer_output = true
+            log_output = true
+            #log_fail_output = true
+            umask = 022
+            user = Debian-exim
+            environment =
+
+    - name: Insert config for pgarchives-private (1/2)
+      blockinfile:
+        path: '{{ exim_configuration_file }}'
+        insertbefore: 'archive_router:' # this router must be placed before pglister's generic one
+        marker: '# {mark} ANSIBLE MANAGED BLOCK 5'
+        block: |
+          archive_private_router:
+            driver = accept
+            domains = {{ service_vhost_name_pgarchives }}
+            local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}' and subscription_policy = 2} {$value}fail}
+            transport = archive_private_pipe
+
+    - name: Insert config for pgarchives-private (2/2)
+      blockinfile:
+        path: '{{ exim_configuration_file }}'
+        insertbefore: 'archive_pipe:'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK 6'
+        block: |
+          archive_private_pipe:
+            driver = pipe
+            command = {{ base_path_pgarchives_private }}/local/django/bin/python {{ base_path_pgarchives_private }}/local/loader/load_message.py -l $local_part
+            #ignore_status
+            temp_errors = *
+            return_output = false
+            freeze_exec_fail = true
+            log_defer_output = true
+            log_output = true
+            #log_fail_output = true
+            umask = 022
+            user = Debian-exim
+            environment =
+
+- name: Add password for smarthost, if exists
   lineinfile:
     path: '/etc/exim4/passwd.client'
     line: '{{ smtp_relay_password }}'
-  when: smtp_relay_password is defined
+  when: smtp_relay_password is defined and smtp_relay_password != ''
 
-- name: Insert config for pglister (1/4)
-  blockinfile:
-    path: '{{ exim_configuration_file }}'
-    insertafter: 'begin transports'
-    block: |
-      pglister_pipe:
-        driver = pipe
-        command = {{ base_path_pglister }}/local/web/pglister/bin/python {{ base_path_pglister }}/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix@$domain -m $header_message-id:
-        #ignore_status
-        temp_errors = *
-        return_output = false
-        freeze_exec_fail = true
-        log_defer_output = true
-        log_output = true
-        headers_remove = List-Unsubscribe:List-Owner:List-Post:List-Subscribe:List-Help:List-Id:List-Archive
-        #log_fail_output = true
-        umask = 022
-        environment =
-        user = Debian-exim
-        message_prefix =
-
-- name: Insert config for pglister (2/4)
-  lineinfile:
-    path: '{{ exim_configuration_file }}'
-    regex: 'domainlist local_domains ='
-    line: "domainlist local_domains = @ : ${lookup pgsql{select name from lists_domain where name='${quote_pgsql:$domain}'} {$value}} : MAIN_LOCAL_DOMAINS"
-
-- name: Insert config for pglister (3/4)
-  lineinfile:
-    path: '{{ exim_configuration_file }}'
-    insertafter: 'hostlist relay_from_hosts ='
-    line: 'hide pgsql_servers = localhost/{{ database_name_pglister }}/{{ database_user }}/{{ database_password }}'
-
-- name: Insert config for pglister (4/4)
-  blockinfile:
-    path: '{{ exim_configuration_file }}'
-    insertbefore: 'begin transports'
-    marker: '# {mark} ANSIBLE MANAGED BLOCK 2'
-    block: |
-      pglister:
-        debug_print = "R: pglister for $local_part@$domain"
-        driver = accept
-        transport = pglister_pipe
-        domains = +local_domains
-        local_parts = mailer-daemon : ${lookup pgsql{select lists_list.name from lists_list, lists_domain WHERE lists_list.name='${quote_pgsql:$local_part}' and lists_domain.name='${quote_pgsql:$domain}' AND lists_list.domain_id=lists_domain.id} {$value}}
-
-- name: Insert config for pgarchives (1/2)
-  blockinfile:
-    path: '{{ exim_configuration_file }}'
-    insertbefore: 'pglister:' # this router must be placed before pglister's generic one
-    marker: '# {mark} ANSIBLE MANAGED BLOCK 3'
-    block: |
-      archive_router:
-        driver = accept
-        domains = {{ service_vhost_name_pgarchives }}
-        local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}' and subscription_policy <> 2} {$value}fail}
-        transport = archive_pipe
-
-- name: Insert config for pgarchives (2/2)
-  blockinfile:
-    path: '{{ exim_configuration_file }}'
-    insertafter: 'begin transports'
-    marker: '# {mark} ANSIBLE MANAGED BLOCK 4'
-    block: |
-      archive_pipe:
-        driver = pipe
-        command = {{ base_path_pgarchives }}/local/django/bin/python {{ base_path_pgarchives }}/local/loader/load_message.py -l $local_part
-        #ignore_status
-        temp_errors = *
-        return_output = false
-        freeze_exec_fail = true
-        log_defer_output = true
-        log_output = true
-        #log_fail_output = true
-        umask = 022
-        user = Debian-exim
-        environment =
-
-- name: Insert config for pgarchives-private (1/2)
-  blockinfile:
-    path: '{{ exim_configuration_file }}'
-    insertbefore: 'archive_router:' # this router must be placed before pglister's generic one
-    marker: '# {mark} ANSIBLE MANAGED BLOCK 5'
-    block: |
-      archive_private_router:
-        driver = accept
-        domains = {{ service_vhost_name_pgarchives }}
-        local_parts = ${lookup pgsql{select name from lists_list where name='${quote_pgsql:$local_part}' and subscription_policy = 2} {$value}fail}
-        transport = archive_private_pipe
-
-- name: Insert config for pgarchives-private (2/2)
-  blockinfile:
-    path: '{{ exim_configuration_file }}'
-    insertbefore: 'archive_pipe:'
-    marker: '# {mark} ANSIBLE MANAGED BLOCK 6'
-    block: |
-      archive_private_pipe:
-        driver = pipe
-        command = {{ base_path_pgarchives_private }}/local/django/bin/python {{ base_path_pgarchives_private }}/local/loader/load_message.py -l $local_part
-        #ignore_status
-        temp_errors = *
-        return_output = false
-        freeze_exec_fail = true
-        log_defer_output = true
-        log_output = true
-        #log_fail_output = true
-        umask = 022
-        user = Debian-exim
-        environment =
-
-- name: install spamassassin
+- name: Install spamassassin
   package:
     name: spamassassin
     state: present
-  when: use_spamassassin is defined and use_spamassassin == True
-
-- name: Check if sockets option for spamassassin is already present
-  command: 'grep -q "socketpath" /lib/systemd/system/spamassassin.service'
-  register: option_check
-  ignore_errors: true
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Modify SpamAssassin service file to use sockets
-  replace:
+  lineinfile:
     path: /lib/systemd/system/spamassassin.service
-    regexp: '^(ExecStart=.+)$'
-    replace: '\1 --socketpath=/var/run/spamd.socket'
-  when: not option_check.rc == 0 and use_spamassassin is defined and use_spamassassin == True
+    regexp: '^(ExecStart=.+?)( --socketpath=/var/run/spamd.socket)?$'
+    line: '\1 --socketpath=/var/run/spamd.socket'
+    backrefs: true
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Add spamassassin rule for exim-spam jail to ban spammers
   lineinfile:
@@ -172,14 +176,14 @@
     line: '             ^%(pid)s \S+ %(host_info)sF=(<>|[^@]+@\S+) rejected after DATA: Your message scored \d+.\d+ SpamAssassin points. Report follows:\s*$'
     insertafter: 'This message contains a virus'
     firstmatch: true
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Reload systemd and start SpamAssassin service
   systemd:
     name: spamassassin
     state: reloaded
-    daemon_reload: yes
-  when: use_spamassassin is defined and use_spamassassin == True
+    daemon_reload: true
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Insert config for spamassassin (1/2)
   blockinfile:
@@ -188,14 +192,14 @@
     marker: '# {mark} ANSIBLE MANAGED BLOCK 7'
     block: |
       spamd_address = {{ exim_spamd_address }}
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Insert a marker before the end of acl_checks using multi-line pattern matching
   replace:
     path: '{{ exim_configuration_file }}'
     regexp: '(?s)(accept\s*begin routers)'
     replace: '# Marker for ansible\n\1'
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Insert config for spamassassin (2/2)
   blockinfile:
@@ -203,10 +207,10 @@
     insertbefore: '# Marker for ansible'
     marker: '# {mark} ANSIBLE MANAGED BLOCK 8'
     block: '{{ lookup("template", "exim_spamassassin.j2") }}'
-  when: use_spamassassin is defined and use_spamassassin == True
+  when: use_spamassassin is defined and use_spamassassin
 
 - name: Add cron emails destination for list
-  cronvar:
+  community.general.cronvar:
     name: "MAILTO"
     value: "{{ cron_emails_destination }}"
   become: true
@@ -221,21 +225,28 @@
     mode: '0644'
   when: mailname is defined
 
+- name: Ensure SSL cert group exists
+  action: group
+  args:
+    name: ssl-cert
+    state: present
+
 - name: Add Debian-exim user to ssl-cert group to be able to read cert files
   user:
     name: 'Debian-exim'
     groups: 'ssl-cert'
-    append: 'yes'
-
-- name: 'Add password for list user in postgres, to allow login from exim'
-  postgresql_query:
-    query: "ALTER USER list WITH password '{{ database_password }}';"
-    db: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
+    append: true
 
 - name: Restart exim.
   service:
     name: '{{ exim_daemon }}'
     state: 'restarted'
-    enabled: 'yes'
+    enabled: true
+
+- name: 'Ensure /var/list exists (for wsgi)'
+  file:
+    path: '/var/list'
+    state: 'directory'
+    owner: 'list'
+    group: 'www-data'
+    mode: '755'

@@ -1,0 +1,67 @@
+---
+- name: 'Create folder tree'
+  file:
+    path: '{{ service_base_path }}'
+    state: 'directory'
+    owner: 'list'
+    group: 'www-data'
+    mode: '755'
+
+- name: 'Clone pgweb repository'
+  git:
+    repo: '{{ repo_uri }}'
+    dest: '{{ service_base_path }}'
+    clone: true
+    update: true
+    version: '{{ pgweb_version }}'
+    force: true
+  become: true
+  become_user: 'list'
+  register: repo
+
+- name: 'Chown list:www-data pgweb directory'
+  file:
+    path: '{{ service_base_path }}'
+    owner: 'list'
+    group: 'www-data'
+    recurse: true
+
+- name: 'Override contexts.py to disable non-account-related links'
+  template:
+    src: 'contexts.py.j2'
+    dest: '{{ service_base_path }}/pgweb/util/contexts.py'
+    owner: 'list'
+    group: 'www-data'
+    mode: '644'
+
+- name: 'Override base.html to disable non-account-related links'
+  copy:
+    src: 'base.html'
+    dest: '{{ service_base_path }}/templates/base/base.html'
+    owner: 'list'
+    group: 'www-data'
+    mode: '644'
+
+- name: 'Override index.html to remove non-account-related information'
+  copy:
+    src: 'index.html'
+    dest: '{{ service_base_path }}/templates/account/index.html'
+    owner: 'list'
+    group: 'www-data'
+    mode: '644'
+
+- name: 'Override userprofileform.html to disable unused fields'
+  copy:
+    src: 'userprofileform.html'
+    dest: '{{ service_base_path }}/templates/account/'
+    owner: 'list'
+    group: 'www-data'
+    mode: '644'
+
+- name: 'Drop settings.py for django'
+  template:
+    src: 'settings.py.j2'
+    dest: '{{ web_path }}/settings_local.py'
+    owner: 'list'
+    group: 'www-data'
+    mode: '660'

@@ -1,67 +1,20 @@
 ---
 - name: 'Install required packages'
   package:
-    state: 'latest'
+    state: 'present'
     name:
       - 'python3'
+      - 'git'
       - 'libapache2-mod-wsgi-py3'
       - 'python3-pip'
-      - 'python-psycopg2'
-      - 'python-virtualenv'
+      - 'python3-psycopg2'
+      - 'python3-virtualenv'
       - 'hunspell-en-us'
       - 'tidy'
+  when: not redeploy
 
-- name: 'Create folder tree'
-  file:
-    path: '{{ service_base_path }}'
-    state: 'directory'
-    owner: 'list'
-    group: 'www-data'
-    mode: 0755
-
-- name: 'Clone pgarchives repository'
-  git:
-    repo: '{{ repo_uri }}'
-    dest: '{{ base_path }}/{{ repo_name }}'
-    clone: true
-    update: true
-    version: '{{ pgarchives_version }}'
-  register: repo
-
-- name: 'Copy repository content to local folder'
-  command:
-    cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
-
-- name: 'chown list:www-data pgarchives directory'
-  file:
-    path: '{{ service_base_path }}'
-    owner: 'list'
-    group: 'www-data'
-    recurse: 'yes'
-
-- name: 'Override page.html to disable non-pglister-related links'
-  template:
-    src: 'page.html.j2'
-    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/page.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
-
-- name: 'Override index.html to disable PostreSQL-related information'
-  template:
-    src: 'index.html.j2'
-    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/index.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
-
-- name: 'Override base.html to disable PostreSQL-related information'
-  template:
-    src: 'base.html.j2'
-    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/base.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
+- name: 'Clone repository'
+  import_tasks: clone_repository.yml
 
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
@@ -74,35 +27,58 @@
   become_user: 'postgres'
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
+  when: not redeploy
 
-- include_role:
+- name: 'Grant permissions to database'
+  community.postgresql.postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pgarchives }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "{{ database_user }}";'
+    - 'GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
+  become: true
+  become_user: 'postgres'
+  when: not redeploy
+
+- name: 'Grant permissions to database to Debian-exim'
+  community.postgresql.postgresql_query:
+    query: '{{ item }}'
+    db: '{{ database_name_pgarchives }}'
+  loop:
+    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
+    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
+    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
+  become: true
+  become_user: 'postgres'
+  when: not redeploy
+
+- name: 'Restart postgresql to make new group perms effective'
+  include_role:
+    name: 'postgresql'
+    tasks_from: 'restart.yml'
+  when: not redeploy
+
+- name: 'Include role http_vhost'
+  include_role:
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
     vhost_extra: '{{ vhost_extra_pgarchives }}'
+  when: not redeploy
 
 - name: 'Activate mod_wsgi on apache2'
-  command: '/usr/sbin/a2enmod wsgi'
-  notify: 'reload httpd'
+  community.general.apache2_module:
+    name: wsgi
+    state: present
+  notify: 'Reload httpd'
+  when: not redeploy
 
-- name: 'Drop settings.py for django'
-  template:
-    src: 'settings.py.j2'
-    dest: '{{ web_path }}/settings_local.py'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0660'
-
-- name: 'install virtualenv via pip'
-  pip:
-    name: virtualenv
-    executable: pip3
-  become: true
-
-- name: 'install required packages for django using pip'
+- name: 'Install required packages for django using pip'
   pip:
     name:
-      - django==2.2.24
+      - django==3.2.6
       - psycopg2-binary
       - requests
       - python-dateutil
@@ -112,8 +88,34 @@
     virtualenv: '{{ service_base_path }}/django'
     virtualenv_python: python3
   become: true
+  when: not redeploy
 
-- include_role:
+- name: 'Ensure the path to drop pg_dict exists'
+  file:
+    path: '/usr/share/postgresql/{{ postgresql_version }}/tsearch_data/'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '755'
+  when: not redeploy
+
+# These file is necessary to install schema
+- name: 'Drop pg_dict.*'
+  copy:
+    src: '{{ item }}'
+    dest: '/usr/share/postgresql/{{ postgresql_version }}/tsearch_data/'
+    owner: 'root'
+    group: 'root'
+    mode: '644'
+  loop:
+    - 'pg_dict.stop'
+    - 'pg_dict.syn' # this file comes from the pgweb repository
+  when: not redeploy
+
+# Todo: s/tsparser/other/
+
+- name: 'Include django role'
+  include_role:
     name: cchurch.django
   vars:
     django_app_path: '{{ service_base_path }}/django'
@@ -125,7 +127,8 @@
 # into pgarchives's virtualenv.
 - name: 'Create django superuser'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/django/manage.py shell"'
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/django/manage.py shell'
     stdin: |
       from django.contrib.auth import get_user_model
       User = get_user_model()
@@ -134,57 +137,17 @@
         user.first_name = "Admin"
         user.last_name = "Admin"
         user.save()
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
-
-- name: 'Drop make-dyncss.sh'
-  template:
-    src: 'make_dyncss.sh.j2'
-    dest: '{{ service_base_path }}/make_dyncss.sh'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0660'
-
-- name: 'Run make_dyncss.sh'
-  command: sh '{{ service_base_path }}/make_dyncss.sh'
-
-# These file is necessary to install schema
-- name: 'Drop pg_dict.*'
-  copy:
-    src: '{{ item }}'
-    dest: '/usr/share/postgresql/12/tsearch_data/'
-    owner: 'root'
-    group: 'root'
-    mode: 0644
-  loop:
-    - 'pg_dict.stop'
-    - 'pg_dict.syn' # this file comes from the pgweb repository
-
-# Todo: s/tsparser/other/
-
-- name: 'Drop archives.ini'
-  template:
-    src: 'archives.ini.j2'
-    dest: '{{ service_base_path }}/loader/archives.ini'
-    owner: 'list'
-    group: 'Debian-exim'
-    mode: '0640'
-
-- name: 'Grant permissions to database to Debian-exim'
-  postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pgarchives }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
-  become: true
-  become_user: 'postgres'
 
 - name: 'Run pglister_sync.py'
   command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
   become: true
   become_user: 'list'
+  when: not redeploy and not test_only
 
 - name: 'Add crontab to run pglister_sync'
   cron:
@@ -193,3 +156,4 @@
     user: 'list'
     minute: '*/5'
     job: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
+  when: not redeploy

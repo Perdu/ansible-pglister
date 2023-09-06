@@ -3,7 +3,7 @@
 - name: 'Install pgbackrest'
   apt:
     name: 'pgbackrest'
-    state: 'latest'
+    state: 'present'
 
 # Not using `notify: 'restart postgresql'` as we need it restarted right
 # after the task to then run `check`.
@@ -13,7 +13,7 @@
     dest: '/etc/pgbackrest.conf'
     owner: 'postgres'
     group: 'postgres'
-    mode: 0640
+    mode: '640'
   register: config
 
 - name: 'Run first backup procedure'
@@ -25,15 +25,15 @@
 - name: 'Drop pgbackrest specific configuration for postgresql'
   copy:
     src: 'postgres_pgbackrest.conf'
-    dest: '/etc/postgresql/12/main/conf.d/postgres_pgbackrest.conf'
+    dest: '/etc/postgresql/{{ postgresql_version }}/main/conf.d/postgres_pgbackrest.conf'
     owner: 'postgres'
     group: 'postgres'
-    mode: 0640
-#  notify: 'restart postgresql'
+    mode: '640'
+#  notify: 'Restart postgresql'
 
 - name: 'Adapt postgres configuration'
   lineinfile:
-    path: '/etc/postgresql/12/main/conf.d/postgres_pgbackrest.conf'
+    path: '/etc/postgresql/{{ postgresql_version }}/main/conf.d/postgres_pgbackrest.conf'
     line: '{{ item.line }}'
     regex: '{{ item.regex }}'
   loop:
@@ -42,10 +42,22 @@
   register: config_archive
 
 - name: 'Restart postgresql'
-  service:
-    name: 'postgresql@12-main'
-    state: 'restarted'
   when: config is changed or config_archive is changed
+  block:
+    - name: 'Ensure postgresql is enabled/started (systemd)'
+      service:
+        name: 'postgresql@{{ postgresql_version }}-main'
+        state: 'restarted'
+        enabled: true
+      ignore_errors: true
+      register: systemd
+
+    - name: 'Ensure postgresql is enabled/started (sysvinit)'
+      service:
+        name: 'postgresql'
+        state: 'restarted'
+        enabled: true
+      when: systemd.failed
 
 - name: 'Check first backup run is correct'
   command: pgbackrest --stanza=main check

@@ -1,10 +1,12 @@
 ---
 
-- fail:
+- name: 'Verify that service_host_name is set'
+  fail:
     msg: 'Please fill the service_vhost_name variable'
   when: service_vhost_name|length == 0
 
-- set_fact:
+- name: 'Construct le_domains variable'
+  set_fact:
     le_domains: '{{ le_domains + [service_vhost_name] + service_vhost_aliases }}'
 
 - name: 'Drop apache restart script'
@@ -13,7 +15,8 @@
     dest: '{{ le_deploy_hooks_path }}/apache2.sh'
     owner: 'root'
     group: 'root'
-    mode: 0755
+    mode: '755'
+  when: 'use_letsencrypt is defined and use_letsencrypt'
 
 - name: 'Create log folder'
   file:
@@ -21,8 +24,8 @@
     state: 'directory'
     owner: 'list'
     group: 'www-data'
-    mode: 0755
-  notify: 'reload httpd'
+    mode: '755'
+  notify: 'Reload httpd'
 
 - name: 'Drop vhost template for {{ service_vhost_name }}'
   template:
@@ -30,10 +33,14 @@
     dest: '/etc/apache2/sites-available/{{ service_vhost_priority }}-{{ service_vhost_name }}.conf'
     owner: 'root'
     group: 'root'
-    mode: 0644
-  notify: 'reload httpd'
+    mode: '644'
+  notify: 'Reload httpd'
 
 # TODO: Ensure unneeded vhosts are disabled.
 - name: 'Enable vhost {{ service_vhost_name }}'
-  command: '/usr/sbin/a2ensite {{ service_vhost_priority }}-{{ service_vhost_name }}'
-  notify: 'reload httpd'
+  ansible.builtin.file:
+    src: '/etc/apache2/sites-available/{{ service_vhost_priority }}-{{ service_vhost_name }}.conf'
+    dest: '/etc/apache2/sites-enabled/{{ service_vhost_priority }}-{{ service_vhost_name }}.conf'
+    state: link
+  become: true
+  notify: 'Reload httpd'

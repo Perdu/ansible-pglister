@@ -1,7 +1,7 @@
 ---
 - name: 'Install required packages'
   package:
-    state: 'latest'
+    state: 'present'
     name:
       - 'python3'
       - 'libapache2-mod-wsgi-py3'
@@ -10,65 +10,8 @@
       - 'python-psycopg2'
       - 'python-virtualenv'
 
-- name: 'Create folder tree'
-  file:
-    path: '{{ service_base_path }}'
-    state: 'directory'
-    owner: 'list'
-    group: 'www-data'
-    mode: 0755
-
-- name: 'Clone pgweb repository'
-  git:
-    repo: '{{ repo_uri }}'
-    dest: '{{ base_path }}/{{ repo_name }}'
-    clone: true
-    update: true
-    version: '{{ pgweb_version }}'
-  register: repo
-
-- name: 'Copy repository content to local folder'
-  command:
-    cmd: sh -c 'cp -r {{ base_path }}/{{ repo_name }}/* {{ service_base_path }}/'
-
-- name: 'chown list:www-data pgweb directory'
-  file:
-    path: '{{ service_base_path }}'
-    owner: 'list'
-    group: 'www-data'
-    recurse: 'yes'
-
-- name: 'override contexts.py to disable non-account-related links'
-  template:
-    src: 'contexts.py.j2'
-    dest: '{{ service_base_path }}/pgweb/util/contexts.py'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
-
-- name: 'override base.html to disable non-account-related links'
-  copy:
-    src: 'base.html'
-    dest: '{{ service_base_path }}/templates/base/base.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
-
-- name: 'override index.html to remove non-account-related information'
-  copy:
-    src: 'index.html'
-    dest: '{{ service_base_path }}/templates/account/index.html'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
-
-- name: 'override userprofileform.html to disable unused fields'
-  copy:
-    src: 'userprofileform.html'
-    dest: '{{ service_base_path }}/templates/account/'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0644'
+- name: 'Clone repository'
+  import_tasks: clone_repository.yml
 
 # Todo: fix issue: this fails silently on error
 - name: 'Create role and database'
@@ -82,50 +25,46 @@
   register: result
   failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
 
-- include_role:
+- name: 'Include http_vhost role'
+  include_role:
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
     vhost_extra: '{{ vhost_extra_pgweb }}'
 
 - name: 'Activate mod_wsgi on apache2'
-  command: '/usr/sbin/a2enmod wsgi'
-  notify: 'reload httpd'
+  community.general.apache2_module:
+    name: wsgi
+    state: present
+  notify: 'Reload httpd'
 
-- name: 'Drop settings.py for django'
-  template:
-    src: 'settings.py.j2'
-    dest: '{{ web_path }}/settings_local.py'
-    owner: 'list'
-    group: 'www-data'
-    mode: '0660'
-
-- name: 'install virtualenv via pip'
+- name: 'Install virtualenv via pip'
   pip:
     name: virtualenv
     executable: pip3
   become: true
 
-- name: 'fix pycopg bug by installing -binary version'
+- name: 'Fix pycopg bug by installing -binary version'
   lineinfile:
     path: '{{ service_base_path }}/requirements.txt'
     regexp: '^psycopg2=='
     line: 'psycopg2-binary'
 
-- name: 'fix pycryptodomex bug by removing version condition'
+- name: 'Fix pycryptodomex bug by removing version condition'
   lineinfile:
     path: '{{ service_base_path }}/requirements.txt'
     regexp: '^pycryptodomex'
     line: 'pycryptodomex'
 
-- name: 'install required packages for django using pip'
+- name: 'Install required packages for django using pip'
   pip:
     requirements: '{{ service_base_path }}/requirements.txt'
     virtualenv: '{{ service_base_path }}/'
     virtualenv_python: python3
   become: true
 
-- include_role:
+- name: 'Include Django role'
+  include_role:
     name: cchurch.django
   vars:
     django_app_path: '{{ service_base_path }}'
@@ -134,10 +73,9 @@
 
 # Todo: it will be better to run this inside the venv
 - name: 'Run varnish_local.sql to disable Varnish functions'
-  postgresql_query:
+  community.postgresql.postgresql_script:
     db: '{{ database_name_pgweb }}'
-    path_to_script: '{{ service_base_path }}/sql/varnish_local.sql'
-    as_single_query: false
+    path: '{{ service_base_path }}/sql/varnish_local.sql'
   become: true
   become_user: 'postgres'
 
@@ -146,7 +84,8 @@
 # into pgweb's virtualenv.
 - name: 'Create django superuser'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
     stdin: |
       from django.contrib.auth import get_user_model
       User = get_user_model()
@@ -155,6 +94,9 @@
         user.first_name = "Admin"
         user.last_name = "Admin"
         user.save()
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
 
@@ -164,7 +106,7 @@
     dest: '{{ service_base_path }}/make_dyncss.sh'
     owner: 'list'
     group: 'www-data'
-    mode: '0660'
+    mode: '660'
 
 - name: 'Run make_dyncss.sh'
   command: sh '{{ service_base_path }}/make_dyncss.sh'
@@ -178,22 +120,48 @@
     hour: '*'
     job: '{{ venv_python }} {{ service_base_path }}/manage.py send_queued_mail'
 
-- name: 'Generate cryptkey to link pgweb and pglister'
+- name: 'Verify if a pgauth_key already exists'
   command:
-    cmd: "sh -c '{{ venv_python }} {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1'"
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
+    stdin: |
+      from pgweb.account.models import *
+      authsites = CommunityAuthSite.objects.all();
+      if len(authsites) > 0:
+        pgauth_key = authsites[0].cryptkey
+        print(pgauth_key)
+      else:
+        print("No key found")
+  become: true
+  become_user: 'list'
+  register: key
+  changed_when: false
+
+- name: 'Generate new cryptkey to link pgweb and pglister'
+  shell: |
+    set -o pipefail
+    {{ venv_python }} {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1
   become: true
   become_user: 'list'
   register: 'pgauth_key_stdout'
-  when: pgauth_key is not defined
+  changed_when: true
+  when: pgauth_key is not defined or pgauth_key == '' or pgauth_key != key.stdout
 
-- set_fact:
-    pgauth_key={{ pgauth_key_stdout.stdout }}
+- name: 'Display generated pgauth_key'
+  debug:
+    var: pgauth_key_stdout.stdout
+  when: pgauth_key_stdout.stdout is defined
+
+- name: 'Save result to pgauth_key variable'
+  set_fact:
+    pgauth_key: '{{ pgauth_key_stdout.stdout }}'
   when: pgauth_key is not defined
 
 # To do this manually, add a community auth org and site in /admin/
 - name: 'Create community auth site to link pgweb and pglister'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
     stdin: |
       from pgweb.account.models import *
       if len(CommunityAuthOrg.objects.filter(orgname="pglister")) == 0:
@@ -211,12 +179,17 @@
           Site.org = Org
           Site.push_changes = True
           Site.save()
+
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
 
 - name: 'Create community auth site to link pgweb and pgarchives_private'
   command:
-    cmd: 'sh -c "cd {{ service_base_path }} && {{ venv_python }} {{ service_base_path }}/manage.py shell"'
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
     stdin: |
       from pgweb.account.models import *
       if len(CommunityAuthOrg.objects.filter(orgname="pgarchives_private")) == 0:
@@ -234,5 +207,25 @@
           Site.org = Org
           Site.push_changes = True
           Site.save()
+
+        print("changed")
+  register: res
+  changed_when: res.stdout == "changed"
+  become: true
+  become_user: 'list'
+
+- name: 'Ensure cryptkeys of all existing authsites match pgauth_key (for idempotence)'
+  command:
+    chdir: '{{ service_base_path }}'
+    cmd: '{{ venv_python }} {{ service_base_path }}/manage.py shell'
+    stdin: |
+      from pgweb.account.models import *
+      authsites = CommunityAuthSite.objects.all()
+      for site in authsites:
+        if site.cryptkey != "{{ pgauth_key }}":
+          site.cryptkey = "{{ pgauth_key }}";
+          print("changed")
+  register: res
+  changed_when: '"changed" in res.stdout'
   become: true
   become_user: 'list'

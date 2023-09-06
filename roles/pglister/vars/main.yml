@@ -1,6 +1,7 @@
 ---
 repo_name: 'pglister.git'
-repo_uri: 'https://gitlab.com/cmatte/{{ repo_name }}'
+repo_base: 'cmatte'
+repo_uri: 'https://gitlab.com/{{ repo_base }}/{{ repo_name }}'
 base_path: '{{ base_path_pglister }}'
 service_base_path: '{{ base_path }}/local'
 external_url: 'https://{{ service_vhost_name }}'
@@ -9,3 +10,4 @@ venv_python: '{{ service_base_path }}/web/pglister/bin/python'
 confirm_sender_address: 'confirmsender@{{ domain }}'
 django_secret_key: 'changemechangeme!-ansible'
 service_vhost_name: '{{ service_vhost_name_pglister }}'
+python_version: '{{ "python3.7" if debian_version == "buster" else "python3.11" }}'

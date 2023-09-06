@@ -4,7 +4,7 @@
     name:
       - 'certbot'
       - 'ssl-cert'
-    state: 'latest'
+    state: 'present'
 
 # Ensure a cert is always present using the ssl-cert package so that
 # processes can start before a proper cert is generated.
@@ -24,26 +24,25 @@
     - { src: 'certs/ssl-cert-snakeoil.pem', dest: '{{ le_cert_path }}' }
     - { src: 'private/ssl-cert-snakeoil.key', dest: '{{ le_key_path }}' }
   when: le_cert.matched == 0
-  notify: 'ensure certificate'
+  notify: 'Ensure certificate'
 
 - name: 'Update certificate if domains list has changed'
   block:
-  - name: 'Verify if LE domains list has changed'
-    shell: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ ansible_host }}.ini
-    loop: '{{ le_domains }}'
-    register: presence
-    failed_when: presence.rc == 1
+    - name: 'Verify if LE domains list has changed'
+      shell: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ ansible_host }}.ini
+      loop: '{{ le_domains }}'
+      register: presence
+      failed_when: presence.rc == 1
   rescue:
-  - name: 'Delete previous cert to force certbot to create one with the new set of domains'
-    command: >-
-      certbot delete
+    - name: 'Delete previous cert to force certbot to create one with the new set of domains'
+      command: >-
+        certbot delete
         --cert-name {{ ansible_host }}
-    ignore_errors: true
-  - name: 'Update LE certificate because domains list has changed'
-    # for some reason, "notify: 'ensure certificate'" doesn't work here
-    vars:
-      additional_options: '--expand --force-renewal'
-    include_tasks: 'run_acme_client.yml'
+    - name: 'Update LE certificate because domains list has changed'
+      # for some reason, "notify: 'ensure certificate'" doesn't work here
+      vars:
+        additional_options: '--expand --force-renewal'
+      include_tasks: 'run_acme_client.yml'
 
 - name: 'Create LE webroot'
   file:
@@ -101,6 +100,14 @@
   template:
     src: 'deploy-hook.sh.j2'
     dest: '/usr/local/bin/le-deploy-hook.sh'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+- name: 'Create LE hooks path'
+  file:
+    path: '/etc/letsencrypt/renewal-hooks/deploy/'
+    state: 'directory'
     owner: 'root'
     group: 'root'
     mode: '0755'

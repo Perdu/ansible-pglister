@@ -1,8 +1,8 @@
-        Alias /admin/css/ {{ service_base_path }}/django/lib/python3.7/site-packages/django/contrib/admin/static/admin/css/
-        Alias /admin/fonts/ {{ service_base_path }}/django/lib/python3.7/site-packages/django/contrib/admin/static/admin/fonts/
-        Alias /admin/img/ {{ service_base_path }}/django/lib/python3.7/site-packages/django/contrib/admin/static/admin/img/
-        Alias /admin/js/ {{ service_base_path }}/django/lib/python3.7/site-packages/django/contrib/admin/static/admin/js/
-        <Directory {{ service_base_path }}/django/lib/python3.7/site-packages/django/contrib/admin/static/admin/>
+        Alias /admin/css/ {{ service_base_path }}/django/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin/css/
+        Alias /admin/fonts/ {{ service_base_path }}/django/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin/fonts/
+        Alias /admin/img/ {{ service_base_path }}/django/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin/img/
+        Alias /admin/js/ {{ service_base_path }}/django/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin/js/
+        <Directory {{ service_base_path }}/django/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin/>
            Require all granted
         </Directory>
 

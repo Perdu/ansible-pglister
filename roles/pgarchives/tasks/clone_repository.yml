@@ -1,0 +1,77 @@
+- name: 'Create folder tree'
+  file:
+    path: '{{ service_base_path }}'
+    state: 'directory'
+    owner: 'list'
+    group: 'www-data'
+    mode: '755'
+
+- name: 'Clone pgarchives repository'
+  git:
+    repo: '{{ repo_uri }}'
+    dest: '{{ service_base_path }}'
+    clone: true
+    update: true
+    version: '{{ pgarchives_version }}'
+    force: true
+  become: true
+  become_user: 'list'
+  register: repo
+
+- name: 'Chown list:www-data pgarchives directory'
+  file:
+    path: '{{ service_base_path }}'
+    owner: 'list'
+    group: 'www-data'
+    recurse: true
+
+- name: 'Override page.html to disable non-pglister-related links'
+  template:
+    src: 'page.html.j2'
+    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/page.html'
+    owner: 'list'
+    group: 'www-data'
+    mode: '644'
+
+- name: 'Override index.html to disable PostreSQL-related information'
+  template:
+    src: 'index.html.j2'
+    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/index.html'
+    owner: 'list'
+    group: 'www-data'
+    mode: '644'
+
+- name: 'Override base.html to disable PostreSQL-related information'
+  template:
+    src: 'base.html.j2'
+    dest: '{{ service_base_path }}/django/archives/mailarchives/templates/base.html'
+    owner: 'list'
+    group: 'www-data'
+    mode: '644'
+
+- name: 'Drop settings.py for django'
+  template:
+    src: 'settings.py.j2'
+    dest: '{{ web_path }}/settings_local.py'
+    owner: 'list'
+    group: 'www-data'
+    mode: '660'
+
+- name: 'Drop make-dyncss.sh'
+  template:
+    src: 'make_dyncss.sh.j2'
+    dest: '{{ service_base_path }}/make_dyncss.sh'
+    owner: 'list'
+    group: 'www-data'
+    mode: '660'
+
+- name: 'Run make_dyncss.sh'
+  command: sh '{{ service_base_path }}/make_dyncss.sh'
+
+- name: 'Drop archives.ini'
+  template:
+    src: 'archives.ini.j2'
+    dest: '{{ service_base_path }}/loader/archives.ini'
+    owner: 'list'
+    group: 'Debian-exim'
+    mode: '640'

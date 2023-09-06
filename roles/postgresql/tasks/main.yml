@@ -1,4 +1,8 @@
 ---
+- name: 'Install gpg to get signing keys for pgdg repositories'
+  package:
+    state: 'present'
+    name: 'gpg'
 
 - name: 'Add PGDG signing key'
   apt_key:
@@ -7,7 +11,7 @@
 
 - name: 'Configure pgdg repositories'
   apt_repository:
-    repo: 'deb https://apt.postgresql.org/pub/repos/apt buster-pgdg main'
+    repo: 'deb https://apt.postgresql.org/pub/repos/apt {{ debian_version }}-pgdg main'
     state: 'present'
     filename: 'pgdg'
 
@@ -20,29 +24,32 @@
       Pin-Priority: 900
     owner: 'root'
     group: 'root'
-    mode: 0640
+    mode: '640'
 
 - name: 'Install postgresl'
-  apt:
+  package:
     name:
-      - 'postgresql-12'
+      - 'postgresql'
       - 'postgresql-client'
-    state: 'latest'
+    state: 'present'
+
+- name: 'Include restart'
+  import_tasks: "restart.yml"
+
+- name: 'Create a postgres user for Debian-exim'
+  community.postgresql.postgresql_user:
+    name: 'Debian-exim'
+  become: true
+  become_user: 'postgres'
 
 - name: 'Copy connection file for postgresql'
   copy:
     src: 'pg_hba.conf'
-    dest: '/etc/postgresql/12/main/pg_hba.conf'
+    dest: '/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf'
     owner: 'postgres'
     group: 'postgres'
-    mode: 0640
-  notify: 'restart postgresql'
+    mode: '640'
 
-- include: "pgbackrest.yml"
-  when: install_pgbackrest is defined and install_pgbackrest == True
-
-- name: 'Ensure postgresql is enabled/started'
-  service:
-    name: 'postgresql'
-    state: 'started'
-    enabled: true
+- name: 'Include pgbackrest'
+  import_tasks: "pgbackrest.yml"
+  when: install_pgbackrest is defined and install_pgbackrest
