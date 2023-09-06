@@ -38,5 +38,9 @@
 
 # TODO: Ensure unneeded vhosts are disabled.
 - name: 'Enable vhost {{ service_vhost_name }}'
-  command: '/usr/sbin/a2ensite {{ service_vhost_priority }}-{{ service_vhost_name }}'
+  ansible.builtin.file:
+    src: '/etc/apache2/sites-available/{{ service_vhost_priority }}-{{ service_vhost_name }}.conf'
+    dest: '/etc/apache2/sites-enabled/{{ service_vhost_priority }}-{{ service_vhost_name }}.conf'
+    state: link
+  become: true
   notify: 'Reload httpd'
