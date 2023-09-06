@@ -139,9 +139,6 @@ FORCE_SCRIPT_NAME = ""
 # Minimum this many seconds between emails sent out to a single user
 RESEND_RATE_LIMIT_SECONDS = 30
 
-# Always override!
-SEARCH_CLIENTS = ('{{ ip_address_pgweb }}',)
-API_CLIENTS = ('{{ ip_address_pgweb }}',)
 {% if pgarchives_private is defined and pgarchives_private == 'True' %}
 PUBLIC_ARCHIVES = False
 PGAUTH_REDIRECT = "https://{{ service_vhost_name_pgweb }}/account/auth/2/"

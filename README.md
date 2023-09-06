@@ -39,7 +39,6 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
     base_path_pgarchives_private: '/srv/pgarchives-private'
     cron_emails_destination: 'root'
     org_name: 'Your organization name'  # Name that will be displayed in pglister instead of PostgreSQL
-    ip_address_pgweb: '0.0.0.0/0'  # pgweb IP address, to restrict access to the API
     debug: 'False'
     logging_level: 'WARNING'
     use_letsencrypt: True
