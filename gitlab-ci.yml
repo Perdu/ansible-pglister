@@ -42,6 +42,7 @@
     pgauth_key: 'CHANGEME'
   roles:
     - {role: 'exim_pglister', tags: 'exim_pglister'}
+    - {role: 'pgweb', tags: 'pgweb'}
     - {role: 'pglister', tags: 'pglister'}
     - {role: 'pgarchives', tags: 'pgarchives'}
     - {role: 'pgarchives_private', tags: 'pgarchives_private'}
