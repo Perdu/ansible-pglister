@@ -147,6 +147,11 @@
   changed_when: true
   when: pgauth_key is not defined or pgauth_key == '' or pgauth_key != key.stdout
 
+- name: 'Display generated pgauth_key'
+  debug:
+    var: pgauth_key_stdout.stdout
+  when: pgauth_key_stdout.stdout is defined
+
 - name: 'Save result to pgauth_key variable'
   set_fact:
     pgauth_key: '{{ pgauth_key_stdout.stdout }}'
