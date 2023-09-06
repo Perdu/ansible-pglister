@@ -134,10 +134,12 @@
     vhost_extra: '{{ vhost_extra_pglister }}'
   when: not redeploy
 
+# ignore_configcheck prevents module from crashing
 - name: 'Activate mod_wsgi on apache2'
   community.general.apache2_module:
     name: wsgi
     state: present
+    ignore_configcheck: true
   notify: 'Reload httpd'
   when: not redeploy
 
