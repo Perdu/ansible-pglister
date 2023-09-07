@@ -2,44 +2,10 @@
 - name: Main playbook to install pglister, pgarchives, pgarchives-private, configure exim4, httpd and postgresql
   hosts: all
   become: true
-  vars:
-    le_domains: []
-    domain: 'beta.lists.spi-inc.org'
-    service_vhost_name_pgweb: 'pgweb.localhost'
-    service_vhost_name_pglister: 'pglister.localhost'
-    service_vhost_name_pgarchives: 'pgarchives.localhost'
-    service_vhost_name_pgarchives_private: 'pgarchives-private.localhost'
-    database_name_pglister: 'pglister'
-    database_user: 'list'
-    django_superuser_address: "root@localhost"
-    base_path_pglister: '/srv/pglister'
-    base_path_pgarchives: '/srv/pgarchives'
-    base_path_pgarchives_private: '/srv/pgarchives-private'
-    org_name: 'gitlab CI'
-    ip_address_pgweb: '127.0.0.1'
-    debug: false
-    logging_level: 'DEBUG'
-    use_letsencrypt: false
-    test_only: true
-    # must not be a string
-    install_pgbackrest: false
-    # exim-pglister
-    mailname: 'localhost'
-    use_spamassassin: false
-    # pglister
-    repo_base: 'pglister'
-    pglister_version: 'master'
-    use_nagios: false
-    # pgarchives
-    database_name_pgarchives: 'pgarchives'
-    pgarchives_version: 'master'
-    # pgarchives_private
-    database_name_pgarchives_private: 'pgarchives_private'
-    # credentials
-    database_password: 'CHANGEME'
-    django_superuser_pass: 'CHANGEME'
-    pgarchives_secret_key: 'CHANGEME'
-    pgauth_key: 'CHANGEME'
+
+  vars_files:
+    - vars/gitlab-ci.yml
+
   roles:
     - {role: 'exim_pglister', tags: 'exim_pglister'}
     - {role: 'pgweb', tags: 'pgweb'}
