@@ -11,7 +11,11 @@ install_pgbackrest: true
 debian_version: 'buster'
 # system user accessing postgresql
 database_user: 'list'
-le_domains: [ '{{service_vhost_name_pgweb }}', '{{service_vhost_name_pglister }}', '{{service_vhost_name_pgarchives }}', '{{service_vhost_name_pgarchives_private }}', ]
+le_domains:
+  - '{{ service_vhost_name_pgweb }}'
+  - '{{ service_vhost_name_pglister }}'
+  - '{{ service_vhost_name_pgarchives }}'
+  - '{{ service_vhost_name_pgarchives_private }}'
 
 ## exim-pglister
 use_spamassassin: true
