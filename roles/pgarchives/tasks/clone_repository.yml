@@ -66,7 +66,9 @@
     mode: '660'
 
 - name: 'Run make_dyncss.sh'
-  command: sh '{{ service_base_path }}/make_dyncss.sh'
+  command:
+    arg: sh '{{ service_base_path }}/make_dyncss.sh'
+    creates: '{{ service_base_path }}/django/media/dyncss/base.css'
 
 - name: 'Drop archives.ini'
   template:
