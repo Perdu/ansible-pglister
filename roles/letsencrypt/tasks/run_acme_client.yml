@@ -20,3 +20,5 @@
       --config /etc/letsencrypt/{{ ansible_host }}.ini
       --deploy-hook /usr/local/bin/le-deploy-hook.sh
       {%if additional_options is defined %}{{ additional_options }}{% endif %}
+  register: res
+  changed_when: '"no action taken" not in res.stdout'
