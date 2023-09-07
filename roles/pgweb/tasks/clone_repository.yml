@@ -65,3 +65,16 @@
     owner: 'list'
     group: 'www-data'
     mode: '660'
+
+- name: 'Drop make-dyncss.sh'
+  template:
+    src: 'make_dyncss.sh.j2'
+    dest: '{{ service_base_path }}/make_dyncss.sh'
+    owner: 'list'
+    group: 'www-data'
+    mode: '660'
+
+- name: 'Run make_dyncss.sh'
+  command:
+    cmd: sh '{{ service_base_path }}/make_dyncss.sh'
+    creates: '{{ service_base_path }}/django/media/dyncss/base.css'
