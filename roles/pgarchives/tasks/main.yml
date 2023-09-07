@@ -16,17 +16,19 @@
 - name: 'Clone repository'
   import_tasks: clone_repository.yml
 
-# Todo: fix issue: this fails silently on error
-- name: 'Create role and database'
-  command:
-    cmd: psql -v ON_ERROR_STOP=0 --no-password
-    stdin: |
-      CREATE USER {{ database_user_pgarchives }} WITH PASSWORD '{{ database_password }}';
-      CREATE DATABASE {{ database_name_pgarchives }};
+- name: 'Create database'
+  community.postgresql.postgresql_db:
+    name: '{{ database_name_pgarchives }}'
   become: true
   become_user: 'postgres'
-  register: result
-  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
+  when: not redeploy
+
+- name: 'Create role for database_user'
+  community.postgresql.postgresql_user:
+    name: '{{ database_user_pgarchives }}'
+    password: '{{ database_password }}'
+  become: true
+  become_user: 'postgres'
   when: not redeploy
 
 - name: 'Grant permissions to database'
