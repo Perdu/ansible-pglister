@@ -9,6 +9,7 @@
       - 'python3-pip'
       - 'python3-psycopg2'
       - 'python3-virtualenv'
+      - 'virtualenv'
       - 'postgresql-contrib'
       - 'procmail' # to import mbox, not mandatory
   when: not redeploy
