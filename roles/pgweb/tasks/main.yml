@@ -131,9 +131,11 @@
   changed_when: false
 
 - name: 'Generate new cryptkey to link pgweb and pglister'
-  shell: |
-    set -o pipefail
-    {{ venv_python }} {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1
+  shell:
+    cmd: |
+      set -o pipefail
+      {{ venv_python }} {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1
+    executable: '/bin/bash'
   become: true
   become_user: 'list'
   register: 'pgauth_key_stdout'
