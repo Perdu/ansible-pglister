@@ -58,12 +58,14 @@
     regexp: '^pycryptodomex'
     line: 'pycryptodomex'
 
+
 - name: 'Install required packages for django using pip'
   pip:
     requirements: '{{ service_base_path }}/requirements.txt'
-    virtualenv: '{{ service_base_path }}/'
+    virtualenv: '{{ service_base_path }}/pgweb/'
     virtualenv_python: python3
   become: true
+  when: not redeploy
 
 - name: 'Include Django role'
   include_role:
@@ -71,7 +73,7 @@
   vars:
     django_app_path: '{{ service_base_path }}'
     django_user: list
-    django_virtualenv: '{{ service_base_path }}'
+    django_virtualenv: '{{ service_base_path }}/pgweb'
 
 # Todo: it will be better to run this inside the venv
 - name: 'Run varnish_local.sql to disable Varnish functions'
