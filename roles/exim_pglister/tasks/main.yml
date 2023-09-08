@@ -5,6 +5,7 @@
     name:
       - '{{ exim_package }}'
       - 'python3-psycopg2'
+      - 'cron'
 
 - name: Copy exim configuration file
   template:
