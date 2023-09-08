@@ -42,6 +42,7 @@
   community.general.apache2_module:
     name: wsgi
     state: present
+    ignore_configcheck: true
   notify: 'Reload httpd'
   when: not redeploy
 
