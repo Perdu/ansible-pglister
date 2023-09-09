@@ -1,10 +1,8 @@
-        Alias /admin/css/ {{ service_base_path }}/lib/python3.7/site-packages/django/contrib/admin/static/admin/css/
-        Alias /admin/fonts/ {{ service_base_path }}/lib/python3.7/site-packages/django/contrib/admin/static/admin/fonts/
-        Alias /admin/img/ {{ service_base_path }}/lib/python3.7/site-packages/django/contrib/admin/static/admin/img/
-        Alias /admin/js/ {{ service_base_path }}/lib/python3.7/site-packages/django/contrib/admin/static/admin/js/
-        <Directory {{ service_base_path }}/lib/python3.7/site-packages/django/contrib/admin/static/admin/>
+        <Directory {{ service_base_path }}/pgweb/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin/>
            Require all granted
         </Directory>
+
+        Alias /media/admin {{ service_base_path }}/pgweb/lib/{{ python_version }}/site-packages/django/contrib/admin/static/admin
 
         Alias /favicon.ico {{ service_base_path }}/media/favicon.ico
         Alias /dyncss {{ service_base_path }}/media/dyncss
@@ -20,7 +18,7 @@
         RewriteRule ^ "/account" [L,R=301]
 
         WSGIScriptAlias / {{ web_path }}/wsgi.py
-        WSGIDaemonProcess {{ service_vhost_name }} user={{ database_user }} python-path={{ service_base_path }} python-home={{ service_base_path }}
+        WSGIDaemonProcess {{ service_vhost_name }} user={{ database_user }} python-path={{ service_base_path }} python-home={{ service_base_path }}/pgweb
         WSGIProcessGroup {{ service_vhost_name }}
 
         <Directory {{ web_path }}/>
