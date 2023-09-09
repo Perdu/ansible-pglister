@@ -1,53 +1,24 @@
 ---
+- name: 'Include role prepare_django_app'
+  include_role:
+    name: prepare_django_app
+  vars:
+    database_name: '{{ database_name_pglister }}'
+    vhost_extra: '{{ vhost_extra_pglister }}'
+
 - name: 'Install required packages'
   package:
     state: 'present'
     name:
-      - 'python3'
-      - 'git'
-      - 'libapache2-mod-wsgi-py3'
-      - 'python3-pip'
-      - 'python3-psycopg2'
-      - 'python3-virtualenv'
-      - 'virtualenv'
-      - 'postgresql-contrib'
       - 'procmail' # to import mbox, not mandatory
   when: not redeploy
 
 - name: 'Clone repository'
   import_tasks: clone_repository.yml
 
-- name: 'Create database'
-  community.postgresql.postgresql_db:
-    name: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Create role for database_user'
-  community.postgresql.postgresql_user:
-    name: '{{ database_user }}'
-    password: '{{ database_password }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
 - name: 'Create a postgres user for Debian-exim'
   community.postgresql.postgresql_user:
     name: 'Debian-exim'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Grant permissions to database'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pglister }} TO "{{ database_user }}";'
-    - 'GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
   become: true
   become_user: 'postgres'
   when: not redeploy
@@ -126,23 +97,6 @@
     - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
   become: true
   become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Include role http_vhost'
-  include_role:
-    name: 'http_vhost'
-  vars:
-    service_vhost_extra: true
-    vhost_extra: '{{ vhost_extra_pglister }}'
-  when: not redeploy
-
-# ignore_configcheck prevents module from crashing
-- name: 'Activate mod_wsgi on apache2'
-  community.general.apache2_module:
-    name: wsgi
-    state: present
-    ignore_configcheck: true
-  notify: 'Reload httpd'
   when: not redeploy
 
 - name: 'Install required packages for django using pip'

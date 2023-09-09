@@ -1,50 +1,13 @@
 ---
-- name: 'Install required packages'
-  package:
-    state: 'present'
-    name:
-      - 'python3'
-      - 'git'
-      - 'libapache2-mod-wsgi-py3'
-      - 'python3-pip'
-      - 'python3-psycopg2'
-      - 'python3-virtualenv'
-      - 'virtualenv'
-      - 'postgresql-contrib'
-  when: not redeploy
+- name: 'Include role prepare_django_app'
+  include_role:
+    name: prepare_django_app
+  vars:
+    database_name: '{{ database_name_pgweb }}'
+    vhost_extra: ''
 
 - name: 'Clone repository'
   import_tasks: clone_repository.yml
-
-- name: 'Create database'
-  community.postgresql.postgresql_db:
-    name: '{{ database_name_pgweb }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Create role for database_user'
-  community.postgresql.postgresql_user:
-    name: '{{ database_user_pgweb }}'
-    password: '{{ database_password }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Include http_vhost role'
-  include_role:
-    name: 'http_vhost'
-  vars:
-    service_vhost_extra: true
-    vhost_extra: '{{ vhost_extra_pgweb }}'
-
-- name: 'Activate mod_wsgi on apache2'
-  community.general.apache2_module:
-    name: wsgi
-    state: present
-    ignore_configcheck: true
-  notify: 'Reload httpd'
-  when: not redeploy
 
 - name: 'Fix pycopg bug by installing -binary version'
   lineinfile:
