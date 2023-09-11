@@ -1,9 +1,9 @@
 ## common
-domain: 'localhost'
+domain: 'YOURDOMAIN.com'
 django_superuser_address: "root@localhost"
-org_name: 'gitlab CI'
+org_name: 'Your Organization'
 debug: false
-logging_level: 'DEBUG'
+logging_level: 'WARN'
 use_letsencrypt: false
 test_only: false
 install_pgbackrest: true

@@ -9,11 +9,6 @@ test_only: true
 install_pgbackrest: true
 # for postgresql's repositories and python version
 debian_version: 'buster'
-le_domains:
-  - '{{ service_vhost_name_pgweb }}'
-  - '{{ service_vhost_name_pglister }}'
-  - '{{ service_vhost_name_pgarchives }}'
-  - '{{ service_vhost_name_pgarchives_private }}'
 
 ## exim-pglister
 use_spamassassin: true
@@ -23,7 +18,7 @@ cron_emails_destination: 'root'
 # smtp_relay_password: 'smtp.gmail.com:address@yourdomain.com:YOUR_PASSWORD'
 
 ## pglister
-service_vhost_name_pglister: 'pglister.localhost'
+service_vhost_name_pglister: 'pglister.{{ domain }}'
 base_path_pglister: '/srv/pglister'
 database_name_pglister: 'pglister'
 repo_base: 'pglister'
@@ -35,18 +30,18 @@ vhost_extra_pglister: |
   Redirect permanent /foo https://bar
 
 ## pgarchives
-service_vhost_name_pgarchives: 'pgarchives.localhost'
+service_vhost_name_pgarchives: 'pgarchives.{{ domain }}'
 base_path_pgarchives: '/srv/pgarchives'
 database_name_pgarchives: 'pgarchives'
 pgarchives_version: 'master'
 base_path_pgarchives_private: '/srv/pgarchives-private'
 
 ## pgarchives_private
-service_vhost_name_pgarchives_private: 'pgarchives-private.localhost'
+service_vhost_name_pgarchives_private: 'pgarchives-private.{{ domain }}'
 database_name_pgarchives_private: 'pgarchives_private'
 
 ## pgweb
-service_vhost_name_pgweb: 'pgweb.localhost'
+service_vhost_name_pgweb: 'pgweb.{{ domain }}'
 base_path_pgweb: '/srv/pgweb'
 pgweb_version: '1adaab8955ccf022b1c22b23d62a383854eb0e9e'
 
