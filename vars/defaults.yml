@@ -1,0 +1,55 @@
+## common
+domain: 'localhost'
+django_superuser_address: "root@localhost"
+org_name: 'gitlab CI'
+debug: false
+logging_level: 'DEBUG'
+use_letsencrypt: false
+test_only: false
+install_pgbackrest: true
+# for postgresql's repositories and python version
+debian_version: 'buster'
+
+## exim-pglister
+use_spamassassin: true
+cron_emails_destination: 'root'
+# If using an SMTP relay, otherwise leave empty
+# dc_smarthost: 'smtp.gmail.com::587'
+# smtp_relay_password: 'smtp.gmail.com:address@yourdomain.com:YOUR_PASSWORD'
+
+## pglister
+service_vhost_name_pglister: 'pglister.{{ domain }}'
+base_path_pglister: '/srv/pglister'
+database_name_pglister: 'pglister'
+repo_base: 'pglister'
+pglister_version: 'master'
+use_nagios: false
+pglister_home_message: '<p><b>To manage your subscriptions, <a href="https://{{ service_vhost_name_pgweb }}/account/signup/">Create an account</a></b></p>'
+# Example of adding extra vhost definition
+vhost_extra_pglister: |
+  Redirect permanent /foo https://bar
+
+## pgarchives
+service_vhost_name_pgarchives: 'pgarchives.{{ domain }}'
+base_path_pgarchives: '/srv/pgarchives'
+database_name_pgarchives: 'pgarchives'
+pgarchives_version: 'master'
+base_path_pgarchives_private: '/srv/pgarchives-private'
+
+## pgarchives_private
+service_vhost_name_pgarchives_private: 'pgarchives-private.{{ domain }}'
+database_name_pgarchives_private: 'pgarchives_private'
+
+## pgweb
+service_vhost_name_pgweb: 'pgweb.{{ domain }}'
+base_path_pgweb: '/srv/pgweb'
+pgweb_version: '1adaab8955ccf022b1c22b23d62a383854eb0e9e'
+
+## credentials
+database_password: 'CHANGEME'
+django_superuser_pass: 'CHANGEME'
+pgarchives_secret_key: 'CHANGEME'
+pgauth_key: ''  # will be generated if not defined
+# for pgweb
+recaptcha_site_key: "YOUR_RECAPTCHA_SITE_KEY"  # https://www.google.com/recaptcha/admin/create
+recaptcha_secret_key: "YOUR_RECAPTCHA_SECRET_KEY"
