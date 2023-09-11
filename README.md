@@ -2,10 +2,7 @@
 
 Ansible script to install [pglister](https://gitlab.com/pglister/pglister).
 
-Status: the script is finished, but necessary patches are still in the process of being integrated upstream. In the meantime, repositories are still pointing to my own forks. Please use:
-- `pgweb_version: 'test'`.
-- `pglister_version: 'master'`.
-- `pgarchives_version: 'master'`.
+Status: the script is finished, but necessary patches are still in the process of being integrated upstream. In the meantime, repositories are still pointing to my own forks.
 
 # Install
 
@@ -19,7 +16,8 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
 ```
 ---
 
-- hosts: all
+- name: Example playbook
+  hosts: all
   become: true
 
   vars_file:
