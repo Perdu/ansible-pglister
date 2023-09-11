@@ -1,6 +1,6 @@
 ---
 # This variable is supposed to be filled by various roles beforehand
-le_domains: []
+le_domains: ['{{ service_vhost_name_pgweb }}', '{{ service_vhost_name_pglister }}', '{{ service_vhost_name_pgarchives }}', '{{ service_vhost_name_pgarchives_private }}']
 
 le_email: 'postmaster@{{ domain }}'
 le_webroot: '/srv/letsencrypt/'
