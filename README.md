@@ -31,23 +31,6 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
     - {role: 'pgarchives', tags: 'pgarchives'}
     - {role: 'pgarchives_private', tags: 'pgarchives_private'}
     - {role: 'pgweb', tags: 'pgweb'}
-
-  vars:
-    domain: 'yourdomain.com'
-    service_vhost_name_pgweb: 'pgweb.yourdomain.com'
-    service_vhost_name_pglister: 'pglister.yourdomain.com'
-    service_vhost_name_pgarchives: 'pgarchives.yourdomain.com'
-    service_vhost_name_pgarchives_private: 'pgarchives-private.yourdomain.com'
-    django_superuser_address: "root@yourdomain.com"
-    org_name: 'Your organization name'
-    use_letsencrypt: true
-
-    # credentials
-    database_password: 'CHANGEME'
-    django_superuser_pass: 'CHANGEME'
-    pgarchives_secret_key: 'CHANGEME'
-    recaptcha_site_key: "YOUR_RECAPTCHA_SITE_KEY"  # https://www.google.com/recaptcha/admin/create
-    recaptcha_secret_key: "YOUR_RECAPTCHA_SECRET_KEY"
 ```
 
 # Redeployment
