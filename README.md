@@ -38,6 +38,7 @@ You can reduce the tasks to repository and related files redeployment using the 
 # Testing
 
 Install the following dependencies:
+
 - molecule
 - molecule-plugins
 - docker
