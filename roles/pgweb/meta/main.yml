@@ -1,3 +1,16 @@
 ---
 dependencies:
   - role: 'postgresql'
+
+galaxy_info:
+  author: 'Célestin Matte'
+  description: Installs PGWeb, which contains the auth system that will be used by PGLister and PGArchives
+  company: SPI
+  issue_tracker_url: https://gitlab.com/cmatte/ansible-pglister/-/issues
+  license: GPL-2.0-or-later
+  min_ansible_version: 2.11.12
+  platforms:
+    - name: Debian
+      versions:
+        - 'buster'
+  galaxy_tags: ['pglister', 'pgweb', 'mailinglist']

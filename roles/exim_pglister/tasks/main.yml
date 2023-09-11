@@ -90,7 +90,7 @@
     - name: Insert config for pgarchives (1/2)
       blockinfile:
         path: '{{ exim_configuration_file }}'
-        insertbefore: 'pglister:' # this router must be placed before pglister's generic one
+        insertbefore: 'pglister:'  # this router must be placed before pglister's generic one
         marker: '# {mark} ANSIBLE MANAGED BLOCK 3'
         block: |
           archive_router:
@@ -122,7 +122,7 @@
     - name: Insert config for pgarchives-private (1/2)
       blockinfile:
         path: '{{ exim_configuration_file }}'
-        insertbefore: 'archive_router:' # this router must be placed before pglister's generic one
+        insertbefore: 'archive_router:'  # this router must be placed before pglister's generic one
         marker: '# {mark} ANSIBLE MANAGED BLOCK 5'
         block: |
           archive_private_router:
@@ -167,7 +167,7 @@
 
 - name: Modify SpamAssassin service file to use sockets
   lineinfile:
-    path: '/lib/systemd/system/{{ spamassassin_service_file }}'
+    path: '/lib/systemd/system/{{ spamassassin_service }}'
     regexp: '^(ExecStart=.+?)( --socketpath=/var/run/spamd.socket)?$'
     line: '\1 --socketpath=/var/run/spamd.socket'
     backrefs: true
@@ -183,7 +183,7 @@
 
 - name: Reload systemd and start SpamAssassin service
   systemd:
-    name: spamassassin
+    name: '{{ spamassassin_service }}'
     state: reloaded
     daemon_reload: true
   when: use_spamassassin is defined and use_spamassassin
