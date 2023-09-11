@@ -90,7 +90,7 @@
     - name: Insert config for pgarchives (1/2)
       blockinfile:
         path: '{{ exim_configuration_file }}'
-        insertbefore: 'pglister:' # this router must be placed before pglister's generic one
+        insertbefore: 'pglister:'  # this router must be placed before pglister's generic one
         marker: '# {mark} ANSIBLE MANAGED BLOCK 3'
         block: |
           archive_router:
@@ -122,7 +122,7 @@
     - name: Insert config for pgarchives-private (1/2)
       blockinfile:
         path: '{{ exim_configuration_file }}'
-        insertbefore: 'archive_router:' # this router must be placed before pglister's generic one
+        insertbefore: 'archive_router:'  # this router must be placed before pglister's generic one
         marker: '# {mark} ANSIBLE MANAGED BLOCK 5'
         block: |
           archive_private_router:

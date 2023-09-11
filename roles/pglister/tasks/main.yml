@@ -10,7 +10,7 @@
   package:
     state: 'present'
     name:
-      - 'procmail' # to import mbox, not mandatory
+      - 'procmail'  # to import mbox, not mandatory
   when: not redeploy
 
 - name: 'Clone repository'
