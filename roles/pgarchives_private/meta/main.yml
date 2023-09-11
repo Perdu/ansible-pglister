@@ -1,11 +1,7 @@
 ---
-dependencies:
-  - { role: 'postgresql', when: redeploy == False }
-  - { role: 'exim_pglister', when: redeploy == False }
-
 galaxy_info:
   author: 'Célestin Matte'
-  description: Installs PGArchives, the web app for storing and seeing archives from the PGLister mailinglist
+  description: Installs PGArchive in private mode, i.e. only giving access to lists to authorized users.
   company: SPI
   issue_tracker_url: https://gitlab.com/cmatte/ansible-pglister/-/issues
   license: GPL-2.0-or-later

@@ -1,11 +1,7 @@
 ---
-dependencies:
-  - { role: 'postgresql', when: redeploy == False }
-  - { role: 'exim_pglister', when: redeploy == False }
-
 galaxy_info:
   author: 'Célestin Matte'
-  description: Installs PGLister, the mailinglist system
+  description: Installs exim with the necessary adaptations to the config file to plug PGLister in.
   company: SPI
   issue_tracker_url: https://gitlab.com/cmatte/ansible-pglister/-/issues
   license: GPL-2.0-or-later
