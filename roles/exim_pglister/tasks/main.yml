@@ -5,6 +5,7 @@
     name:
       - '{{ exim_package }}'
       - 'python3-psycopg2'
+      - 'cron'
 
 - name: Copy exim configuration file
   template:
@@ -156,15 +157,17 @@
     line: '{{ smtp_relay_password }}'
   when: smtp_relay_password is defined and smtp_relay_password != ''
 
-- name: Install spamassassin
+- name: Install spamassassin and fail2ban
   package:
-    name: spamassassin
+    name:
+      - spamassassin
+      - fail2ban
     state: present
   when: use_spamassassin is defined and use_spamassassin
 
 - name: Modify SpamAssassin service file to use sockets
   lineinfile:
-    path: /lib/systemd/system/spamassassin.service
+    path: '/lib/systemd/system/{{ spamassassin_service_file }}'
     regexp: '^(ExecStart=.+?)( --socketpath=/var/run/spamd.socket)?$'
     line: '\1 --socketpath=/var/run/spamd.socket'
     backrefs: true

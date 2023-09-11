@@ -1,50 +1,24 @@
 ---
+- name: 'Include role prepare_django_app'
+  include_role:
+    name: prepare_django_app
+  vars:
+    database_name: '{{ database_name_pglister }}'
+    vhost_extra: '{{ vhost_extra_pglister }}'
+
 - name: 'Install required packages'
   package:
     state: 'present'
     name:
-      - 'python3'
-      - 'git'
-      - 'libapache2-mod-wsgi-py3'
-      - 'python3-pip'
-      - 'python3-psycopg2'
-      - 'python3-virtualenv'
-      - 'postgresql-contrib'
       - 'procmail' # to import mbox, not mandatory
   when: not redeploy
 
 - name: 'Clone repository'
   import_tasks: clone_repository.yml
 
-# Todo: fix issue: this fails silently on error
-- name: 'Create role and database'
-  command:
-    cmd: psql -v ON_ERROR_STOP=0 --no-password
-    stdin: |
-      CREATE USER {{ database_user }} WITH PASSWORD '{{ database_password }}';
-      CREATE DATABASE {{ database_name_pglister }};
-  become: true
-  become_user: 'postgres'
-  register: result
-  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-  when: not redeploy
-
 - name: 'Create a postgres user for Debian-exim'
   community.postgresql.postgresql_user:
     name: 'Debian-exim'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Grant permissions to database'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pglister }} TO "{{ database_user }}";'
-    - 'GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
   become: true
   become_user: 'postgres'
   when: not redeploy
@@ -70,14 +44,11 @@
   when: not redeploy
 
 - name: 'Create nagios role for postgres'
-  command:
-    cmd: psql -v ON_ERROR_STOP=0 --no-password
-    stdin: |
-      CREATE USER "nagios";
+  community.postgresql.postgresql_user:
+    name: nagios
   become: true
   become_user: 'postgres'
   register: result
-  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
   when: 'use_nagios and not redeploy'
 
 - name: 'Grant permissions to database to nagios'
@@ -120,27 +91,12 @@
     - 'CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
     - 'CREATE SCHEMA IF NOT EXISTS eximintegration;'
     - 'GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};'
-    - "CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL) SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');"
+    - >
+      CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL)
+      SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
     - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
   become: true
   become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Include role http_vhost'
-  include_role:
-    name: 'http_vhost'
-  vars:
-    service_vhost_extra: true
-    vhost_extra: '{{ vhost_extra_pglister }}'
-  when: not redeploy
-
-# ignore_configcheck prevents module from crashing
-- name: 'Activate mod_wsgi on apache2'
-  community.general.apache2_module:
-    name: wsgi
-    state: present
-    ignore_configcheck: true
-  notify: 'Reload httpd'
   when: not redeploy
 
 - name: 'Install required packages for django using pip'

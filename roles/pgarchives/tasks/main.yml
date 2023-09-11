@@ -1,46 +1,21 @@
 ---
+- name: 'Include role prepare_django_app'
+  include_role:
+    name: prepare_django_app
+  vars:
+    database_name: '{{ database_name_pgarchives }}'
+    vhost_extra: '{{ vhost_extra_pgarchives }}'
+
 - name: 'Install required packages'
   package:
     state: 'present'
     name:
-      - 'python3'
-      - 'git'
-      - 'libapache2-mod-wsgi-py3'
-      - 'python3-pip'
-      - 'python3-psycopg2'
-      - 'python3-virtualenv'
       - 'hunspell-en-us'
       - 'tidy'
   when: not redeploy
 
 - name: 'Clone repository'
   import_tasks: clone_repository.yml
-
-# Todo: fix issue: this fails silently on error
-- name: 'Create role and database'
-  command:
-    cmd: psql -v ON_ERROR_STOP=0 --no-password
-    stdin: |
-      CREATE USER {{ database_user_pgarchives }} WITH PASSWORD '{{ database_password }}';
-      CREATE DATABASE {{ database_name_pgarchives }};
-  become: true
-  become_user: 'postgres'
-  register: result
-  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-  when: not redeploy
-
-- name: 'Grant permissions to database'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pgarchives }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "{{ database_user }}";'
-    - 'GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
 
 - name: 'Grant permissions to database to Debian-exim'
   community.postgresql.postgresql_query:
@@ -58,21 +33,6 @@
   include_role:
     name: 'postgresql'
     tasks_from: 'restart.yml'
-  when: not redeploy
-
-- name: 'Include role http_vhost'
-  include_role:
-    name: 'http_vhost'
-  vars:
-    service_vhost_extra: true
-    vhost_extra: '{{ vhost_extra_pgarchives }}'
-  when: not redeploy
-
-- name: 'Activate mod_wsgi on apache2'
-  community.general.apache2_module:
-    name: wsgi
-    state: present
-  notify: 'Reload httpd'
   when: not redeploy
 
 - name: 'Install required packages for django using pip'

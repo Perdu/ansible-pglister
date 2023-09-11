@@ -1,0 +1,1 @@
+- Turn collection into a single role. See https://stackoverflow.com/questions/77054432/ansible-best-way-to-handle-default-variables-in-a-collection

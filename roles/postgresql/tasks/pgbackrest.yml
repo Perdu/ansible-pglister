@@ -20,7 +20,7 @@
   command: pgbackrest stanza-create --stanza=main
   become: true
   become_user: 'postgres'
-  when: config is changed
+  when: config is changed  # noqa: no-handler
 
 - name: 'Drop pgbackrest specific configuration for postgresql'
   copy:
@@ -42,7 +42,7 @@
   register: config_archive
 
 - name: 'Restart postgresql'
-  when: config is changed or config_archive is changed
+  when: config is changed or config_archive is changed  # noqa: no-handler
   block:
     - name: 'Ensure postgresql is enabled/started (systemd)'
       service:
@@ -63,7 +63,7 @@
   command: pgbackrest --stanza=main check
   become: true
   become_user: 'postgres'
-  when: config is changed or config_archive is changed
+  when: config is changed or config_archive is changed  # noqa: no-handler
 
 - name: 'Setup pgbackrest crontab'
   cron:

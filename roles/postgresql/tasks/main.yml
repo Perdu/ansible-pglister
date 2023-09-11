@@ -1,8 +1,10 @@
 ---
-- name: 'Install gpg to get signing keys for pgdg repositories'
+- name: 'Install necessary packages for role execution'
   package:
     state: 'present'
-    name: 'gpg'
+    name:
+      - 'gpg'
+      - 'python3-psycopg2'
 
 - name: 'Add PGDG signing key'
   apt_key:

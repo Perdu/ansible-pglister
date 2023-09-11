@@ -1,48 +1,13 @@
 ---
-- name: 'Install required packages'
-  package:
-    state: 'present'
-    name:
-      - 'python3'
-      - 'libapache2-mod-wsgi-py3'
-      - 'python3-pip'
-      - 'python3-psycopg2'
-      - 'python-psycopg2'
-      - 'python-virtualenv'
+- name: 'Include role prepare_django_app'
+  include_role:
+    name: prepare_django_app
+  vars:
+    database_name: '{{ database_name_pgweb }}'
+    vhost_extra: ''
 
 - name: 'Clone repository'
   import_tasks: clone_repository.yml
-
-# Todo: fix issue: this fails silently on error
-- name: 'Create role and database'
-  command:
-    cmd: psql -v ON_ERROR_STOP=0 --no-password
-    stdin: |
-      CREATE USER {{ database_user_pgweb }} WITH PASSWORD '{{ database_password }}';
-      CREATE DATABASE {{ database_name_pgweb }};
-  become: true
-  become_user: 'postgres'
-  register: result
-  failed_when: 'result.rc != 0 and not "already exists" in result.stderr'
-
-- name: 'Include http_vhost role'
-  include_role:
-    name: 'http_vhost'
-  vars:
-    service_vhost_extra: true
-    vhost_extra: '{{ vhost_extra_pgweb }}'
-
-- name: 'Activate mod_wsgi on apache2'
-  community.general.apache2_module:
-    name: wsgi
-    state: present
-  notify: 'Reload httpd'
-
-- name: 'Install virtualenv via pip'
-  pip:
-    name: virtualenv
-    executable: pip3
-  become: true
 
 - name: 'Fix pycopg bug by installing -binary version'
   lineinfile:
@@ -56,12 +21,14 @@
     regexp: '^pycryptodomex'
     line: 'pycryptodomex'
 
+
 - name: 'Install required packages for django using pip'
   pip:
     requirements: '{{ service_base_path }}/requirements.txt'
-    virtualenv: '{{ service_base_path }}/'
+    virtualenv: '{{ service_base_path }}/pgweb/'
     virtualenv_python: python3
   become: true
+  when: not redeploy
 
 - name: 'Include Django role'
   include_role:
@@ -69,7 +36,7 @@
   vars:
     django_app_path: '{{ service_base_path }}'
     django_user: list
-    django_virtualenv: '{{ service_base_path }}'
+    django_virtualenv: '{{ service_base_path }}/pgweb'
 
 # Todo: it will be better to run this inside the venv
 - name: 'Run varnish_local.sql to disable Varnish functions'
@@ -100,17 +67,6 @@
   become: true
   become_user: 'list'
 
-- name: 'Drop make-dyncss.sh'
-  template:
-    src: 'make_dyncss.sh.j2'
-    dest: '{{ service_base_path }}/make_dyncss.sh'
-    owner: 'list'
-    group: 'www-data'
-    mode: '660'
-
-- name: 'Run make_dyncss.sh'
-  command: sh '{{ service_base_path }}/make_dyncss.sh'
-
 - name: 'Add crontab to emit emails'
   cron:
     state: 'present'
@@ -138,9 +94,11 @@
   changed_when: false
 
 - name: 'Generate new cryptkey to link pgweb and pglister'
-  shell: |
-    set -o pipefail
-    {{ venv_python }} {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1
+  shell:
+    cmd: |
+      set -o pipefail
+      {{ venv_python }} {{ service_base_path }}/tools/communityauth/generate_cryptkey.py | tail -n 1
+    executable: '/bin/bash'
   become: true
   become_user: 'list'
   register: 'pgauth_key_stdout'
