@@ -2,4 +2,4 @@
 exim_package: exim4-daemon-heavy
 exim_daemon: exim4
 exim_configuration_file: /etc/exim4/exim4.conf
-spamassassin_service_file: '{{ "spamassassin.service" if debian_version == "buster" else "spamd.service" }}'
+spamassassin_service: '{{ "spamassassin.service" if debian_version == "buster" else "spamd.service" }}'

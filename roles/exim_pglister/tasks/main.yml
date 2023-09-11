@@ -167,7 +167,7 @@
 
 - name: Modify SpamAssassin service file to use sockets
   lineinfile:
-    path: '/lib/systemd/system/{{ spamassassin_service_file }}'
+    path: '/lib/systemd/system/{{ spamassassin_service }}'
     regexp: '^(ExecStart=.+?)( --socketpath=/var/run/spamd.socket)?$'
     line: '\1 --socketpath=/var/run/spamd.socket'
     backrefs: true
@@ -183,7 +183,7 @@
 
 - name: Reload systemd and start SpamAssassin service
   systemd:
-    name: spamassassin
+    name: '{{ spamassassin_service }}'
     state: reloaded
     daemon_reload: true
   when: use_spamassassin is defined and use_spamassassin
