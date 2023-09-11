@@ -9,8 +9,6 @@ test_only: true
 install_pgbackrest: true
 # for postgresql's repositories and python version
 debian_version: 'buster'
-# system user accessing postgresql
-database_user: 'list'
 le_domains:
   - '{{ service_vhost_name_pgweb }}'
   - '{{ service_vhost_name_pglister }}'
