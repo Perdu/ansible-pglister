@@ -1,3 +1,5 @@
 ---
 postgresql_version: '15'
 debian_version: 'bookworm'
+# system user accessing postgresql
+database_user: 'list'
