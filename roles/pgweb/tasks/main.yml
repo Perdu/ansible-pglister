@@ -21,6 +21,17 @@
     regexp: '^pycryptodomex'
     line: 'pycryptodomex'
 
+- name: 'Fix bleach bug on Debian bookworm by using an another version for bleach'
+  lineinfile:
+    path: '{{ service_base_path }}/requirements.txt'
+    regexp: '^bleach==3.1.4'
+    line: 'bleach==3.3.1'
+
+- name: 'Fix bleach bug on Debian bookworm by using an another version for bleach'
+  lineinfile:
+    path: '{{ service_base_path }}/requirements.txt'
+    regexp: '^Babel==2.6.0'
+    line: 'Babel==2.7.0'
 
 - name: 'Install required packages for django using pip'
   pip:
