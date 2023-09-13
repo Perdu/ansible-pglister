@@ -1,6 +1,6 @@
 ---
 database_user_pgweb: 'list'
 database_name_pgweb: 'pgweb'
-pgweb_version: '1adaab8955ccf022b1c22b23d62a383854eb0e9e'
+pgweb_version: '91991aa1712892b7862528f8d47e8a52415f740d'
 debug: false
 logging_level: 'ERROR'
