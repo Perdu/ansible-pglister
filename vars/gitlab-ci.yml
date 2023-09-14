@@ -11,7 +11,7 @@ install_pgbackrest: true
 debian_version: 'bookworm'
 
 ## exim-pglister
-use_spamassassin: true
+use_spamassassin: false
 cron_emails_destination: 'root'
 # If using an SMTP relay, otherwise leave empty
 # dc_smarthost: 'smtp.gmail.com::587'
