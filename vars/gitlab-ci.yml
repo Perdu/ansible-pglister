@@ -8,7 +8,7 @@ use_letsencrypt: false
 test_only: true
 install_pgbackrest: true
 # for postgresql's repositories and python version
-debian_version: 'buster'
+debian_version: 'bookworm'
 
 ## exim-pglister
 use_spamassassin: true
