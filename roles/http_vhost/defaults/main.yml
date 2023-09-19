@@ -11,5 +11,4 @@ service_log_prefix: '{{ service_vhost_name }}'
 le_deploy_hooks_path: '/srv/letsencrypt/hooks'
 
 # Allows for vhosts to add extra content in the template. boolean variable
-service_needs_document_root: true
 service_vhost_extra: false
