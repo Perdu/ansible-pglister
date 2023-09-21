@@ -8,8 +8,8 @@
 # Not using `notify: 'restart postgresql'` as we need it restarted right
 # after the task to then run `check`.
 - name: 'Drop pgbackrest config'
-  copy:
-    src: 'pgbackrest.conf'
+  template:
+    src: 'pgbackrest.conf.j2'
     dest: '/etc/pgbackrest.conf'
     owner: 'postgres'
     group: 'postgres'
