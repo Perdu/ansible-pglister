@@ -36,7 +36,7 @@
 - name: 'Install postgresl'
   package:
     name:
-      - 'postgresql'
+      - 'postgresql-{{ postgresql_version }}'
       - 'postgresql-client'
     state: 'present'
 
