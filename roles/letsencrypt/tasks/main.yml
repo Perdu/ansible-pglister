@@ -33,6 +33,7 @@
       loop: '{{ le_domains }}'
       register: presence
       failed_when: presence.rc == 1
+      changed_when: false
   rescue:
     - name: 'Delete previous cert to force certbot to create one with the new set of domains'
       command: >-

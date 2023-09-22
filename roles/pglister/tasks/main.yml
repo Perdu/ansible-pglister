@@ -227,6 +227,7 @@
   command: 'which systemctl'
   register: 'systemctl_available'
   ignore_errors: true
+  changed_when: false
 
 - name: 'Install systemd services'
   command:
