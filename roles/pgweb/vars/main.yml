@@ -9,4 +9,4 @@ repo_path: '{{ base_path }}/{{ repo_name }}'
 venv_python: '{{ service_base_path }}/pgweb/bin/python'
 
 admin_email_address: 'webmaster@{{ domain }}'
-django_secret_key: 'changemechangeme!-ansible'
+pgweb_django_secret_key: 'changemechangeme!-ansible'

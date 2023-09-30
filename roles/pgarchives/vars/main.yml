@@ -10,5 +10,5 @@ repo_path: '{{ base_path }}/{{ repo_name }}'
 venv_python: '{{ service_base_path }}/django/bin/python'
 
 admin_email_address: 'webmaster@{{ domain }}'
-django_secret_key: 'changemechangeme!-ansible'
+pgarchives_django_secret_key: 'changemechangeme!-ansible'
 python_version: '{{ "python3.7" if debian_version == "buster" else "python3.11" }}'
