@@ -29,7 +29,6 @@
     owner: 'postgres'
     group: 'postgres'
     mode: '640'
-#  notify: 'Restart postgresql'
 
 - name: 'Adapt postgres configuration'
   lineinfile:
