@@ -45,7 +45,7 @@
   block:
     - name: 'Ensure postgresql is enabled/started (systemd)'
       service:
-        name: 'postgresql'
+        name: 'postgresql@{{ postgresql_version }}-main'
         state: 'restarted'
         enabled: true
       ignore_errors: true
