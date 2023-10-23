@@ -98,6 +98,7 @@
         user.last_name = "Admin"
         user.save()
         print("changed")
+  no_log: True
   register: res
   changed_when: res.stdout == "changed"
   become: true
