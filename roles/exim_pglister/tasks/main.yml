@@ -41,10 +41,8 @@
     mode: '640'
     owner: 'root'
     group: 'Debian-exim'
-  when: not 'skipped' in new_exim_config.stdout
 
 - name: Edit configuration with parts for pglister, pgarchives and pgarchives_private
-  when: not 'skipped' in new_exim_config.stdout
   block:
     - name: Insert config for pglister (1/4)
       blockinfile:
