@@ -6,6 +6,22 @@
       - 'ssl-cert'
     state: 'present'
 
+- name: 'Create LE webroot'
+  file:
+    path: '{{ le_webroot }}/.well-known/acme-challenge'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+- name: 'Ensure LE folder exists'
+  file:
+    path: '/etc/letsencrypt'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
 # Ensure a cert is always present using the ssl-cert package so that
 # processes can start before a proper cert is generated.
 - name: 'Find existing certificates'
@@ -44,22 +60,6 @@
       vars:
         additional_options: '--expand --force-renewal'
       include_tasks: 'run_acme_client.yml'
-
-- name: 'Create LE webroot'
-  file:
-    path: '{{ le_webroot }}/.well-known/acme-challenge'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
-
-- name: 'Ensure LE folder exists'
-  file:
-    path: '/etc/letsencrypt'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0751'
 
 - name: 'Add LE crontab'
   cron:
