@@ -29,6 +29,13 @@
     path: '/etc/apache2/sites-available/default-ssl.conf'
     state: 'absent'
 
+- name: 'Enable proxy module'
+  when: httpd_proxy | default(false)
+  community.general.apache2_module:
+    name: 'proxy'
+    state: present
+  notify: 'Reload httpd'
+
 - name: 'Enable modules'
   community.general.apache2_module:
     name: '{{ item }}'
