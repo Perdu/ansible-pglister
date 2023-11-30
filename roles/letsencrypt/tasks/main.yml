@@ -48,10 +48,11 @@
       command: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ ansible_host }}.ini
       loop: '{{ le_domains }}'
       register: presence
-      failed_when: presence.rc == 1
+      failed_when: presence.rc != 0
       changed_when: false
   rescue:
     - name: 'Delete previous cert to force certbot to create one with the new set of domains'
+      when: presence.results[0].rc == 1
       command: >-
         certbot delete
         --cert-name {{ ansible_host }}
