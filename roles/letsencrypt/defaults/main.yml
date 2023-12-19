@@ -5,6 +5,7 @@ le_domains:
   - '{{ service_vhost_name_pgarchives }}'
   - '{{ service_vhost_name_pgarchives_private }}'
 
+letsencrypt_host: '{{ ansible_host|default("localhost") }}'
 le_email: 'postmaster@{{ domain }}'
 le_webroot: '/srv/letsencrypt/'
 # Also defined in http_vhost role. We have to define it here as well since
@@ -12,5 +13,5 @@ le_webroot: '/srv/letsencrypt/'
 le_deploy_hooks_path: '/srv/letsencrypt/hooks'
 le_cert_dir: '/etc/ssl/certs'
 le_key_dir: '/etc/ssl/private'
-le_cert_path: '{{ le_cert_dir }}/{{ ansible_host }}.pem'
-le_key_path: '{{ le_key_dir }}/{{ ansible_host }}.key'
+le_cert_path: '{{ le_cert_dir }}/{{ letsencrypt_host }}.pem'
+le_key_path: '{{ le_key_dir }}/{{ letsencrypt_host }}.key'

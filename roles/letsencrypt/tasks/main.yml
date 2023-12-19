@@ -27,7 +27,7 @@
 - name: 'Find existing certificates'
   find:
     path: '{{ le_cert_dir }}'
-    pattern: '{{ ansible_host }}.pem'
+    pattern: '{{ letsencrypt_host }}.pem'
     follow: true
   register: le_cert
 
@@ -45,7 +45,7 @@
 - name: 'Update certificate if domains list has changed'
   block:
     - name: 'Verify if LE domains list has changed'
-      command: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ ansible_host }}.ini
+      command: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ letsencrypt_host }}.ini
       loop: '{{ le_domains }}'
       register: presence
       failed_when: presence.rc != 0
@@ -55,7 +55,7 @@
       when: presence.results[0].rc == 1
       command: >-
         certbot delete
-        --cert-name {{ ansible_host }}
+        --cert-name {{ letsencrypt_host }}
     - name: 'Update LE certificate because domains list has changed'
       # for some reason, "notify: 'ensure certificate'" doesn't work here
       vars:
