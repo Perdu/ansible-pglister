@@ -16,3 +16,5 @@ exim_spamassassin_reject_score: 59
 # Whether stderr of load_message.py will be logged to
 # /tmp/debug_exim_archive_pipe.txt (for debugging)
 exim_log_archive_pipe_output: false
+
+spamassassin_domain: '{{ domain }}'
