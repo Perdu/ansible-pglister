@@ -193,6 +193,7 @@
     name: '{{ spamassassin_service }}'
     state: reloaded
     daemon_reload: true
+    enabled: true
   when: use_spamassassin is defined and use_spamassassin
 
 - name: Insert config for spamassassin (1/2)
