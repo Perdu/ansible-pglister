@@ -156,6 +156,7 @@
         user.last_name = "Admin"
         user.save()
         print("changed")
+  no_log: True
   register: res
   changed_when: res.stdout == "changed"
   become: true
@@ -196,6 +197,7 @@
         arch.apikey = "{{ pgarchives_secret_key }}"
         arch.save()
         print("changed")
+  no_log: True
   register: res
   changed_when: res.stdout == "changed"
   become: true
@@ -217,6 +219,7 @@
         arch.apikey = "{{ pgarchives_secret_key }}"
         arch.save()
         print("changed")
+  no_log: True
   register: res
   changed_when: res.stdout == "changed"
   become: true
@@ -227,6 +230,7 @@
   command: 'which systemctl'
   register: 'systemctl_available'
   ignore_errors: true
+  changed_when: false
 
 - name: 'Install systemd services'
   command:

@@ -8,8 +8,8 @@
 # Not using `notify: 'restart postgresql'` as we need it restarted right
 # after the task to then run `check`.
 - name: 'Drop pgbackrest config'
-  copy:
-    src: 'pgbackrest.conf'
+  template:
+    src: 'pgbackrest.conf.j2'
     dest: '/etc/pgbackrest.conf'
     owner: 'postgres'
     group: 'postgres'
@@ -29,7 +29,6 @@
     owner: 'postgres'
     group: 'postgres'
     mode: '640'
-#  notify: 'Restart postgresql'
 
 - name: 'Adapt postgres configuration'
   lineinfile:
@@ -64,6 +63,7 @@
   become: true
   become_user: 'postgres'
   when: config is changed or config_archive is changed  # noqa: no-handler
+  changed_when: false
 
 - name: 'Setup pgbackrest crontab'
   cron:

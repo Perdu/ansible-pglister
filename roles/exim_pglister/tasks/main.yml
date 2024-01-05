@@ -1,4 +1,9 @@
 ---
+- name: 'Update APT cache'
+  apt:
+    update_cache: true
+  when: ansible_os_family == 'Debian'
+
 - name: 'Install required packages'
   package:
     state: 'present'
@@ -36,10 +41,8 @@
     mode: '640'
     owner: 'root'
     group: 'Debian-exim'
-  when: not 'skipped' in new_exim_config.stdout
 
 - name: Edit configuration with parts for pglister, pgarchives and pgarchives_private
-  when: not 'skipped' in new_exim_config.stdout
   block:
     - name: Insert config for pglister (1/4)
       blockinfile:
@@ -107,7 +110,8 @@
         block: |
           archive_pipe:
             driver = pipe
-            command = {{ base_path_pgarchives }}/local/django/bin/python {{ base_path_pgarchives }}/local/loader/load_message.py -l $local_part
+            command = {{ base_path_pgarchives }}/local/django/bin/python {{ base_path_pgarchives }}/local/loader/load_message.py -l $local_part{% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %} -v 2>>/tmp/debug_exim_archive_pipe.txt >>/tmp/debug_exim_archive_pipe_stdout.txt{% endif %}
+
             #ignore_status
             temp_errors = *
             return_output = false
@@ -118,6 +122,7 @@
             umask = 022
             user = Debian-exim
             environment =
+            {% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %}use_shell = true{% endif %}
 
     - name: Insert config for pgarchives-private (1/2)
       blockinfile:
@@ -139,7 +144,8 @@
         block: |
           archive_private_pipe:
             driver = pipe
-            command = {{ base_path_pgarchives_private }}/local/django/bin/python {{ base_path_pgarchives_private }}/local/loader/load_message.py -l $local_part
+            command = {{ base_path_pgarchives_private }}/local/django/bin/python {{ base_path_pgarchives_private }}/local/loader/load_message.py -l $local_part{% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %} 2>/tmp/debug_exim_archiveprivate_pipe.txt{% endif %}
+
             #ignore_status
             temp_errors = *
             return_output = false
@@ -150,6 +156,7 @@
             umask = 022
             user = Debian-exim
             environment =
+            {% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %}use_shell = true{% endif %}
 
 - name: Add password for smarthost, if exists
   lineinfile:
@@ -186,6 +193,7 @@
     name: '{{ spamassassin_service }}'
     state: reloaded
     daemon_reload: true
+    enabled: true
   when: use_spamassassin is defined and use_spamassassin
 
 - name: Insert config for spamassassin (1/2)

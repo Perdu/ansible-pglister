@@ -33,6 +33,10 @@ ansible-galaxy collection install https://gitlab.com/cmatte/ansible-pglister.git
     - {role: 'pgweb', tags: 'pgweb'}
 ```
 
+# Variables
+
+Some variables can and should be configured. See [here](vars/defaults.yml).
+
 # Redeployment
 
 You can reduce the tasks to repository and related files redeployment using the `redeploy` option, e.g. using `-e "{redeploy: True}"` from the command line.
@@ -40,6 +44,7 @@ You can reduce the tasks to repository and related files redeployment using the 
 # Testing
 
 Install the following dependencies:
+
 - molecule
 - molecule-plugins
 - docker

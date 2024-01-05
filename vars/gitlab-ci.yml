@@ -8,10 +8,10 @@ use_letsencrypt: false
 test_only: true
 install_pgbackrest: true
 # for postgresql's repositories and python version
-debian_version: 'buster'
+debian_version: 'bookworm'
 
 ## exim-pglister
-use_spamassassin: true
+use_spamassassin: false
 cron_emails_destination: 'root'
 # If using an SMTP relay, otherwise leave empty
 # dc_smarthost: 'smtp.gmail.com::587'

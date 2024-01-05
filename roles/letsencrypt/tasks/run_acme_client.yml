@@ -4,12 +4,12 @@
 # /etc/letsencrypt/live/<fdqn>/fullchain.pem
 - name: 'Construct le_domains variable'
   set_fact:
-    le_domains: '{{ ([ansible_host] + le_domains) | unique }}'
+    le_domains: '{{ ([letsencrypt_host] + le_domains) | unique }}'
 
 - name: 'Configure ACME client'
   template:
     src: 'cli.ini.j2'
-    dest: '/etc/letsencrypt/{{ ansible_host }}.ini'
+    dest: '/etc/letsencrypt/{{ letsencrypt_host }}.ini'
     owner: 'root'
     group: 'root'
     mode: '0644'
@@ -17,7 +17,7 @@
 - name: 'Run certbot'
   command: >-
     certbot certonly
-      --config /etc/letsencrypt/{{ ansible_host }}.ini
+      --config /etc/letsencrypt/{{ letsencrypt_host }}.ini
       --deploy-hook /usr/local/bin/le-deploy-hook.sh
       {%if additional_options is defined %}{{ additional_options }}{% endif %}
   register: res

@@ -1,3 +1,10 @@
+  # Avoid scanning outgoing messages
+  # We check if a X-Spam-Score with correct domain already exists
+  # This can be bypassed by spammers, but testing the Return-Path somehow fails
+  accept  condition   = ${if and { {def:header_x-spam-score:} {match{$header_x-spam-score:} {\N^{{ spamassassin_domain|replace('.', '\\.') }}:\N} } } }
+  # Uncomment for debug
+  #        add_header  = X-Spam-Note: SpamAssassin run bypassed for outgoing message
+
   # Bypass SpamAssassin checks if the message is too large (4 million).
   warn    condition   = ${if >={$message_size}{ {{ exim_spamcheck_max_size }} } {1}}
           add_header  = X-Spam-Note: SpamAssassin run bypassed due to message size

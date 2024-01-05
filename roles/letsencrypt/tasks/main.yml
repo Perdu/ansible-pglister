@@ -6,12 +6,28 @@
       - 'ssl-cert'
     state: 'present'
 
+- name: 'Create LE webroot'
+  file:
+    path: '{{ le_webroot }}/.well-known/acme-challenge'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+- name: 'Ensure LE folder exists'
+  file:
+    path: '/etc/letsencrypt'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
 # Ensure a cert is always present using the ssl-cert package so that
 # processes can start before a proper cert is generated.
 - name: 'Find existing certificates'
   find:
     path: '{{ le_cert_dir }}'
-    pattern: '{{ ansible_host }}.pem'
+    pattern: '{{ letsencrypt_host }}.pem'
     follow: true
   register: le_cert
 
@@ -29,36 +45,22 @@
 - name: 'Update certificate if domains list has changed'
   block:
     - name: 'Verify if LE domains list has changed'
-      command: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ ansible_host }}.ini
+      command: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ letsencrypt_host }}.ini
       loop: '{{ le_domains }}'
       register: presence
-      failed_when: presence.rc == 1
+      failed_when: presence.rc != 0
+      changed_when: false
   rescue:
     - name: 'Delete previous cert to force certbot to create one with the new set of domains'
+      when: presence.results[0].rc == 1
       command: >-
         certbot delete
-        --cert-name {{ ansible_host }}
+        --cert-name {{ letsencrypt_host }}
     - name: 'Update LE certificate because domains list has changed'
       # for some reason, "notify: 'ensure certificate'" doesn't work here
       vars:
         additional_options: '--expand --force-renewal'
       include_tasks: 'run_acme_client.yml'
-
-- name: 'Create LE webroot'
-  file:
-    path: '{{ le_webroot }}/.well-known/acme-challenge'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
-
-- name: 'Ensure LE folder exists'
-  file:
-    path: '/etc/letsencrypt'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0751'
 
 - name: 'Add LE crontab'
   cron:

@@ -1,4 +1,9 @@
 ---
+- name: 'Update APT cache'
+  apt:
+    update_cache: true
+  when: ansible_os_family == 'Debian'
+
 - name: 'Install necessary packages for role execution'
   package:
     state: 'present'
@@ -31,7 +36,7 @@
 - name: 'Install postgresl'
   package:
     name:
-      - 'postgresql'
+      - 'postgresql-{{ postgresql_version }}'
       - 'postgresql-client'
     state: 'present'
 

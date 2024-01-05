@@ -1,1 +1,4 @@
 - Turn collection into a single role. See https://stackoverflow.com/questions/77054432/ansible-best-way-to-handle-default-variables-in-a-collection
+- It could be interesting to add exim queue monitoring with nagios.
+  There is a script here that could be used here https://exchange.nagios.org/directory/Plugins/Email-and-Groupware/Exim/check_eximailqueue/details
+  However, it would be better if adapted to monitor emails stuck in queue for more than a given delay, instead of raw number of messages
