@@ -51,7 +51,7 @@
         block: |
           pglister_pipe:
             driver = pipe
-            command = {{ base_path_pglister }}/local/web/pglister/bin/python {{ base_path_pglister }}/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix@$domain -m $header_message-id:
+            command = {{ base_path_pglister }}/local/web/pglister/bin/python {{ base_path_pglister }}/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix@$domain -m $header_message-id: {% if exim_log_pglister_pipe_output is defined and exim_log_pglister_pipe_output %}2>>/tmp/debug_exim_pglister_pipe.txt >>/tmp/debug_exim_pglister_pipe_stdout.txt{% endif %}
             #ignore_status
             temp_errors = *
             return_output = false
@@ -64,6 +64,7 @@
             environment =
             user = Debian-exim
             message_prefix =
+            {% if exim_log_pglister_pipe_output is defined and exim_log_pglister_pipe_output %}use_shell = true{% endif %}
 
     - name: Insert config for pglister (2/4)
       lineinfile:

@@ -18,5 +18,6 @@ exim_spamassassin_reject_score: 59
 # CAREFUL: THIS IS DANGEROUS, DO NOT LEAVE IN PRODUCTION
 # OR ON ANY REACHABLE SERVER
 exim_log_archive_pipe_output: false
+exim_log_pglister_pipe_output: false
 
 spamassassin_domain: '{{ domain }}'
