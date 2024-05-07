@@ -239,19 +239,20 @@
   become: true
   when: 'not redeploy and systemctl_available.rc == 0'
 
-- name: 'Start systemd services'
-  command:
-    cmd: './install.sh -start'
-    chdir: '{{ service_base_path }}/systemd/'
+- name: 'Restart systemd services'
+  service:
+    name: 'pglister_{{ item }}'
+    state: 'restarted'
+    enabled: true
+  loop:
+    - 'bounceprocessor'
+    - 'cleanup'
+    - 'eximcleaner'
+    - 'mailprocessor'
+    - 'mailsender'
+    - 'moderationprocessor'
   become: true
-  when: 'not redeploy and systemctl_available.rc == 0'
-
-- name: 'Enable systemd services'
-  command:
-    cmd: './install.sh -enable'
-    chdir: '{{ service_base_path }}/systemd/'
-  become: true
-  when: 'not redeploy and systemctl_available.rc == 0'
+  when: 'not redeploy'
 
 - name: 'Add pglister commands to nagios'
   when: use_nagios and not redeploy
