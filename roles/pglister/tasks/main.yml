@@ -5,6 +5,7 @@
   vars:
     database_name: '{{ database_name_pglister }}'
     vhost_extra: '{{ vhost_extra_pglister }}'
+    app_user: 'list'
 
 - name: 'Install required packages'
   package:

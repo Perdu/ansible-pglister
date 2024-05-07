@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: 'Célestin Matte'
-  description: Template role to install django applications (pglister, pgarchives and pgweb)
+  description: Template role to install django applications (pglister, pgarchives, pgweb and membersdjango)
   company: SPI
   issue_tracker_url: https://gitlab.com/cmatte/ansible-pglister/-/issues
   license: GPL-2.0-or-later

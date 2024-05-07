@@ -5,6 +5,7 @@
   vars:
     database_name: '{{ database_name_pgarchives }}'
     vhost_extra: '{{ vhost_extra_pgarchives }}'
+    app_user: 'list'
 
 - name: 'Install required packages'
   package:

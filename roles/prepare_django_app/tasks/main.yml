@@ -46,6 +46,7 @@
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
+    http_vhost_app_user: '{{ app_user }}'
   when: not redeploy
 
 # ignore_configcheck prevents module from crashing

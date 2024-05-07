@@ -22,7 +22,7 @@
   file:
     path: '{{ debug_log_path }}'
     state: 'directory'
-    owner: 'list'
+    owner: '{{ http_vhost_app_user }}'
     group: 'www-data'
     mode: '755'
   notify: 'Reload httpd'
