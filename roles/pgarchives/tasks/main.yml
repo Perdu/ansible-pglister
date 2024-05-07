@@ -109,6 +109,8 @@
   command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
   become: true
   become_user: 'list'
+  register: result
+  changed_when: result.stdout != ""
   when: not redeploy and not test_only
 
 - name: 'Add crontab to run pglister_sync'
