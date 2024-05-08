@@ -33,7 +33,7 @@
     state: 'directory'
     owner: '{{ http_vhost_app_user }}'
     group: 'www-data'
-    mode: '751'
+    mode: '755'
   notify: 'Reload httpd'
 
 - name: 'Drop vhost template for {{ service_vhost_name }}'
