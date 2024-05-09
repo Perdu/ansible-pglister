@@ -1,7 +1,7 @@
 ---
 service_vhost_name: ''
 service_vhost_aliases: []
-service_vhost_priority: '000'
+service_vhost_priority: '010'
 base_path: '/srv/{{ service_vhost_name }}'
 log_path: '/var/log/apache2/'
 debug_log_path: '{{ base_path }}/log'

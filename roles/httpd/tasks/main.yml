@@ -4,13 +4,6 @@
     name: 'apache2'
     state: 'present'
 
-- name: 'Disable "000-default" vhost'
-  command: '/usr/sbin/a2dissite 000-default'
-  register: result
-  changed_when: 'not "already enabled" in result.stdout'
-  notify: 'Reload httpd'
-  ignore_errors: true
-
 - name: 'Drop default templates'
   template:
     src: '{{ item.src }}.j2'
@@ -19,7 +12,7 @@
     group: 'root'
     mode: '0644'
   loop:
-    - { src: '090-default.conf', dest: '/etc/apache2/sites-available/090-default.conf' }
+    - { src: '000-default.conf', dest: '/etc/apache2/sites-available/000-default.conf' }
     - { src: 'ssl.conf', dest: '{{ httpd_ssl_conf }}' }
     - { src: 'mod_ssl.conf', dest: '/etc/apache2/mods-available/ssl.conf' }
   notify: 'Reload httpd'
@@ -47,7 +40,7 @@
   notify: 'Reload httpd'
 
 - name: 'Enable default vhost'
-  command: '/usr/sbin/a2ensite 090-default'
+  command: '/usr/sbin/a2ensite 000-default'
   register: result
   changed_when: 'not "already enabled" in result.stdout'
   notify: 'Reload httpd'
