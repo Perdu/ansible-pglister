@@ -50,10 +50,12 @@
   when: not redeploy
 
 # ignore_configcheck prevents module from crashing
+# ignore_error is used because the task WILL crash if wsgi is already enabled
 - name: 'Activate mod_wsgi on apache2'
   community.general.apache2_module:
     name: wsgi
     state: present
     ignore_configcheck: true
+  ignore_errors: true
   notify: 'Reload httpd'
   when: not redeploy
