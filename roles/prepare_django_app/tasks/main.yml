@@ -82,8 +82,8 @@
 - name: 'Install required packages for ansible using pip'
   pip:
     name:
-      - psycopg==3.1.19
-      - pycryptodomex==3.20.0
+      - '{{ psycopg_version }}'
+      - '{{ pycryptodomex_version }}'
     virtualenv: '{{ app_virtualenv }}'
     virtualenv_python: python3
   become: true
