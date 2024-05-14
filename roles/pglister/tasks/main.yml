@@ -10,6 +10,7 @@
     app_version: '{{ pglister_version }}'
     app_base_path: '{{ service_base_path }}'
     app_virtualenv: '{{ service_base_path }}/web/pglister/'
+    psycopg_version: 'psycopg2-binary'
 
 - name: 'Install required packages'
   package:
