@@ -1,3 +1,5 @@
 ---
 # defaults file for django_app
 redeploy: false
+psycopg_version: '{{ "psycopg2-binary" if debian_version == "bullseye" else "psycopg==3.1.19" }}'
+pycryptodomex_version: '{{ "pycryptodomex" if debian_version == "bullseye" else "pycryptodomex==3.20.0" }}'

@@ -1,7 +1,7 @@
 ---
 database_user_pgarchives: 'list'
 database_name_pgarchives: 'spi_pgarchives'
-pgarchives_version: 'a4b24b88cb343f778cac5ab66cc6117dac68bf21'
+pgarchives_version: 'master'
 debug: false
 logging_level: 'ERROR'
 redeploy: false

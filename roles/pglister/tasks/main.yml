@@ -6,6 +6,10 @@
     database_name: '{{ database_name_pglister }}'
     vhost_extra: '{{ vhost_extra_pglister }}'
     app_user: 'list'
+    repo_uri: '{{ repo_uri_pglister }}'
+    app_version: '{{ pglister_version }}'
+    app_base_path: '{{ service_base_path }}'
+    app_virtualenv: '{{ service_base_path }}/web/pglister/'
 
 - name: 'Install required packages'
   package:
@@ -14,8 +18,8 @@
       - 'procmail'  # to import mbox, not mandatory
   when: not redeploy
 
-- name: 'Clone repository'
-  import_tasks: clone_repository.yml
+- name: 'Customize repository'
+  import_tasks: customize_repository.yml
 
 - name: 'Create a postgres user for Debian-exim'
   community.postgresql.postgresql_user:
@@ -104,10 +108,8 @@
   pip:
     name:
       - django==4.2
-      - psycopg2-binary
       - requests
       - pycryptodome
-      - pycryptodomex
       - crypto
     virtualenv: '{{ service_base_path }}/web/pglister/'
     virtualenv_python: python3
