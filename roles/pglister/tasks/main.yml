@@ -255,7 +255,7 @@
     - 'mailsender'
     - 'moderationprocessor'
   become: true
-  when: 'not redeploy'
+  when: 'not redeploy and systemctl_available.rc == 0'
 
 - name: 'Add pglister commands to nagios'
   when: use_nagios and not redeploy
