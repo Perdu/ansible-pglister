@@ -169,7 +169,7 @@
 - name: Install spamassassin and fail2ban
   package:
     name:
-      - spamassassin
+      - spamd
       - fail2ban
     state: present
   when: use_spamassassin is defined and use_spamassassin
