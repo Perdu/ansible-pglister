@@ -31,9 +31,7 @@
 - name: Generate exim4 config
   command:
     cmd: '/usr/sbin/update-exim4.conf -o {{ exim_configuration_file }}'
-    creates: '{{ exim_configuration_file }}'
   become: true
-  register: new_exim_config
 
 - name: Set permissions of exim4.conf
   file:
