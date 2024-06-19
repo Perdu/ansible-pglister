@@ -53,8 +53,7 @@
             # restrictions.
             # Also using exim's internal $message_id instead of the message's
             # header's message_id.
-            command = {{ base_path_pglister }}/local/web/pglister/bin/python {{ base_path_pglister }}/local/bin/inject.py -s '' -d $local_part_data@$domain_data -m $message_id {% if exim_log_pglister_pipe_output is defined and exim_log_pglister_pipe_output %}2>>/tmp/debug_exim_pglister_pipe.txt >>/tmp/debug_exim_pglister_pipe_stdout.txt{% endif %}
-
+            command = {{ base_path_pglister }}/local/web/pglister/bin/python {{ base_path_pglister }}/local/bin/inject.py {% if exim_log_pglister_pipe_output is defined and exim_log_pglister_pipe_output %}2>>/tmp/debug_exim_pglister_pipe.txt >>/tmp/debug_exim_pglister_pipe_stdout.txt{% endif %}
             #ignore_status
             temp_errors = *
             return_output = false
@@ -64,7 +63,7 @@
             headers_remove = List-Unsubscribe:List-Owner:List-Post:List-Subscribe:List-Help:List-Id:List-Archive
             #log_fail_output = true
             umask = 022
-            environment =
+            environment = HEADER_MESSAGE_ID=$header_message-id:
             user = Debian-exim
             message_prefix =
             {% if exim_log_pglister_pipe_output is defined and exim_log_pglister_pipe_output %}use_shell = true{% endif %}
