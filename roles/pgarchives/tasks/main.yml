@@ -115,7 +115,7 @@
   become_user: 'list'
   register: result
   changed_when: result.stdout != ""
-  when: not redeploy and not test_only
+  when: not redeploy and not test_only and not pre_deployment
 
 - name: 'Add crontab to run pglister_sync'
   cron:

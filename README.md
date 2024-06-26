@@ -39,6 +39,8 @@ Some variables can and should be configured. See [here](vars/defaults.yml).
 
 You can reduce the tasks to repository and related files redeployment using the `redeploy` option, e.g. using `-e "{redeploy: True}"` from the command line.
 
+Using the `pre_deployment` option, you can also skips some tasks when correct DNS is not set up (e.g. pglister_sync).
+
 # Testing
 
 Install the following dependencies:
