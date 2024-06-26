@@ -22,13 +22,6 @@
     path: '/etc/apache2/sites-available/default-ssl.conf'
     state: 'absent'
 
-- name: 'Enable proxy module'
-  when: httpd_proxy | default(false)
-  community.general.apache2_module:
-    name: 'proxy'
-    state: present
-  notify: 'Reload httpd'
-
 # Necessary to enable modules, otherwise apache crashes
 - name: 'Disable "000-default" vhost'
   command: '/usr/sbin/a2dissite 000-default'
@@ -42,6 +35,13 @@
     - 'headers'
     - 'rewrite'
     - 'ssl'
+  notify: 'Reload httpd'
+
+- name: 'Enable proxy module'
+  when: httpd_proxy | default(false)
+  community.general.apache2_module:
+    name: 'proxy'
+    state: present
   notify: 'Reload httpd'
 
 - name: 'Enable default vhost'
