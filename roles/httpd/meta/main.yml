@@ -1,6 +1,6 @@
 ---
 dependencies:
-  - { role: 'letsencrypt', when: use_letsencrypt is defined and use_letsencrypt }
+  - { role: 'letsencrypt', when: use_letsencrypt and not pre_deployment }
 
 galaxy_info:
   author: 'Célestin Matte, Maxim Buquet (pep)'
