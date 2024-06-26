@@ -124,4 +124,4 @@
     user: 'list'
     minute: '*/5'
     job: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
-  when: not redeploy
+  when: not redeploy and not pre_deployment
