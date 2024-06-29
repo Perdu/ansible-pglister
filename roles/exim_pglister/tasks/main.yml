@@ -190,7 +190,7 @@
 - name: Reload systemd and start SpamAssassin service
   systemd:
     name: '{{ spamassassin_service }}'
-    state: reloaded
+    state: restarted
     daemon_reload: true
     enabled: true
   when: use_spamassassin is defined and use_spamassassin
