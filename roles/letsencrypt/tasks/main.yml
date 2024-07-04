@@ -51,7 +51,7 @@
       failed_when: not cert_stat.stat.exists
 
     - name: 'Verify if LE domains list has changed'
-      command: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ letsencrypt_host }}.ini
+      command: grep '^domains\s*=.* {{ item }}.*' /etc/letsencrypt/{{ letsencrypt_host }}.ini
       loop: '{{ le_domains }}'
       register: presence
       failed_when: presence.rc != 0
