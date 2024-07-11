@@ -5,6 +5,12 @@
   vars:
     database_name: '{{ database_name_pgarchives }}'
     vhost_extra: '{{ vhost_extra_pgarchives }}'
+    app_user: 'list'
+    repo_uri: '{{ repo_uri_pgarchives }}'
+    app_version: '{{ pgarchives_version }}'
+    app_base_path: '{{ service_base_path }}'
+    app_virtualenv: '{{ service_base_path }}/django'
+    psycopg_version: 'psycopg2-binary'
 
 - name: 'Install required packages'
   package:
@@ -14,8 +20,8 @@
       - 'tidy'
   when: not redeploy
 
-- name: 'Clone repository'
-  import_tasks: clone_repository.yml
+- name: 'Customize repository'
+  import_tasks: customize_repository.yml
 
 - name: 'Grant permissions to database to Debian-exim'
   community.postgresql.postgresql_query:
@@ -38,8 +44,7 @@
 - name: 'Install required packages for django using pip'
   pip:
     name:
-      - django==3.2.6
-      - psycopg2-binary
+      - django==4.2
       - requests
       - python-dateutil
       - pytidylib
@@ -98,7 +103,7 @@
         user.last_name = "Admin"
         user.save()
         print("changed")
-  no_log: True
+  no_log: true
   register: res
   changed_when: res.stdout == "changed"
   become: true
@@ -108,7 +113,9 @@
   command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
   become: true
   become_user: 'list'
-  when: not redeploy and not test_only
+  register: result
+  changed_when: result.stdout != ""
+  when: not redeploy and not test_only and not pre_deployment
 
 - name: 'Add crontab to run pglister_sync'
   cron:
@@ -117,4 +124,4 @@
     user: 'list'
     minute: '*/5'
     job: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
-  when: not redeploy
+  when: not redeploy and not pre_deployment

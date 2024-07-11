@@ -31,9 +31,7 @@
 - name: Generate exim4 config
   command:
     cmd: '/usr/sbin/update-exim4.conf -o {{ exim_configuration_file }}'
-    creates: '{{ exim_configuration_file }}'
   become: true
-  register: new_exim_config
 
 - name: Set permissions of exim4.conf
   file:
@@ -51,7 +49,7 @@
         block: |
           pglister_pipe:
             driver = pipe
-            command = {{ base_path_pglister }}/local/web/pglister/bin/python {{ base_path_pglister }}/local/bin/inject.py -s $sender_address -d $local_part$local_part_suffix@$domain -m $header_message-id:
+            command = {{ base_path_pglister }}/local/web/pglister/bin/python {{ base_path_pglister }}/local/bin/inject.py {% if exim_log_pglister_pipe_output is defined and exim_log_pglister_pipe_output %}2>>/tmp/debug_exim_pglister_pipe.txt >>/tmp/debug_exim_pglister_pipe_stdout.txt{% endif %}
             #ignore_status
             temp_errors = *
             return_output = false
@@ -61,9 +59,10 @@
             headers_remove = List-Unsubscribe:List-Owner:List-Post:List-Subscribe:List-Help:List-Id:List-Archive
             #log_fail_output = true
             umask = 022
-            environment =
+            environment = HEADER_MESSAGE_ID=$header_message-id:
             user = Debian-exim
             message_prefix =
+            {% if exim_log_pglister_pipe_output is defined and exim_log_pglister_pipe_output %}use_shell = true{% endif %}
 
     - name: Insert config for pglister (2/4)
       lineinfile:
@@ -110,7 +109,7 @@
         block: |
           archive_pipe:
             driver = pipe
-            command = {{ base_path_pgarchives }}/local/django/bin/python {{ base_path_pgarchives }}/local/loader/load_message.py -l $local_part{% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %} -v 2>>/tmp/debug_exim_archive_pipe.txt >>/tmp/debug_exim_archive_pipe_stdout.txt{% endif %}
+            command = {{ base_path_pgarchives }}/local/django/bin/python {{ base_path_pgarchives }}/local/loader/load_message.py -l {% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %}"$local_part_data" -v 2>>/tmp/debug_exim_archive_pipe.txt >>/tmp/debug_exim_archive_pipe_stdout.txt{% else %}$local_part_data{% endif %}
 
             #ignore_status
             temp_errors = *
@@ -144,7 +143,7 @@
         block: |
           archive_private_pipe:
             driver = pipe
-            command = {{ base_path_pgarchives_private }}/local/django/bin/python {{ base_path_pgarchives_private }}/local/loader/load_message.py -l $local_part{% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %} 2>/tmp/debug_exim_archiveprivate_pipe.txt{% endif %}
+            command = {{ base_path_pgarchives_private }}/local/django/bin/python {{ base_path_pgarchives_private }}/local/loader/load_message.py -l $local_part_data{% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %} 2>/tmp/debug_exim_archiveprivate_pipe.txt{% endif %}
 
             #ignore_status
             temp_errors = *
@@ -167,7 +166,7 @@
 - name: Install spamassassin and fail2ban
   package:
     name:
-      - spamassassin
+      - spamd
       - fail2ban
     state: present
   when: use_spamassassin is defined and use_spamassassin
@@ -191,7 +190,7 @@
 - name: Reload systemd and start SpamAssassin service
   systemd:
     name: '{{ spamassassin_service }}'
-    state: reloaded
+    state: restarted
     daemon_reload: true
     enabled: true
   when: use_spamassassin is defined and use_spamassassin

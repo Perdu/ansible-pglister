@@ -5,7 +5,7 @@ le_domains:
   - '{{ service_vhost_name_pgarchives }}'
   - '{{ service_vhost_name_pgarchives_private }}'
 
-letsencrypt_host: '{{ ansible_host|default("localhost") }}'
+letsencrypt_host: '{{ ansible_host | default("localhost") }}'
 le_email: 'postmaster@{{ domain }}'
 le_webroot: '/srv/letsencrypt/'
 # Also defined in http_vhost role. We have to define it here as well since
@@ -15,3 +15,6 @@ le_cert_dir: '/etc/ssl/certs'
 le_key_dir: '/etc/ssl/private'
 le_cert_path: '{{ le_cert_dir }}/{{ letsencrypt_host }}.pem'
 le_key_path: '{{ le_key_dir }}/{{ letsencrypt_host }}.key'
+# Certbot has an internal log rotation mechanism. Disable it if you
+# use logrotate.
+disable_certbot_internal_rotation: false

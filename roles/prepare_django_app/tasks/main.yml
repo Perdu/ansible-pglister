@@ -46,13 +46,54 @@
     name: 'http_vhost'
   vars:
     service_vhost_extra: true
+    http_vhost_app_user: '{{ app_user }}'
   when: not redeploy
 
 # ignore_configcheck prevents module from crashing
+# ignore_error is used because the task WILL crash if wsgi is already enabled
 - name: 'Activate mod_wsgi on apache2'
   community.general.apache2_module:
     name: wsgi
     state: present
     ignore_configcheck: true
+  ignore_errors: true
   notify: 'Reload httpd'
   when: not redeploy
+
+- name: 'Clone repository'
+  git:
+    repo: '{{ repo_uri }}'
+    dest: '{{ app_base_path }}'
+    clone: true
+    update: true
+    version: '{{ app_version }}'
+    force: true
+  become: true
+  become_user: '{{ app_user }}'
+  register: repo
+
+- name: 'Chown app_user:www-data pglister directory'
+  file:
+    path: '{{ app_base_path }}'
+    owner: '{{ app_user }}'
+    group: 'www-data'
+    recurse: true
+
+- name: 'Install required packages for ansible using pip'
+  pip:
+    name:
+      - '{{ psycopg_version }}'
+      - '{{ pycryptodomex_version }}'
+    virtualenv: '{{ app_virtualenv }}'
+    virtualenv_python: python3
+  become: true
+  become_user: '{{ app_user }}'
+
+- name: Install python dependencies from requirements.txt
+  ansible.builtin.pip:
+    requirements: '{{ requirements_path }}/requirements.txt'
+    virtualenv: '{{ app_virtualenv }}'
+    virtualenv_python: python3
+  become: true
+  become_user: '{{ app_user }}'
+  when: 'requirements_path is defined'

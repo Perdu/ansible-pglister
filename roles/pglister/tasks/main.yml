@@ -5,6 +5,12 @@
   vars:
     database_name: '{{ database_name_pglister }}'
     vhost_extra: '{{ vhost_extra_pglister }}'
+    app_user: 'list'
+    repo_uri: '{{ repo_uri_pglister }}'
+    app_version: '{{ pglister_version }}'
+    app_base_path: '{{ service_base_path }}'
+    app_virtualenv: '{{ service_base_path }}/web/pglister/'
+    psycopg_version: 'psycopg2-binary'
 
 - name: 'Install required packages'
   package:
@@ -13,8 +19,8 @@
       - 'procmail'  # to import mbox, not mandatory
   when: not redeploy
 
-- name: 'Clone repository'
-  import_tasks: clone_repository.yml
+- name: 'Customize repository'
+  import_tasks: customize_repository.yml
 
 - name: 'Create a postgres user for Debian-exim'
   community.postgresql.postgresql_user:
@@ -102,11 +108,9 @@
 - name: 'Install required packages for django using pip'
   pip:
     name:
-      - django==3.2.6
-      - psycopg2-binary
+      - django==4.2
       - requests
       - pycryptodome
-      - pycryptodomex
       - crypto
     virtualenv: '{{ service_base_path }}/web/pglister/'
     virtualenv_python: python3
@@ -156,7 +160,7 @@
         user.last_name = "Admin"
         user.save()
         print("changed")
-  no_log: True
+  no_log: true
   register: res
   changed_when: res.stdout == "changed"
   become: true
@@ -197,7 +201,7 @@
         arch.apikey = "{{ pgarchives_secret_key }}"
         arch.save()
         print("changed")
-  no_log: True
+  no_log: true
   register: res
   changed_when: res.stdout == "changed"
   become: true
@@ -219,7 +223,7 @@
         arch.apikey = "{{ pgarchives_secret_key }}"
         arch.save()
         print("changed")
-  no_log: True
+  no_log: true
   register: res
   changed_when: res.stdout == "changed"
   become: true
@@ -239,17 +243,18 @@
   become: true
   when: 'not redeploy and systemctl_available.rc == 0'
 
-- name: 'Start systemd services'
-  command:
-    cmd: './install.sh -start'
-    chdir: '{{ service_base_path }}/systemd/'
-  become: true
-  when: 'not redeploy and systemctl_available.rc == 0'
-
-- name: 'Enable systemd services'
-  command:
-    cmd: './install.sh -enable'
-    chdir: '{{ service_base_path }}/systemd/'
+- name: 'Restart systemd services'
+  service:
+    name: 'pglister_{{ item }}'
+    state: 'restarted'
+    enabled: true
+  loop:
+    - 'bounceprocessor'
+    - 'cleanup'
+    - 'eximcleaner'
+    - 'mailprocessor'
+    - 'mailsender'
+    - 'moderationprocessor'
   become: true
   when: 'not redeploy and systemctl_available.rc == 0'
 

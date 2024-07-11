@@ -1,7 +1,7 @@
 ---
 service_vhost_name: ''
 service_vhost_aliases: []
-service_vhost_priority: '000'
+service_vhost_priority: '010'
 base_path: '/srv/{{ service_vhost_name }}'
 log_path: '/var/log/apache2/'
 debug_log_path: '{{ base_path }}/log'
@@ -9,6 +9,7 @@ service_log_prefix: '{{ service_vhost_name }}'
 # Also defined in Let's Encrypt role. We have to define it here as well since
 # including role does not import variables
 le_deploy_hooks_path: '/srv/letsencrypt/hooks'
+http_vhost_app_user: 'list'
 
 # Allows for vhosts to add extra content in the template. boolean variable
 service_vhost_extra: false

@@ -44,15 +44,21 @@
 
 - name: 'Update certificate if domains list has changed'
   block:
+    - name: 'Check if the certificate file exists'
+      stat:
+        path: '/etc/letsencrypt/live/{{ letsencrypt_host }}/fullchain.pem'
+      register: cert_stat
+      failed_when: not cert_stat.stat.exists
+
     - name: 'Verify if LE domains list has changed'
-      command: grep '^domains\s*=.*{{ item }}.*' /etc/letsencrypt/{{ letsencrypt_host }}.ini
+      command: grep '^domains\s*=.* {{ item }}.*' /etc/letsencrypt/{{ letsencrypt_host }}.ini
       loop: '{{ le_domains }}'
       register: presence
       failed_when: presence.rc != 0
       changed_when: false
   rescue:
     - name: 'Delete previous cert to force certbot to create one with the new set of domains'
-      when: presence.results[0].rc == 1
+      when: cert_stat.stat.exists and presence.results[0].rc == 1
       command: >-
         certbot delete
         --cert-name {{ letsencrypt_host }}
@@ -113,6 +119,16 @@
     owner: 'root'
     group: 'root'
     mode: '0755'
+
+- name: 'Disable certbot internal log rotation mechanism'
+  lineinfile:
+    path: '/etc/letsencrypt/cli.ini'
+    create: yes
+    line: 'max-log-backups = 0'
+    owner: root
+    group: root
+    mode: '0644'
+  when: disable_certbot_internal_rotation
 
 - name: 'Ensure hooks work after renewal'
   file:

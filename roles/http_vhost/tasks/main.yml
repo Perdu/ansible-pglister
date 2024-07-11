@@ -18,11 +18,20 @@
     mode: '755'
   when: 'use_letsencrypt is defined and use_letsencrypt'
 
+- name: 'Create app folder'
+  file:
+    path: '{{ base_path }}'
+    state: 'directory'
+    owner: '{{ http_vhost_app_user }}'
+    group: 'www-data'
+    mode: '755'
+  notify: 'Reload httpd'
+
 - name: 'Create log folder'
   file:
     path: '{{ debug_log_path }}'
     state: 'directory'
-    owner: 'list'
+    owner: '{{ http_vhost_app_user }}'
     group: 'www-data'
     mode: '755'
   notify: 'Reload httpd'

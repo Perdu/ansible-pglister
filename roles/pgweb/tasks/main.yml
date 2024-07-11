@@ -5,6 +5,7 @@
   vars:
     database_name: '{{ database_name_pgweb }}'
     vhost_extra: ''
+    app_user: 'list'
 
 - name: 'Clone repository'
   import_tasks: clone_repository.yml
