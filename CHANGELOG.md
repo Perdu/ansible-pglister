@@ -3,6 +3,7 @@
 ## 1.0.6
 
 New features:
+- Replace pglister and pgarchives generic master version with precise commits
 - molecule: add MOLECULE_DISTRO variable to image to select image from command line
 - Adapt all roles for Debian Bookworm support, drop Debian Buster support
 - Update Django roles to Django 4.2
