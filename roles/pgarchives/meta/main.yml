@@ -1,7 +1,7 @@
 ---
 dependencies:
-  - { role: 'postgresql', when: redeploy == False }
-  - { role: 'exim_pglister', when: redeploy == False }
+  - { role: 'postgresql', when: redeploy == False, tags: 'postgresql' }
+  - { role: 'exim_pglister', when: redeploy == False, tags: ['exim_pglister', 'exim-pglister'] }
 
 galaxy_info:
   author: 'Célestin Matte'

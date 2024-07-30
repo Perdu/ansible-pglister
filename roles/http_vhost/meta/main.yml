@@ -1,6 +1,6 @@
 ---
 dependencies:
-  - role: 'httpd'
+  - { role: 'httpd', tags: 'httpd' }
 
 galaxy_info:
   author: 'Maxime Buquet (pep), Célestin Matte'
