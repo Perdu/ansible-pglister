@@ -58,5 +58,5 @@ molecule test
 
 # Authors
 
-- Célestin Matte
+- Célestin Matte for [Software in the Public Interest (SPI)](https://spi-inc.org)
 - Maxime "pep" Buquet
