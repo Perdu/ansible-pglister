@@ -22,7 +22,7 @@ service_vhost_name_pglister: 'pglister.{{ domain }}'
 base_path_pglister: '/srv/pglister'
 database_name_pglister: 'pglister'
 repo_base: 'pglister'
-pglister_version: 'master'
+pglister_version: 'fbd8201565893b03fc92280628456f4b975b2f1c'
 use_nagios: false
 pglister_home_message: '<p><b>To manage your subscriptions, <a href="https://{{ service_vhost_name_pgweb }}/account/signup/">Create an account</a></b></p>'
 # Example of adding extra vhost definition
@@ -33,7 +33,7 @@ vhost_extra_pglister: |
 service_vhost_name_pgarchives: 'pgarchives.{{ domain }}'
 base_path_pgarchives: '/srv/pgarchives'
 database_name_pgarchives: 'pgarchives'
-pgarchives_version: 'master'
+pgarchives_version: '04b577002aa4550b8fb3113feff0021bd35dfb5e'
 base_path_pgarchives_private: '/srv/pgarchives-private'
 
 ## pgarchives_private
