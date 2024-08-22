@@ -28,6 +28,7 @@ pglister_home_message: '<p><b>To manage your subscriptions, <a href="https://{{ 
 # Example of adding extra vhost definition
 vhost_extra_pglister: |
   Redirect permanent /foo https://bar
+banner_links: []
 
 ## pgarchives
 service_vhost_name_pgarchives: 'pgarchives.{{ domain }}'
