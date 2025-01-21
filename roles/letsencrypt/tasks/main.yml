@@ -68,14 +68,10 @@
         additional_options: '--expand --force-renewal'
       include_tasks: 'run_acme_client.yml'
 
-- name: 'Add LE crontab'
-  cron:
-    state: 'present'
-    name: 'certbot-renewal'
-    user: 'root'
-    minute: '0'
-    hour: '1'  # Every day at night
-    job: 'certbot renew --quiet --webroot-path /srv/letsencrypt/'
+- name: 'Ensure certbot timer installed by the certbot package is enabled'
+  ansible.builtin.systemd:
+    name: certbot.timer
+    enabled: true
 
 - name: 'Find existing files in {{ le_deploy_hooks_path }}'
   find:
