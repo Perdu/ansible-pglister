@@ -4,6 +4,12 @@
     name: 'apache2'
     state: 'present'
 
+- name: 'Install python-passlib to create htpassword, if necessary'
+  package:
+    name: 'python3-passlib'
+    state: 'present'
+  when: not production
+
 - name: 'Drop default templates'
   template:
     src: '{{ item.src }}.j2'
@@ -37,6 +43,15 @@
     - 'ssl'
   notify: 'Reload httpd'
 
+- name: 'Enable Apache auth modules'
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  loop:
+    - auth_basic
+    - authn_file
+  when: not production
+
 - name: 'Enable proxy module'
   when: httpd_proxy | default(false)
   community.general.apache2_module:
@@ -56,6 +71,16 @@
     regexp: '^ServerTokens'
     line: 'ServerTokens Prod'
   notify: 'Reload httpd'
+
+- name: 'Create the .htpasswd file with user credentials'
+  community.general.htpasswd:
+    path: /etc/apache2/.htpasswd
+    name: "{{ http_auth_username }}"
+    password: "{{ http_auth_password }}"
+    crypt_scheme: bcrypt
+    mode: '640'
+    group: 'www-data'
+  when: not production
 
 # Ensure certificates are present before starting the server.
 
