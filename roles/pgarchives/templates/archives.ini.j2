@@ -7,7 +7,13 @@ heloname=localhost
 resender=noreply@example.com
 
 [pglister]
+{% if pgarchives_pglister_sync_use_host %}
+root=https://localhost
+host={{ service_vhost_name_pglister }}
+{% else %}
 root=https://{{ service_vhost_name_pglister }}
+host=
+{% endif %}
 {% if pgarchives_private is defined and pgarchives_private == 'True' %}
 myname=pgarchivesprivate
 subscribers=1

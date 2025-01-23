@@ -10,3 +10,6 @@ test_only: false
 # Will skips some steps in case application is deployed without
 # correct DNS setup
 pre_deployment: false
+# If set to true, pglister_sync will query localhost and modify the Host header
+# This avoids using external IP address, e.g. to whitelist localhost
+pgarchives_pglister_sync_use_host: false
