@@ -30,6 +30,7 @@
                 AuthName "Restricted Access"
                 AuthUserFile /etc/apache2/.htpasswd
                 Require valid-user
+                Require local
         </Location>
 {% endif %}
 
