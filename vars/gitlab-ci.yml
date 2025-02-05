@@ -10,7 +10,9 @@ install_pgbackrest: true
 # for postgresql's repositories and python version
 debian_version: 'bookworm'
 pre_deployment: false
-production: false
+# Set to true to avoid the HTTP auth check because we can't edit
+# /etc/hosts in the gitlab's pipeline
+production: true
 
 ## exim-pglister
 use_spamassassin: false
