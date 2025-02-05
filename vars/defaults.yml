@@ -9,6 +9,8 @@ test_only: false
 install_pgbackrest: true
 # for postgresql's repositories and python version
 debian_version: 'bookworm'
+pre_deployment: false
+production: false
 
 ## exim-pglister
 use_spamassassin: true
@@ -52,6 +54,9 @@ database_password: 'CHANGEME'
 django_superuser_pass: 'CHANGEME'
 pgarchives_secret_key: 'CHANGEME'
 pgauth_key: ''  # will be generated if not defined
+http_auth_username: 'default'
+http_auth_password: 'CHANGEME'
+
 # for pgweb
 recaptcha_site_key: "YOUR_RECAPTCHA_SITE_KEY"  # https://www.google.com/recaptcha/admin/create
 recaptcha_secret_key: "YOUR_RECAPTCHA_SECRET_KEY"
