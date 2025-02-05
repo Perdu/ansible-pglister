@@ -10,6 +10,7 @@ service_log_prefix: '{{ service_vhost_name }}'
 # including role does not import variables
 le_deploy_hooks_path: '/srv/letsencrypt/hooks'
 http_vhost_app_user: 'list'
+production: false
 
 # Allows for vhosts to add extra content in the template. boolean variable
 service_vhost_extra: false

@@ -2,3 +2,4 @@
 httpd_serveradmin: 'webmaster@{{ domain }}'
 use_letsencrypt: true
 pre_deployment: false
+production: false
