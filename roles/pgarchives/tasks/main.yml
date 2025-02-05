@@ -109,6 +109,15 @@
   become: true
   become_user: 'list'
 
+# Without this line, apache receive pglister_sync's requests from the server's external address,
+# which makes the localhost exception for HTTP auth fail.
+- name: 'Add pglister address to resolve to 127.0.0.1 in /etc/hosts so that http auth can be properly bypassed'
+  lineinfile:
+    dest: '/etc/hosts'
+    line: "127.0.0.1 {{ service_vhost_name_pglister }}"
+    state: 'present'
+  become: true
+
 - name: 'Run pglister_sync.py'
   command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
   become: true
