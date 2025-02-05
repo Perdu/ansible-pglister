@@ -117,6 +117,7 @@
     line: "127.0.0.1 {{ service_vhost_name_pglister }}"
     state: 'present'
   become: true
+  when: not test_only
 
 - name: 'Run pglister_sync.py'
   command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'
