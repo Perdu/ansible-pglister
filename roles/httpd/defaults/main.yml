@@ -3,3 +3,5 @@ httpd_serveradmin: 'webmaster@{{ domain }}'
 use_letsencrypt: true
 pre_deployment: false
 production: false
+http_auth_username: 'default'
+http_auth_password: 'CHANGEME'
