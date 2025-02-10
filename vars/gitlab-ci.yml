@@ -13,6 +13,7 @@ pre_deployment: false
 # Set to true to avoid the HTTP auth check because we can't edit
 # /etc/hosts in the gitlab's pipeline
 production: true
+use_http_auth: true
 
 ## exim-pglister
 use_spamassassin: false

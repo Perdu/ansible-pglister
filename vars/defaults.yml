@@ -11,6 +11,7 @@ install_pgbackrest: true
 debian_version: 'bookworm'
 pre_deployment: false
 production: false
+use_http_auth: false
 
 ## exim-pglister
 use_spamassassin: true

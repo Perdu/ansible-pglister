@@ -8,7 +8,7 @@
   package:
     name: 'python3-passlib'
     state: 'present'
-  when: not production
+  when: use_http_auth
 
 - name: 'Drop default templates'
   template:
@@ -50,7 +50,7 @@
   loop:
     - auth_basic
     - authn_file
-  when: not production
+  when: use_http_auth
 
 - name: 'Enable proxy module'
   when: httpd_proxy | default(false)
@@ -80,7 +80,7 @@
     crypt_scheme: bcrypt
     mode: '640'
     group: 'www-data'
-  when: not production
+  when: use_http_auth
 
 # Ensure certificates are present before starting the server.
 

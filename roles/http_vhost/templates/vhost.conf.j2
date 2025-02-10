@@ -24,7 +24,7 @@
         ErrorLog {{ log_path }}/{{ service_log_prefix }}{% if service_log_prefix %}-{% endif %}error.log
         CustomLog {{ log_path }}/{{ service_log_prefix }}{% if service_log_prefix %}-{% endif %}access.log combined
 
-{% if not production %}
+{% if use_http_auth %}
         <Location />
                 AuthType Basic
                 AuthName "Restricted Access"
