@@ -39,6 +39,7 @@
     - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
   become: true
   become_user: 'postgres'
+  notify: 'Restart postgresql'
   when: not redeploy
 
 - name: 'Include role http_vhost'
