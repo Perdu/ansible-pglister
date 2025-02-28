@@ -19,6 +19,7 @@
     owner: 'root'
     group: 'root'
     mode: '644'
+  register: config_copy
 
 - name: Add .localmacros file for SMTPS
   template:
@@ -32,6 +33,7 @@
   command:
     cmd: '/usr/sbin/update-exim4.conf -o {{ exim_configuration_file }}'
   become: true
+  when: config_copy.changed
 
 - name: Set permissions of exim4.conf
   file:
