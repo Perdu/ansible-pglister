@@ -115,6 +115,7 @@
     virtualenv: '{{ service_base_path }}/web/pglister/'
     virtualenv_python: python3
   become: true
+  become_user: 'list'
   when: not redeploy
 
 - name: 'Give exim permissions to list user (add list to Debian-exim group)'

@@ -53,6 +53,7 @@
     virtualenv: '{{ service_base_path }}/django'
     virtualenv_python: python3
   become: true
+  become_user: 'list'
   when: not redeploy
 
 - name: 'Ensure the path to drop pg_dict exists'
