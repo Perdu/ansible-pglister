@@ -21,3 +21,5 @@ exim_log_archive_pipe_output: false
 exim_log_pglister_pipe_output: false
 
 spamassassin_domain: '{{ domain }}'
+
+database_user: 'list'
