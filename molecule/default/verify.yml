@@ -35,5 +35,5 @@
         return_content: true
       register: pgarchives_private_content
       failed_when: >
-        "'The website you are trying to log in to (pgarchives_private) is using the\n
-        postgresql.org community login system' not in pgarchives_private_content.content"
+        "The website you are trying to log in to (pgarchives_private)"
+        not in pgarchives_private_content.content
