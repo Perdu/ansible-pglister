@@ -51,6 +51,7 @@
     - auth_basic
     - authn_file
   when: use_http_auth
+  notify: 'Reload httpd'
 
 - name: 'Enable proxy module'
   when: httpd_proxy | default(false)
