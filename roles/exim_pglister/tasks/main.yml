@@ -28,12 +28,14 @@
     owner: root
     group: Debian-exim
     mode: '640'
+  notify: 'Restart exim'
 
 - name: Generate exim4 config
   command:
     cmd: '/usr/sbin/update-exim4.conf -o {{ exim_configuration_file }}'
   become: true
   when: config_copy.changed
+  notify: 'Restart exim'
 
 - name: Set permissions of exim4.conf
   file:
@@ -43,6 +45,7 @@
     group: 'Debian-exim'
 
 - name: Edit configuration with parts for pglister, pgarchives and pgarchives_private
+  notify: 'Restart exim'
   block:
     - name: Insert config for pglister (1/4)
       blockinfile:
@@ -164,6 +167,7 @@
     path: '/etc/exim4/passwd.client'
     line: '{{ smtp_relay_password }}'
   when: smtp_relay_password is defined and smtp_relay_password != ''
+  notify: 'Restart exim'
 
 - name: Install spamassassin and fail2ban
   package:
@@ -205,6 +209,7 @@
     block: |
       spamd_address = {{ exim_spamd_address }}
   when: use_spamassassin is defined and use_spamassassin
+  notify: 'Restart exim'
 
 - name: Insert a marker before the end of acl_checks using multi-line pattern matching
   replace:
@@ -212,6 +217,7 @@
     regexp: '(?s)(accept\s*begin routers)'
     replace: '# Marker for ansible\n\1'
   when: use_spamassassin is defined and use_spamassassin
+  notify: 'Restart exim'
 
 - name: Insert config for spamassassin (2/2)
   blockinfile:
@@ -220,6 +226,7 @@
     marker: '# {mark} ANSIBLE MANAGED BLOCK 8'
     block: '{{ lookup("template", "exim_spamassassin.j2") }}'
   when: use_spamassassin is defined and use_spamassassin
+  notify: 'Restart exim'
 
 - name: Add cron emails destination for list
   community.general.cronvar:
@@ -249,12 +256,6 @@
     groups: 'ssl-cert'
     append: true
 
-- name: Restart exim.
-  service:
-    name: '{{ exim_daemon }}'
-    state: 'restarted'
-    enabled: true
-
 - name: 'Ensure /var/list exists (for wsgi)'
   file:
     path: '/var/list'
@@ -262,3 +263,8 @@
     owner: 'list'
     group: 'www-data'
     mode: '755'
+
+- name: Ensure exim service is enabled
+  service:
+    name: '{{ exim_daemon }}'
+    enabled: true
