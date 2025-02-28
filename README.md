@@ -51,7 +51,7 @@ Install the following dependencies:
 
 Then run:
 ```
-molecule test
+MOLECULE_DISTRO=debian12 molecule test
 ```
 
 # Authors
