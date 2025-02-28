@@ -73,7 +73,7 @@
   become_user: '{{ app_user }}'
   register: repo
 
-- name: 'Chown app_user:www-data pglister directory'
+- name: 'Chown app_user:www-data app directory'
   file:
     path: '{{ app_base_path }}'
     owner: '{{ app_user }}'
