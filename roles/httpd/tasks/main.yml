@@ -45,11 +45,11 @@
 
 - name: 'Enable Apache auth modules'
   community.general.apache2_module:
-    state: present
     name: "{{ item }}"
-  loop:
-    - auth_basic
-    - authn_file
+    state: present
+  with_items:
+    - 'auth_basic'
+    - 'authn_file'
   when: use_http_auth
   notify: 'Reload httpd'
 
