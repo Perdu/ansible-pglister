@@ -6,9 +6,14 @@
     database_name: '{{ database_name_pgweb }}'
     vhost_extra: ''
     app_user: 'list'
+    repo_uri: '{{ repo_uri_pgweb }}'
+    app_version: '{{ pgweb_version }}'
+    app_base_path: '{{ service_base_path }}'
+    app_virtualenv: '{{ service_base_path }}/pgweb/'
+    psycopg_version: 'psycopg2-binary'
 
-- name: 'Clone repository'
-  import_tasks: clone_repository.yml
+- name: 'Customize repository'
+  import_tasks: customize_repository.yml
 
 - name: 'Fix pycopg bug by installing -binary version'
   lineinfile:
