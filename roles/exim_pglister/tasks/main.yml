@@ -177,12 +177,22 @@
     state: present
   when: use_spamassassin is defined and use_spamassassin
 
+- name: Create override directory for spamd
+  file:
+    path: '/etc/systemd/system/{{ spamassassin_service }}.d/'
+    owner: 'root'
+    group: 'root'
+    mode: '755'
+    state: 'directory'
+  when: use_spamassassin is defined and use_spamassassin
+
 - name: Modify SpamAssassin service file to use sockets
-  lineinfile:
-    path: '/lib/systemd/system/{{ spamassassin_service }}'
-    regexp: '^(ExecStart=.+?)( --socketpath=/var/run/spamd.socket)?$'
-    line: '\1 --socketpath=/var/run/spamd.socket'
-    backrefs: true
+  copy:
+    src: 'spamd_override.conf'
+    dest: '/etc/systemd/system/{{ spamassassin_service }}.d/override.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '644'
   when: use_spamassassin is defined and use_spamassassin
 
 - name: Add spamassassin rule for exim-spam jail to ban spammers
