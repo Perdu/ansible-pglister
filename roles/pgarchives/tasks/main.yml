@@ -29,12 +29,6 @@
   become_user: 'postgres'
   when: not redeploy
 
-- name: 'Restart postgresql to make new group perms effective'
-  include_role:
-    name: 'postgresql'
-    tasks_from: 'restart.yml'
-  when: not redeploy
-
 - name: 'Install required packages for django using pip'
   pip:
     name:
