@@ -13,34 +13,12 @@
       - 'postgresql-contrib'
   when: not redeploy
 
-- name: 'Create database'
-  community.postgresql.postgresql_db:
-    name: '{{ database_name }}'
+- name: 'Postresql queries'
+  import_tasks: postgresql_queries.yml
   become: true
   become_user: 'postgres'
   when: not redeploy
-
-- name: 'Create role for database_user'
-  community.postgresql.postgresql_user:
-    name: '{{ database_user }}'
-    password: '{{ database_password }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Grant permissions to database'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name }} TO "{{ database_user }}";'
-    - 'GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
-  become: true
-  become_user: 'postgres'
   notify: 'Restart postgresql'
-  when: not redeploy
 
 - name: 'Include role http_vhost'
   include_role:
