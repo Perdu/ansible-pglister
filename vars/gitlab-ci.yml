@@ -14,6 +14,7 @@ pre_deployment: false
 # /etc/hosts in the gitlab's pipeline
 production: true
 use_http_auth: true
+redeploy: false
 
 ## exim-pglister
 use_spamassassin: false

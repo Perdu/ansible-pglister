@@ -6,6 +6,7 @@ debug: false
 logging_level: 'ERROR'
 use_nagios: false
 log_path: '/var/log/apache2'
+redeploy: false
 
 # nagios
 nagios_incoming_ok_warn: 3
