@@ -23,14 +23,8 @@
 - name: 'Customize repository'
   import_tasks: customize_repository.yml
 
-- name: 'Grant permissions to database to Debian-exim'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pgarchives }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
+- name: 'Postgresql queries'
+  import_tasks: postgresql_queries.yml
   become: true
   become_user: 'postgres'
   when: not redeploy
