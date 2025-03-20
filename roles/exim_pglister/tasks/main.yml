@@ -44,6 +44,7 @@
     owner: 'root'
     group: 'Debian-exim'
 
+# yamllint disable rule:line-length
 - name: Edit configuration with parts for pglister, pgarchives and pgarchives_private
   notify: 'Restart exim'
   block:
@@ -161,6 +162,7 @@
             user = Debian-exim
             environment =
             {% if exim_log_archive_pipe_output is defined and exim_log_archive_pipe_output %}use_shell = true{% endif %}
+# yamllint enable rule:line-length
 
 - name: Add password for smarthost, if exists
   lineinfile:
