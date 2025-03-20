@@ -1,0 +1,21 @@
+---
+- name: 'Install systemd services'
+  command:
+    cmd: './install.sh -install'
+    chdir: '{{ service_base_path }}/systemd/'
+  become: true
+  notify: 'Restart systemd services'
+
+- name: 'Restart systemd services'
+  service:
+    name: 'pglister_{{ item }}'
+    state: 'restarted'
+    enabled: true
+  loop:
+    - 'bounceprocessor'
+    - 'cleanup'
+    - 'eximcleaner'
+    - 'mailprocessor'
+    - 'mailsender'
+    - 'moderationprocessor'
+  become: true
