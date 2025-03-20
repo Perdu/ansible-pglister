@@ -119,7 +119,7 @@
 - name: 'Disable certbot internal log rotation mechanism'
   lineinfile:
     path: '/etc/letsencrypt/cli.ini'
-    create: yes
+    create: true
     line: 'max-log-backups = 0'
     owner: root
     group: root
