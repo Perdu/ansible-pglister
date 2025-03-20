@@ -47,33 +47,33 @@
   when: 'use_nagios'
   block:
 
-  # GRANT CONNECT ON DATABASE {{ database_name_pglister }} TO "nagios";
-  - name: 'Grant permissions to database to nagios'
-    community.postgresql.postgresql_privs:
-      db: '{{ database_name_pglister }}'
-      privs: 'CONNECT'
-      type: 'database'
-      objs: '{{ database_name_pglister }}'
-      role: "nagios"
+    # GRANT CONNECT ON DATABASE {{ database_name_pglister }} TO "nagios";
+    - name: 'Grant permissions to database to nagios'
+      community.postgresql.postgresql_privs:
+        db: '{{ database_name_pglister }}'
+        privs: 'CONNECT'
+        type: 'database'
+        objs: '{{ database_name_pglister }}'
+        role: "nagios"
 
-  # GRANT USAGE ON SCHEMA public TO "nagios";
-  - name: 'Grant usage on schema public to nagios'
-    community.postgresql.postgresql_privs:
-      db: '{{ database_name_pglister }}'
-      privs: 'USAGE'
-      type: 'schema'
-      objs: 'public'
-      role: "nagios"
+    # GRANT USAGE ON SCHEMA public TO "nagios";
+    - name: 'Grant usage on schema public to nagios'
+      community.postgresql.postgresql_privs:
+        db: '{{ database_name_pglister }}'
+        privs: 'USAGE'
+        type: 'schema'
+        objs: 'public'
+        role: "nagios"
 
-  # GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";
-  - name: 'Grant select on all tables in public schema to nagios'
-    community.postgresql.postgresql_privs:
-      db: '{{ database_name_pglister }}'
-      privs: 'SELECT'
-      type: 'table'
-      objs: 'ALL_IN_SCHEMA'
-      role: "nagios"
-      schema: 'public'
+    # GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";
+    - name: 'Grant select on all tables in public schema to nagios'
+      community.postgresql.postgresql_privs:
+        db: '{{ database_name_pglister }}'
+        privs: 'SELECT'
+        type: 'table'
+        objs: 'ALL_IN_SCHEMA'
+        role: "nagios"
+        schema: 'public'
 
 - name: 'Install postgresql pgcrypto schema'
   community.postgresql.postgresql_schema:
@@ -99,70 +99,71 @@
 
 - name: 'Run necessary operations to run eximintegration migrations'
   block:
-  # CREATE EXTENSION IF NOT EXISTS file_fdw;
-  - name: 'Ensure file_fdw extension exists'
-    community.postgresql.postgresql_ext:
-      name: 'file_fdw'
-      db: '{{ database_name_pglister }}'
-      state: 'present'
 
-  # CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
-  - name: 'Ensure file_fdw foreign server exists'
-    community.postgresql.postgresql_query:
-      query: >
-        DO $$ BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_foreign_server WHERE srvname = 'file_fdw')
-          THEN CREATE SERVER file_fdw FOREIGN DATA WRAPPER file_fdw;
-          END IF;
-        END $$;
-      db: '{{ database_name_pglister }}'
-    register: res
-    changed_when: "'CREATE' in res.statusmessage"
+    # CREATE EXTENSION IF NOT EXISTS file_fdw;
+    - name: 'Ensure file_fdw extension exists'
+      community.postgresql.postgresql_ext:
+        name: 'file_fdw'
+        db: '{{ database_name_pglister }}'
+        state: 'present'
 
-  # CREATE SCHEMA IF NOT EXISTS eximintegration;
-  - name: 'Ensure eximintegration schema exists'
-    community.postgresql.postgresql_schema:
-      db: "{{ database_name_pglister }}"
-      name: eximintegration
-      state: present
-      owner: "{{ database_user }}"
+    # CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
+    - name: 'Ensure file_fdw foreign server exists'
+      community.postgresql.postgresql_query:
+        query: >
+          DO $$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_foreign_server WHERE srvname = 'file_fdw')
+            THEN CREATE SERVER file_fdw FOREIGN DATA WRAPPER file_fdw;
+            END IF;
+          END $$;
+        db: '{{ database_name_pglister }}'
+      register: res
+      changed_when: "'CREATE' in res.statusmessage"
 
-  # GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};
-  - name: 'Grant CREATE and USAGE on schema eximintegration to user'
-    community.postgresql.postgresql_privs:
-      db: "{{ database_name_pglister }}"
-      privs: "CREATE,USAGE"
-      type: schema
-      objs: eximintegration
-      role: "{{ database_user }}"
+    # CREATE SCHEMA IF NOT EXISTS eximintegration;
+    - name: 'Ensure eximintegration schema exists'
+      community.postgresql.postgresql_schema:
+        db: "{{ database_name_pglister }}"
+        name: eximintegration
+        state: present
+        owner: "{{ database_user }}"
 
-  # CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL)
-  # SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
-  - name: 'Ensure foreign table eximintegration._raw_eximqueue exists'
-    community.postgresql.postgresql_query:
-      db: "{{ database_name_pglister }}"
-      query: >
-        DO $$ BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM information_schema.tables
-            WHERE table_schema = 'eximintegration'
-            AND table_name = '_raw_eximqueue'
-          )
-          THEN
-            CREATE FOREIGN TABLE eximintegration._raw_eximqueue(
-              jdata jsonb NOT NULL
-            ) SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
-          END IF;
-        END $$;
-    register: res
-    changed_when: "'CREATE' in res.statusmessage"
+    # GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};
+    - name: 'Grant CREATE and USAGE on schema eximintegration to user'
+      community.postgresql.postgresql_privs:
+        db: "{{ database_name_pglister }}"
+        privs: "CREATE,USAGE"
+        type: schema
+        objs: eximintegration
+        role: "{{ database_user }}"
 
-  # GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};
-  - name: 'Grant SELECT on eximintegration._raw_eximqueue to user'
-    community.postgresql.postgresql_privs:
-      db: "{{ database_name_pglister }}"
-      privs: 'SELECT'
-      type: 'table'
-      objs: "_raw_eximqueue"
-      schema: "eximintegration"
-      role: "{{ database_user }}"
+    # CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL)
+    # SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
+    - name: 'Ensure foreign table eximintegration._raw_eximqueue exists'
+      community.postgresql.postgresql_query:
+        db: "{{ database_name_pglister }}"
+        query: >
+          DO $$ BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM information_schema.tables
+              WHERE table_schema = 'eximintegration'
+              AND table_name = '_raw_eximqueue'
+            )
+            THEN
+              CREATE FOREIGN TABLE eximintegration._raw_eximqueue(
+                jdata jsonb NOT NULL
+              ) SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
+            END IF;
+          END $$;
+      register: res
+      changed_when: "'CREATE' in res.statusmessage"
+
+    # GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};
+    - name: 'Grant SELECT on eximintegration._raw_eximqueue to user'
+      community.postgresql.postgresql_privs:
+        db: "{{ database_name_pglister }}"
+        privs: 'SELECT'
+        type: 'table'
+        objs: "_raw_eximqueue"
+        schema: "eximintegration"
+        role: "{{ database_user }}"
