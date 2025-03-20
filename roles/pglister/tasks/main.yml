@@ -22,7 +22,7 @@
 - name: 'Customize repository'
   import_tasks: customize_repository.yml
 
-- name: 'Postresql queries'
+- name: 'Postgresql queries'
   import_tasks: postgresql_queries.yml
   become: true
   become_user: 'postgres'
