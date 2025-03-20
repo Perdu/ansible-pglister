@@ -237,28 +237,14 @@
   ignore_errors: true
   changed_when: false
 
-- name: 'Install systemd services'
-  command:
-    cmd: './install.sh -install'
-    chdir: '{{ service_base_path }}/systemd/'
-  become: true
-  when: 'not redeploy and systemctl_available.rc == 0'
-  notify: 'Restart systemd services'
-
-- name: 'Add pglister commands to nagios'
+- name: 'Add pglister commands to nrpe config (nagios)'
   when: use_nagios and not redeploy
-  block:
-    - name: 'Add pglister commands to nrpe config'
-      lineinfile:
-        line: '{{ item }}'
-        path: '/etc/nagios/nrpe_ansible.cfg'
-        state: 'present'
-      loop:
-        - 'command[pglister_log]={{ venv_python }} {{ service_base_path }}/nagios/pglister_log.py'
-        - 'command[pglister_processes]={{ venv_python }} {{ service_base_path }}/nagios/pglister_processes.py'
-        - 'command[pglister_queues]={{ venv_python }} {{ service_base_path }}/nagios/pglister_queues.py'
-
-    - name: 'Restart nagios-nrpe-server'
-      service:
-        name: 'nagios-nrpe-server.service'
-        state: 'restarted'
+  lineinfile:
+    line: '{{ item }}'
+    path: '/etc/nagios/nrpe_ansible.cfg'
+    state: 'present'
+  loop:
+    - 'command[pglister_log]={{ venv_python }} {{ service_base_path }}/nagios/pglister_log.py'
+    - 'command[pglister_processes]={{ venv_python }} {{ service_base_path }}/nagios/pglister_processes.py'
+    - 'command[pglister_queues]={{ venv_python }} {{ service_base_path }}/nagios/pglister_queues.py'
+  notify: 'Restart nagios-nrpe-server'

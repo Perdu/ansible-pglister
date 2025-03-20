@@ -19,3 +19,8 @@
     - 'mailsender'
     - 'moderationprocessor'
   become: true
+
+- name: 'Restart nagios-nrpe-server'
+  service:
+    name: 'nagios-nrpe-server.service'
+    state: 'restarted'
