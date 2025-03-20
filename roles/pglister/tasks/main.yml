@@ -22,85 +22,8 @@
 - name: 'Customize repository'
   import_tasks: customize_repository.yml
 
-- name: 'Create a postgres user for Debian-exim'
-  community.postgresql.postgresql_user:
-    name: 'Debian-exim'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Add password for list user in postgres, to allow login from exim'
-  community.postgresql.postgresql_query:
-    query: "ALTER USER list WITH password '{{ database_password }}';"
-    db: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Grant permissions to database to Debian-exim'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pglister }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Create nagios role for postgres'
-  community.postgresql.postgresql_user:
-    name: nagios
-  become: true
-  become_user: 'postgres'
-  register: result
-  when: 'use_nagios and not redeploy'
-
-- name: 'Grant permissions to database to nagios'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'GRANT CONNECT ON DATABASE {{ database_name_pglister }} TO "nagios";'
-    - 'GRANT USAGE ON SCHEMA public TO "nagios";'
-    - 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";'
-  become: true
-  become_user: 'postgres'
-  when: 'use_nagios and not redeploy'
-
-- name: 'Install postgresql pgcrypto schema'
-  community.postgresql.postgresql_schema:
-    name: 'pgcrypto'
-    database: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Install postgresql crypto extension and grant usage'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA pgcrypto;'
-    - 'GRANT USAGE ON SCHEMA pgcrypto TO {{ database_user }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Run necessary operations to run eximintegration migrations'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'CREATE EXTENSION IF NOT EXISTS file_fdw;'
-    - 'CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
-    - 'CREATE SCHEMA IF NOT EXISTS eximintegration;'
-    - 'GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};'
-    - >
-      CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL)
-      SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
-    - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
+- name: 'Postresql queries'
+  import_tasks: postgresql_queries.yml
   become: true
   become_user: 'postgres'
   when: not redeploy
@@ -123,6 +46,7 @@
     name: '{{ database_user }}'
     groups: 'Debian-exim'
     append: true
+  register: res
   when: not redeploy
 
 - name: 'Give exim permissions to postgres user (add postgres to Debian-exim group)'
@@ -130,13 +54,14 @@
     name: 'postgres'
     groups: 'Debian-exim'
     append: true
+  register: res2
   when: not redeploy
 
 - name: 'Restart postgresql to make new group perms effective'
   include_role:
     name: 'postgresql'
     tasks_from: 'restart.yml'
-  when: not redeploy
+  when: not redeploy and (res.changed or res2.changed)
 
 - name: 'Include Django role'
   include_role:
