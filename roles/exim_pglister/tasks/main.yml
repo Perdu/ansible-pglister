@@ -34,7 +34,8 @@
   command:
     cmd: '/usr/sbin/update-exim4.conf -o {{ exim_configuration_file }}'
   become: true
-  when: config_copy.changed
+  when: config_copy.changed  # noqa: no-handler # we need to regenerate config here to modify it
+  changed_when: true
   notify: 'Restart exim'
 
 - name: Set permissions of exim4.conf

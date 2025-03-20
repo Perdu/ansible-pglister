@@ -20,6 +20,7 @@
   command: pgbackrest stanza-create --stanza=main
   become: true
   become_user: 'postgres'
+  changed_when: true
   when: config is changed  # noqa: no-handler
 
 - name: 'Drop pgbackrest specific configuration for postgresql'
