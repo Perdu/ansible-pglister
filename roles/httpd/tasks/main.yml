@@ -31,7 +31,6 @@
 # Necessary to enable modules, otherwise apache crashes
 - name: 'Disable "000-default" vhost'
   command: '/usr/sbin/a2dissite 000-default'
-  ignore_errors: true
 
 - name: 'Enable modules'
   community.general.apache2_module:
