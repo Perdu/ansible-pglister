@@ -40,21 +40,28 @@
 - name: 'Clone repository'
   git:
     repo: '{{ repo_uri }}'
-    dest: '{{ app_base_path }}'
+    dest: '{{ app_base_path }}/repo.git'
     clone: true
     update: true
     version: '{{ app_version }}'
-    force: true
   become: true
   become_user: '{{ app_user }}'
   register: repo
 
+- name: 'Copy repository to folder used by apache2'
+  ansible.builtin.copy:
+    src: '{{ app_base_path }}/repo.git/'
+    dest: '{{ app_service_base_path }}/'
+    remote_src: true
+  when: repo.changed
+
 - name: 'Chown app_user:www-data app directory'
   file:
-    path: '{{ app_base_path }}'
+    path: '{{ app_service_base_path }}'
     owner: '{{ app_user }}'
     group: 'www-data'
     recurse: true
+  when: repo.changed
 
 - name: 'Install required packages for ansible using pip'
   pip:

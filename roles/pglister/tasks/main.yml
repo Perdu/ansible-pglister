@@ -8,7 +8,8 @@
     app_user: 'list'
     repo_uri: '{{ repo_uri_pglister }}'
     app_version: '{{ pglister_version }}'
-    app_base_path: '{{ service_base_path }}'
+    app_base_path: '{{ base_path }}'
+    app_service_base_path: '{{ service_base_path }}'
     app_virtualenv: '{{ service_base_path }}/web/pglister/'
     psycopg_version: 'psycopg2-binary'
 
@@ -21,6 +22,7 @@
 
 - name: 'Customize repository'
   import_tasks: customize_repository.yml
+  when: repo.changed
 
 - name: 'Postgresql queries'
   import_tasks: postgresql_queries.yml

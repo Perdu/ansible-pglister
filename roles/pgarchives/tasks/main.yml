@@ -8,7 +8,8 @@
     app_user: 'list'
     repo_uri: '{{ repo_uri_pgarchives }}'
     app_version: '{{ pgarchives_version }}'
-    app_base_path: '{{ service_base_path }}'
+    app_base_path: '{{ base_path }}'
+    app_service_base_path: '{{ service_base_path }}'
     app_virtualenv: '{{ service_base_path }}/django'
     psycopg_version: 'psycopg2-binary'
 
