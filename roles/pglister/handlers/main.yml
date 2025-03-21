@@ -3,6 +3,7 @@
   command:
     cmd: './install.sh -install'
     chdir: '{{ service_base_path }}/systemd/'
+    creates: '/etc/systemd/system/pglister_bounceprocessor.service'  # "creates" can only take one file
   become: true
   notify: 'Restart systemd services'
 
