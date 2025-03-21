@@ -10,27 +10,34 @@
     state: 'present'
   when: use_http_auth
 
-- name: 'Drop default templates'
-  template:
-    src: '{{ item.src }}.j2'
-    dest: '{{ item.dest }}'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-  loop:
-    - { src: '000-default.conf', dest: '/etc/apache2/sites-available/000-default.conf' }
-    - { src: 'ssl.conf', dest: '{{ httpd_ssl_conf }}' }
-    - { src: 'mod_ssl.conf', dest: '/etc/apache2/mods-available/ssl.conf' }
-  notify: 'Reload httpd'
+- name: 'Check if mod_rewrite is enabled'
+  command: /usr/sbin/a2query -m rewrite
+  register: mod_rewrite_status
+  changed_when: false
+  failed_when: 'not ("rewrite" in mod_rewrite_status.stdout or "rewrite" in mod_rewrite_status.stderr)'
 
-- name: 'Remove ssl-cert vhost'
-  file:
-    path: '/etc/apache2/sites-available/default-ssl.conf'
-    state: 'absent'
+- name: 'Properly enable rewrite module'
+  when: mod_rewrite_status.rc != 0
+  block:
+    # Necessary to enable rewrite module, otherwise apache crashes
+    # I haven't found any other workaround to this
+    - name: 'Disable "000-default" vhost'
+      command: '/usr/sbin/a2dissite 000-default'
+      register: result
+      changed_when: 'not "already disabled" in result.stdout'
 
-# Necessary to enable modules, otherwise apache crashes
-- name: 'Disable "000-default" vhost'
-  command: '/usr/sbin/a2dissite 000-default'
+    - name: 'Enable rewrite module'
+      community.general.apache2_module:
+        name: 'rewrite'
+        state: present
+        ignore_configcheck: true
+      register: rewrite_enabling
+
+    - name: 'Enable default vhost'
+      command: '/usr/sbin/a2ensite 000-default'
+      register: result
+      changed_when: 'not "already enabled" in result.stdout'
+      notify: 'Reload httpd'
 
 - name: 'Enable modules'
   community.general.apache2_module:
@@ -38,7 +45,6 @@
     state: present
   with_items:
     - 'headers'
-    - 'rewrite'
     - 'ssl'
   notify: 'Reload httpd'
 
@@ -59,11 +65,23 @@
     state: present
   notify: 'Reload httpd'
 
-- name: 'Enable default vhost'
-  command: '/usr/sbin/a2ensite 000-default'
-  register: result
-  changed_when: 'not "already enabled" in result.stdout'
+- name: 'Drop default templates'
+  template:
+    src: '{{ item.src }}.j2'
+    dest: '{{ item.dest }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  loop:
+    - { src: '000-default.conf', dest: '/etc/apache2/sites-available/000-default.conf' }
+    - { src: 'ssl.conf', dest: '{{ httpd_ssl_conf }}' }
+    - { src: 'mod_ssl.conf', dest: '/etc/apache2/mods-available/ssl.conf' }
   notify: 'Reload httpd'
+
+- name: 'Remove ssl-cert vhost'
+  file:
+    path: '/etc/apache2/sites-available/default-ssl.conf'
+    state: 'absent'
 
 - name: 'Set ServerTokens'
   lineinfile:
