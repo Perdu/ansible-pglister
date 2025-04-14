@@ -22,6 +22,7 @@
     type: 'database'
     objs: '{{ database_name_pglister }}'
     role: "Debian-exim"
+  register: debian_exim_privs
 
 # GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";
 - name: 'Grant permissions on all tables in public schema to Debian-exim'
@@ -32,6 +33,9 @@
     objs: 'ALL_IN_SCHEMA'
     role: "Debian-exim"
     schema: 'public'
+  # Ugly hack to fix idempotency because postgresql_privs fails at properly
+  # returning changed status
+  when: debian_exim_privs.changed  # noqa: no-handler
 
 # GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";
 - name: 'Grant permissions on all sequences in public schema to Debian-exim'
@@ -42,6 +46,7 @@
     objs: 'ALL_IN_SCHEMA'
     role: "Debian-exim"
     schema: 'public'
+  when: debian_exim_privs.changed  # noqa: no-handler
 
 - name: 'Grant permissions to database to nagios'
   when: 'use_nagios'

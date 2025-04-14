@@ -25,6 +25,7 @@
     type: 'schema'
     objs: 'public'
     role: '{{ database_user }}'
+  register: user_privs
 
 # GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
 - name: 'Grant all privileges on all tables in public schema to user'
@@ -35,6 +36,9 @@
     objs: 'ALL_IN_SCHEMA'
     role: '{{ database_user }}'
     schema: 'public'
+  # Ugly hack to fix idempotency because postgresql_privs fails at properly
+  # returning changed status
+  when: user_privs.changed  # noqa: no-handler
 
 # GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
 - name: 'Grant all privileges on all sequences in public schema to user'
@@ -45,3 +49,6 @@
     objs: 'ALL_IN_SCHEMA'
     role: '{{ database_user }}'
     schema: 'public'
+  # Ugly hack to fix idempotency because postgresql_privs fails at properly
+  # returning changed status
+  when: user_privs.changed  # noqa: no-handler
