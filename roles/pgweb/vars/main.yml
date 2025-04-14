@@ -10,3 +10,4 @@ venv_python: '{{ service_base_path }}/pgweb/bin/python'
 
 admin_email_address: 'webmaster@{{ domain }}'
 pgweb_django_secret_key: 'changemechangeme!-ansible'
+python_version: '{{ "python3.9" if debian_version == "bullseye" else "python3.11" }}'
