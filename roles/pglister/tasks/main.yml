@@ -22,7 +22,7 @@
 
 - name: 'Customize repository'
   import_tasks: customize_repository.yml
-  when: repo.changed
+  when: repo.changed  # noqa: no-handler
 
 - name: 'Postgresql queries'
   import_tasks: postgresql_queries.yml
