@@ -52,6 +52,7 @@
   ansible.builtin.copy:
     src: '{{ app_base_path }}/repo.git/'
     dest: '{{ app_service_base_path }}/'
+    mode: '755'
     remote_src: true
   when: repo.changed  # noqa: no-handler
 
