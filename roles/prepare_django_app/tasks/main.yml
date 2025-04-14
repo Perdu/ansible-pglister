@@ -53,7 +53,7 @@
     src: '{{ app_base_path }}/repo.git/'
     dest: '{{ app_service_base_path }}/'
     remote_src: true
-  when: repo.changed
+  when: repo.changed  # noqa: no-handler
 
 - name: 'Chown app_user:www-data app directory'
   file:
@@ -61,7 +61,7 @@
     owner: '{{ app_user }}'
     group: 'www-data'
     recurse: true
-  when: repo.changed
+  when: repo.changed  # noqa: no-handler
 
 - name: 'Install required packages for ansible using pip'
   pip:
