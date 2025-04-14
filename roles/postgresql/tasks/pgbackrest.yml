@@ -30,15 +30,6 @@
     owner: 'postgres'
     group: 'postgres'
     mode: '640'
-
-- name: 'Adapt postgres configuration'
-  lineinfile:
-    path: '/etc/postgresql/{{ postgresql_version }}/main/conf.d/postgres_pgbackrest.conf'
-    line: '{{ item.line }}'
-    regex: '{{ item.regex }}'
-  loop:
-    - {line: 'archive_mode = on', regex: '^archive_mode'}
-    - {line: "archive_command = 'pgbackrest --stanza=main archive-push %p'", regex: '^archive_command'}
   register: config_archive
 
 - name: 'Restart postgresql'
