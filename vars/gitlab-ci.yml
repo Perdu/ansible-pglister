@@ -56,7 +56,7 @@ pgweb_version: '1adaab8955ccf022b1c22b23d62a383854eb0e9e'
 database_password: 'CHANGEME'
 django_superuser_pass: 'CHANGEME'
 pgarchives_secret_key: 'CHANGEME'
-pgauth_key: ''  # will be generated if not defined
+pgauth_key: 'CHANGEME'  # will be generated if not defined
 http_auth_username: 'default'
 http_auth_password: 'CHANGEME'
 # for pgweb
