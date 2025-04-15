@@ -64,6 +64,7 @@
     path: '{{ service_base_path }}/sql/varnish_local.sql'
   become: true
   become_user: 'postgres'
+  changed_when: false  # ugly but making this task idempotent is otherwise difficult
 
 # To run this manually, simply run
 # python manage.py createsuperuser
