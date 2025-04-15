@@ -58,7 +58,6 @@
     django_user: list
     django_virtualenv: '{{ service_base_path }}/pgweb'
 
-# Todo: it will be better to run this inside the venv
 - name: 'Run varnish_local.sql to disable Varnish functions'
   community.postgresql.postgresql_script:
     db: '{{ database_name_pgweb }}'
