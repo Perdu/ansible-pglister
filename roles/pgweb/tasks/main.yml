@@ -35,7 +35,7 @@
     regexp: '^bleach==3.1.4'
     line: 'bleach==3.3.1'
 
-- name: 'Fix bleach bug on Debian bookworm by using an another version for bleach'
+- name: 'Fix Babel bug on Debian bookworm by using an another version for Babel'
   lineinfile:
     path: '{{ service_base_path }}/requirements.txt'
     regexp: '^Babel==2.6.0'
