@@ -1,5 +1,48 @@
 # Changelog
 
+## 1.0.7
+
+Code cleaning:
+- Whole collection is now passing ansible-lint
+- Whole collection is now idempotent. Idempotency-related changes:
+  - become list user for pip installs to not install as root
+  - exim_pglister: only regenerate exim config when necessary
+  - exim_pglister: move restart_exim to a handler
+  - exim_pglister: fix idempotency in exim.conf editing tasks
+  - exim_pglister: override the systemd service file in a proper override file
+  - pglister: move tasks to a handler for idempotency
+  - make all postgresql_queries idempotent (sometimes with ugly hacks)
+  - httpd: fix the lint and idempotency issue related to the rewrite module enabling task
+  - add 'creates' for task installing systemd services
+  - postgresql: factorize/merge tasks
+  - Add hacky workaround to failing idempotency for postgresql_privs tasks
+  - pgweb: fix tasks for idempotency
+- Set generic organization names in many places
+- Some code rewriting for style consistency
+- Remove some unnecessary tasks
+- Remove useless ignore_errors statements
+
+New features:
+- pglister: add possibility to configure links in the banner
+- Add http auth when not running in production (adds production option)
+  Requires adding variables:
+  - http_auth_username
+  - http_auth_password
+- pgarchives: add pglister address to /etc/hosts to allow local requests without http auth
+- http_vhost & httpd: add use_http_auth var, separate from production
+- prepare-django-app: now makes a copy of the repository to properly apply changes (for idempotency)
+
+Bugfixes:
+- Remove certbot crontab, ensure default certbot systemd timer is enabled instead
+- Add default vars to avoid errors
+- CI: set production to true to avoid crash
+- CI: don't edit /etc/hosts to avoid crash
+- prepare_django_app: add handler to restart postgres when necessary
+- README: fix molecule command
+- Fix pgweb role, which had not been updated to latest changes
+- Fix molecule verify command
+- httpd: add missing notify
+
 ## 1.0.6
 
 New features:
