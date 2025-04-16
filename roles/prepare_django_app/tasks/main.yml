@@ -74,7 +74,7 @@
   become: true
   become_user: '{{ app_user }}'
 
-- name: Install python dependencies from requirements.txt
+- name: 'Install python dependencies from requirements.txt'
   ansible.builtin.pip:
     requirements: '{{ requirements_path }}/requirements.txt'
     virtualenv: '{{ app_virtualenv }}'
