@@ -11,7 +11,7 @@
 # GRANT ALL ON DATABASE {{ database_name }} TO "{{ database_user }}";'
 - name: 'Grant database privileges to user'
   community.postgresql.postgresql_privs:
-    db: '{{ database_name }}'
+    login_db: '{{ database_name }}'
     privs: 'ALL'
     type: 'database'
     objs: '{{ database_name }}'
@@ -20,7 +20,7 @@
 # GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
 - name: 'Grant CREATE on schema public to user'
   community.postgresql.postgresql_privs:
-    db: '{{ database_name }}'
+    login_db: '{{ database_name }}'
     privs: 'CREATE'
     type: 'schema'
     objs: 'public'
@@ -30,7 +30,7 @@
 # GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
 - name: 'Grant all privileges on all tables in public schema to user'
   community.postgresql.postgresql_privs:
-    db: '{{ database_name }}'
+    login_db: '{{ database_name }}'
     privs: 'ALL'
     type: 'table'
     objs: 'ALL_IN_SCHEMA'
@@ -43,7 +43,7 @@
 # GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
 - name: 'Grant all privileges on all sequences in public schema to user'
   community.postgresql.postgresql_privs:
-    db: '{{ database_name }}'
+    login_db: '{{ database_name }}'
     privs: 'ALL'
     type: 'sequence'
     objs: 'ALL_IN_SCHEMA'
