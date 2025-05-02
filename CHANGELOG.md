@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8
+
+Bugfix:
+- Fix missing handling of bounce emails
+- Fix deprecation warnings in postgresql modules
+
 ## 1.0.7
 
 Code cleaning:
