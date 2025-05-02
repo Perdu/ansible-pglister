@@ -94,7 +94,12 @@
             driver = accept
             transport = pglister_pipe
             domains = +local_domains
-            local_parts = mailer-daemon : *-owner : *-notice : ${lookup pgsql{select lists_list.name from lists_list, lists_domain WHERE lists_list.name='${quote_pgsql:$local_part}' and lists_domain.name='${quote_pgsql:$domain}' AND lists_list.domain_id=lists_domain.id} {$value}}
+            local_part_suffix = +*
+            local_part_suffix_optional = true
+            local_parts = mailer-daemon :\
+                ${lookup pgsql{select lists_list.name from lists_list, lists_domain WHERE lists_list.name='${quote_pgsql:${local_part}}' and lists_domain.name='${quote_pgsql:$domain}' AND lists_list.domain_id=lists_domain.id} {$value}} :\
+                ${lookup pgsql{select lists_list.name from lists_list, lists_domain WHERE lists_list.name=substr('${quote_pgsql:${local_part}}', 1, length('${quote_pgsql:${local_part}}') - 6) and lists_domain.name='${quote_pgsql:$domain}' AND lists_list.domain_id=lists_domain.id} {$value}}-owner :\
+                ${lookup pgsql{select lists_list.name from lists_list, lists_domain WHERE lists_list.name=substr('${quote_pgsql:${local_part}}', 1, length('${quote_pgsql:${local_part}}') - 7) and lists_domain.name='${quote_pgsql:$domain}' AND lists_list.domain_id=lists_domain.id} {$value}}-notice
 
     - name: Insert config for pgarchives (1/2)
       blockinfile:
