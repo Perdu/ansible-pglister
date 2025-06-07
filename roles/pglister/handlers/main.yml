@@ -5,6 +5,7 @@
     chdir: '{{ service_base_path }}/systemd/'
     creates: '/etc/systemd/system/pglister_bounceprocessor.service'  # "creates" can only take one file
   become: true
+  when: 'not redeploy and systemctl_available.rc == 0'
   notify: 'Restart systemd services'
 
 - name: 'Restart systemd services'
