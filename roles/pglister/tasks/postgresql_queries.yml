@@ -163,12 +163,24 @@
       register: res
       changed_when: "'CREATE' in res.statusmessage"
 
-    # GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};
-    - name: 'Grant SELECT on eximintegration._raw_eximqueue to user'
-      community.postgresql.postgresql_privs:
-        login_db: "{{ database_name_pglister }}"
-        privs: 'SELECT'
-        type: 'table'
-        objs: "_raw_eximqueue"
-        schema: "eximintegration"
-        role: "{{ database_user }}"
+    # The postgresql_privs module is buggy and fails to properly apply this
+    # permission, reverting back to postgresql_query
+    - name: 'Run necessary operations to run eximintegration migrations'
+      community.postgresql.postgresql_query:
+        query: 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
+        db: '{{ database_name_pglister }}'
+      become: true
+      become_user: 'postgres'
+      # for idempotence tests
+      changed_when: false
+
+    #  GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};
+    # - name: 'Grant SELECT on eximintegration._raw_eximqueue to user'
+    #   community.postgresql.postgresql_privs:
+    #     login_db: "{{ database_name_pglister }}"
+    #     login_user: "postgres"
+    #     privs: 'SELECT'
+    #     type: 'table'
+    #     objs: "_raw_eximqueue"
+    #     schema: "eximintegration"
+    #     role: "{{ database_user }}"
