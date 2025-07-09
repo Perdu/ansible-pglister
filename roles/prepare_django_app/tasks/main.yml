@@ -29,14 +29,13 @@
   when: not redeploy
 
 # ignore_configcheck prevents module from crashing
-# ignore_error is used because the task WILL crash if wsgi is already enabled
 - name: 'Activate mod_wsgi on apache2'
   community.general.apache2_module:
     name: wsgi
     state: present
     ignore_configcheck: true
-  # Ignoring ansible-lint error because the module is buggy
-  ignore_errors: true  # noqa: ignore-errors
+  register: res
+  failed_when: 'res.rc != 0 and "Module wsgi already enabled" not in res.stdout'
   notify: 'Reload httpd'
   when: not redeploy
 
