@@ -35,7 +35,8 @@
     name: wsgi
     state: present
     ignore_configcheck: true
-  ignore_errors: true
+  # Ignoring ansible-lint error because the module is buggy
+  ignore_errors: true  # noqa: ignore-errors
   notify: 'Reload httpd'
   when: not redeploy
 
