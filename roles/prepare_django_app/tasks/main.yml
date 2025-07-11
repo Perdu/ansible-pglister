@@ -28,14 +28,13 @@
     http_vhost_app_user: '{{ app_user }}'
   when: not redeploy
 
-# ignore_configcheck prevents module from crashing
+# Using command because community.general.apache2_module is buggy
 - name: 'Activate mod_wsgi on apache2'
-  community.general.apache2_module:
-    name: wsgi
-    state: present
-    ignore_configcheck: true
+  ansible.builtin.command:  # noqa: no-changed-when
+    cmd: /usr/sbin/a2enmod wsgi
   register: res
   failed_when: 'res.rc != 0 and "Module wsgi already enabled" not in res.stdout'
+  changed_when: '"Module wsgi already enabled" not in res.stdout'
   notify: 'Reload httpd'
   when: not redeploy
 
