@@ -14,12 +14,12 @@ heloname=localhost
 root={{ external_url }}
 
 [bounces]
-senderaddr='testsender@{{ ansible_host }}'
-sendername='MAILER-DAEMON'
+senderaddr=testsender@{{ ansible_host }}
+sendername=MAILER-DAEMON
 
 [notify]
-address='notify@{{ ansible_host }}'
-name='Notification Receiver'
+address=notify@{{ ansible_host }}
+name=Notification Receiver
 
 [nagios]
 incoming_ok_warn={{ nagios_incoming_ok_warn }}
