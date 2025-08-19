@@ -2,7 +2,7 @@
 # GRANT ALL ON DATABASE {{ database_name_pglister }} TO "Debian-exim";'
 - name: 'Grant permissions to database to Debian-exim'
   community.postgresql.postgresql_privs:
-    db: '{{ database_name_pgarchives }}'
+    login_db: '{{ database_name_pgarchives }}'
     privs: 'ALL'
     type: 'database'
     objs: '{{ database_name_pgarchives }}'
@@ -11,7 +11,7 @@
 # GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";
 - name: 'Grant permissions on all tables in public schema to Debian-exim'
   community.postgresql.postgresql_privs:
-    db: '{{ database_name_pgarchives }}'
+    login_db: '{{ database_name_pgarchives }}'
     privs: 'ALL'
     type: 'table'
     objs: 'ALL_IN_SCHEMA'
@@ -21,7 +21,7 @@
 # GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";
 - name: 'Grant permissions on all sequences in public schema to Debian-exim'
   community.postgresql.postgresql_privs:
-    db: '{{ database_name_pgarchives }}'
+    login_db: '{{ database_name_pgarchives }}'
     privs: 'ALL'
     type: 'sequence'
     objs: 'ALL_IN_SCHEMA'

@@ -168,7 +168,7 @@
     - name: 'Run necessary operations to run eximintegration migrations'
       community.postgresql.postgresql_query:
         query: 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
-        db: '{{ database_name_pglister }}'
+        login_db: '{{ database_name_pglister }}'
       become: true
       become_user: 'postgres'
       # for idempotence tests
