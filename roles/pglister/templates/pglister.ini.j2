@@ -18,7 +18,7 @@ senderaddr=testsender@{{ ansible_host }}
 sendername=MAILER-DAEMON
 
 [notify]
-address=notify@{{ ansible_host }}
+address={{ pglister_notify_address }}
 name=Notification Receiver
 
 [nagios]

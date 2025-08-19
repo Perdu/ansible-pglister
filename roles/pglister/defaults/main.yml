@@ -1,4 +1,5 @@
 ---
+pglister_notify_address: 'root@localhost'
 database_user: 'list'
 database_name_pglister: 'pglister'
 pglister_version: '8f34e03e0a4ce499bae89bd3849178f671c99dc7'
