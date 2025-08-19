@@ -14,6 +14,7 @@
     owner: 'list'
     group: 'www-data'
     mode: '664'
+  notify: 'Restart systemd services'
 
 - name: 'Drop settings.py for django'
   template:
