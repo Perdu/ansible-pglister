@@ -21,6 +21,7 @@
     - 'mailsender'
     - 'moderationprocessor'
   become: true
+  when: 'not redeploy and systemctl_available.rc == 0'
 
 - name: 'Restart nagios-nrpe-server'
   service:
