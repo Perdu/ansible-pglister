@@ -20,6 +20,12 @@
   when: not redeploy
   notify: 'Restart postgresql'
 
+# Allow deleting destination path manually for reinstalling properly
+- name: 'Check if local deployment folder exists or has been deleted'
+  ansible.builtin.stat:
+    path: "{{ app_service_base_path }}"
+  register: local_folder
+
 - name: 'Include role http_vhost'
   include_role:
     name: 'http_vhost'
@@ -56,7 +62,7 @@
     dest: '{{ app_service_base_path }}/'
     mode: '755'
     remote_src: true
-  when: repo.changed  # noqa: no-handler
+  when: repo.changed or not local_folder.stat.exists  # noqa: no-handler
 
 - name: 'Chown app_user:www-data app directory'
   file:
@@ -64,7 +70,7 @@
     owner: '{{ app_user }}'
     group: 'www-data'
     recurse: true
-  when: repo.changed  # noqa: no-handler
+  when: repo.changed or not local_folder.stat.exists  # noqa: no-handler
 
 - name: 'Install required packages for ansible using pip'
   pip:
