@@ -65,13 +65,8 @@
     tasks_from: 'restart.yml'
   when: not redeploy and (res.changed or res2.changed)
 
-- name: 'Include Django role'
-  include_role:
-    name: cchurch.django
-  vars:
-    django_app_path: '{{ service_base_path }}/web'
-    django_user: list
-    django_virtualenv: '{{ service_base_path }}/web/pglister'
+- name: 'Configure django'
+  import_tasks: django.yml
 
 # To run this manually, simply run
 # python manage.py createsuperuser

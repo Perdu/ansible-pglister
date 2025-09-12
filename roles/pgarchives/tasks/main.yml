@@ -69,13 +69,8 @@
 
 # Todo: s/tsparser/other/
 
-- name: 'Include django role'
-  include_role:
-    name: cchurch.django
-  vars:
-    django_app_path: '{{ service_base_path }}/django'
-    django_user: list
-    django_virtualenv: '{{ service_base_path }}/django'
+- name: 'Configure django'
+  import_tasks: django.yml
 
 # To run this manually, simply run
 # python manage.py createsuperuser
