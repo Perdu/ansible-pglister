@@ -22,7 +22,7 @@
 
 - name: 'Customize repository'
   import_tasks: customize_repository.yml
-  when: repo.changed  # noqa: no-handler
+  when: repo.changed or not local_folder.stat.exists  # noqa: no-handler
 
 - name: 'Postgresql queries'
   import_tasks: postgresql_queries.yml
