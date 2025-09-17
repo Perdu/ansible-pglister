@@ -1,11 +1,13 @@
 ---
+pglister_notify_address: 'root@localhost'
 database_user: 'list'
 database_name_pglister: 'pglister'
-pglister_version: 'fbd8201565893b03fc92280628456f4b975b2f1c'
+pglister_version: '8f34e03e0a4ce499bae89bd3849178f671c99dc7'
 debug: false
 logging_level: 'ERROR'
 use_nagios: false
 log_path: '/var/log/apache2'
+redeploy: false
 
 # nagios
 nagios_incoming_ok_warn: 3

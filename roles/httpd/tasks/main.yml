@@ -4,6 +4,67 @@
     name: 'apache2'
     state: 'present'
 
+- name: 'Install python-passlib to create htpassword, if necessary'
+  package:
+    name: 'python3-passlib'
+    state: 'present'
+  when: use_http_auth
+
+- name: 'Check if mod_rewrite is enabled'
+  command: /usr/sbin/a2query -m rewrite
+  register: mod_rewrite_status
+  changed_when: false
+  failed_when: 'not ("rewrite" in mod_rewrite_status.stdout or "rewrite" in mod_rewrite_status.stderr)'
+
+- name: 'Properly enable rewrite module'
+  when: mod_rewrite_status.rc != 0
+  block:
+    # Necessary to enable rewrite module, otherwise apache crashes
+    # I haven't found any other workaround to this
+    - name: 'Disable "000-default" vhost'
+      command: '/usr/sbin/a2dissite 000-default'
+      register: result
+      changed_when: 'not "already disabled" in result.stdout'
+
+    - name: 'Enable rewrite module'
+      community.general.apache2_module:
+        name: 'rewrite'
+        state: present
+        ignore_configcheck: true
+      register: rewrite_enabling
+
+    - name: 'Enable default vhost'
+      command: '/usr/sbin/a2ensite 000-default'
+      register: result
+      changed_when: 'not "already enabled" in result.stdout'
+      notify: 'Reload httpd'
+
+- name: 'Enable modules'
+  community.general.apache2_module:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - 'headers'
+    - 'ssl'
+  notify: 'Reload httpd'
+
+- name: 'Enable Apache auth modules'
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - 'auth_basic'
+    - 'authn_file'
+  when: use_http_auth
+  notify: 'Reload httpd'
+
+- name: 'Enable proxy module'
+  when: httpd_proxy | default(false)
+  community.general.apache2_module:
+    name: 'proxy'
+    state: present
+  notify: 'Reload httpd'
+
 - name: 'Drop default templates'
   template:
     src: '{{ item.src }}.j2'
@@ -22,40 +83,22 @@
     path: '/etc/apache2/sites-available/default-ssl.conf'
     state: 'absent'
 
-# Necessary to enable modules, otherwise apache crashes
-- name: 'Disable "000-default" vhost'
-  command: '/usr/sbin/a2dissite 000-default'
-  ignore_errors: true
-
-- name: 'Enable modules'
-  community.general.apache2_module:
-    name: '{{ item }}'
-    state: present
-  with_items:
-    - 'headers'
-    - 'rewrite'
-    - 'ssl'
-  notify: 'Reload httpd'
-
-- name: 'Enable proxy module'
-  when: httpd_proxy | default(false)
-  community.general.apache2_module:
-    name: 'proxy'
-    state: present
-  notify: 'Reload httpd'
-
-- name: 'Enable default vhost'
-  command: '/usr/sbin/a2ensite 000-default'
-  register: result
-  changed_when: 'not "already enabled" in result.stdout'
-  notify: 'Reload httpd'
-
 - name: 'Set ServerTokens'
   lineinfile:
     path: '/etc/apache2/conf-available/security.conf'
     regexp: '^ServerTokens'
     line: 'ServerTokens Prod'
   notify: 'Reload httpd'
+
+- name: 'Create the .htpasswd file with user credentials'
+  community.general.htpasswd:
+    path: /etc/apache2/.htpasswd
+    name: "{{ http_auth_username }}"
+    password: "{{ http_auth_password }}"
+    crypt_scheme: bcrypt
+    mode: '640'
+    group: 'www-data'
+  when: use_http_auth
 
 # Ensure certificates are present before starting the server.
 

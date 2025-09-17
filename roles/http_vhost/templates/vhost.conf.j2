@@ -24,6 +24,16 @@
         ErrorLog {{ log_path }}/{{ service_log_prefix }}{% if service_log_prefix %}-{% endif %}error.log
         CustomLog {{ log_path }}/{{ service_log_prefix }}{% if service_log_prefix %}-{% endif %}access.log combined
 
+{% if use_http_auth %}
+        <Location />
+                AuthType Basic
+                AuthName "Restricted Access"
+                AuthUserFile /etc/apache2/.htpasswd
+                Require valid-user
+                Require local
+        </Location>
+{% endif %}
+
 {% if service_vhost_extra %}{% include 'vhost-partial.conf.j2' %}{% endif %}
 
 </VirtualHost>

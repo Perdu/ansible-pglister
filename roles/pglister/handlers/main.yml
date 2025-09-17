@@ -1,0 +1,29 @@
+---
+- name: 'Install systemd services'
+  command:
+    cmd: './install.sh -install'
+    chdir: '{{ service_base_path }}/systemd/'
+    creates: '/etc/systemd/system/pglister_bounceprocessor.service'  # "creates" can only take one file
+  become: true
+  when: 'not redeploy and systemctl_available.rc == 0'
+  notify: 'Restart systemd services'
+
+- name: 'Restart systemd services'
+  service:
+    name: 'pglister_{{ item }}'
+    state: 'restarted'
+    enabled: true
+  loop:
+    - 'bounceprocessor'
+    - 'cleanup'
+    - 'eximcleaner'
+    - 'mailprocessor'
+    - 'mailsender'
+    - 'moderationprocessor'
+  become: true
+  when: 'not redeploy and systemctl_available.rc == 0'
+
+- name: 'Restart nagios-nrpe-server'
+  service:
+    name: 'nagios-nrpe-server.service'
+    state: 'restarted'

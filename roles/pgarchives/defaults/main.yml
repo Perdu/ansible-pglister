@@ -1,6 +1,6 @@
 ---
 database_user_pgarchives: 'list'
-database_name_pgarchives: 'spi_pgarchives'
+database_name_pgarchives: 'pgarchives'
 pgarchives_version: '04b577002aa4550b8fb3113feff0021bd35dfb5e'
 debug: false
 logging_level: 'ERROR'

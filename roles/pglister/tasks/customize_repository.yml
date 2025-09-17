@@ -14,6 +14,7 @@
     owner: 'list'
     group: 'www-data'
     mode: '664'
+  notify: 'Restart systemd services'
 
 - name: 'Drop settings.py for django'
   template:
@@ -23,11 +24,8 @@
     group: 'www-data'
     mode: '640'
 
-- name: 'Add link to venv to systemd services'
-  lineinfile:
-    path: '{{ service_base_path }}/systemd/pglister_{{ item }}.template'
-    regexp: '^ExecStart=_ROOT_'
-    line: 'ExecStart={{ venv_python }} _ROOT_/bin/{{ item }}.py'
+- name: 'Loop over services to properly edit them'
+  include_tasks: 'service_override.yml'
   loop:
     - 'bounceprocessor'
     - 'cleanup'
@@ -35,3 +33,5 @@
     - 'mailprocessor'
     - 'mailsender'
     - 'moderationprocessor'
+  loop_control:
+    loop_var: service_name

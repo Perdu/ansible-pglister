@@ -8,7 +8,8 @@
     app_user: 'list'
     repo_uri: '{{ repo_uri_pgarchives }}'
     app_version: '{{ pgarchives_version }}'
-    app_base_path: '{{ service_base_path }}'
+    app_base_path: '{{ base_path }}'
+    app_service_base_path: '{{ service_base_path }}'
     app_virtualenv: '{{ service_base_path }}/django'
     psycopg_version: 'psycopg2-binary'
 
@@ -23,22 +24,10 @@
 - name: 'Customize repository'
   import_tasks: customize_repository.yml
 
-- name: 'Grant permissions to database to Debian-exim'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pgarchives }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pgarchives }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
+- name: 'Postgresql queries'
+  import_tasks: postgresql_queries.yml
   become: true
   become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Restart postgresql to make new group perms effective'
-  include_role:
-    name: 'postgresql'
-    tasks_from: 'restart.yml'
   when: not redeploy
 
 - name: 'Install required packages for django using pip'
@@ -53,6 +42,7 @@
     virtualenv: '{{ service_base_path }}/django'
     virtualenv_python: python3
   become: true
+  become_user: 'list'
   when: not redeploy
 
 - name: 'Ensure the path to drop pg_dict exists'
@@ -79,13 +69,8 @@
 
 # Todo: s/tsparser/other/
 
-- name: 'Include django role'
-  include_role:
-    name: cchurch.django
-  vars:
-    django_app_path: '{{ service_base_path }}/django'
-    django_user: list
-    django_virtualenv: '{{ service_base_path }}/django'
+- name: 'Configure django'
+  import_tasks: django.yml
 
 # To run this manually, simply run
 # python manage.py createsuperuser
@@ -108,6 +93,16 @@
   changed_when: res.stdout == "changed"
   become: true
   become_user: 'list'
+
+# Without this line, apache receive pglister_sync's requests from the server's external address,
+# which makes the localhost exception for HTTP auth fail.
+- name: 'Add pgarchives address to resolve to 127.0.0.1 in /etc/hosts so that http auth can be properly bypassed'
+  lineinfile:
+    dest: '/etc/hosts'
+    line: "127.0.0.1 {{ service_vhost_name_pgarchives }}"
+    state: 'present'
+  become: true
+  when: not test_only
 
 - name: 'Run pglister_sync.py'
   command: '{{ venv_python }} {{ service_base_path }}/loader/pglister_sync.py'

@@ -4,3 +4,4 @@ database_name_pgweb: 'pgweb'
 pgweb_version: '91991aa1712892b7862528f8d47e8a52415f740d'
 debug: false
 logging_level: 'ERROR'
+redeploy: false

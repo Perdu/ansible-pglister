@@ -9,6 +9,10 @@ test_only: false
 install_pgbackrest: true
 # for postgresql's repositories and python version
 debian_version: 'bookworm'
+pre_deployment: false
+production: false
+use_http_auth: false
+redeploy: false
 
 ## exim-pglister
 use_spamassassin: true
@@ -22,12 +26,14 @@ service_vhost_name_pglister: 'pglister.{{ domain }}'
 base_path_pglister: '/srv/pglister'
 database_name_pglister: 'pglister'
 repo_base: 'pglister'
-pglister_version: 'fbd8201565893b03fc92280628456f4b975b2f1c'
+pglister_version: '9359fe85ec8f01570a2ac98fbfda4eb42591fe58'
 use_nagios: false
 pglister_home_message: '<p><b>To manage your subscriptions, <a href="https://{{ service_vhost_name_pgweb }}/account/signup/">Create an account</a></b></p>'
 # Example of adding extra vhost definition
 vhost_extra_pglister: |
   Redirect permanent /foo https://bar
+banner_links: []
+#  - {name: 'Your account', url: 'https://somewebsite.com'}
 
 ## pgarchives
 service_vhost_name_pgarchives: 'pgarchives.{{ domain }}'
@@ -50,6 +56,9 @@ database_password: 'CHANGEME'
 django_superuser_pass: 'CHANGEME'
 pgarchives_secret_key: 'CHANGEME'
 pgauth_key: ''  # will be generated if not defined
+http_auth_username: 'default'
+http_auth_password: 'CHANGEME'
+
 # for pgweb
 recaptcha_site_key: "YOUR_RECAPTCHA_SITE_KEY"  # https://www.google.com/recaptcha/admin/create
 recaptcha_secret_key: "YOUR_RECAPTCHA_SECRET_KEY"

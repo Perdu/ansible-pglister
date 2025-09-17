@@ -1,0 +1,186 @@
+---
+- name: 'Create a postgres user for Debian-exim'
+  community.postgresql.postgresql_user:
+    name: 'Debian-exim'
+
+- name: 'Create nagios role for postgres'
+  community.postgresql.postgresql_user:
+    name: nagios
+  when: 'use_nagios'
+
+- name: 'Add password for list user in postgres, to allow login from exim'
+  community.postgresql.postgresql_user:
+    name: list
+    password: '{{ database_password }}'
+    login_db: '{{ database_name_pglister }}'
+
+# GRANT ALL ON DATABASE {{ database_name_pglister }} TO "Debian-exim";'
+- name: 'Grant permissions to database to Debian-exim'
+  community.postgresql.postgresql_privs:
+    login_db: '{{ database_name_pglister }}'
+    privs: 'ALL'
+    type: 'database'
+    objs: '{{ database_name_pglister }}'
+    role: "Debian-exim"
+  register: debian_exim_privs
+
+# GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";
+- name: 'Grant permissions on all tables in public schema to Debian-exim'
+  community.postgresql.postgresql_privs:
+    login_db: '{{ database_name_pglister }}'
+    privs: 'ALL'
+    type: 'table'
+    objs: 'ALL_IN_SCHEMA'
+    role: "Debian-exim"
+    schema: 'public'
+  # Ugly hack to fix idempotency because postgresql_privs fails at properly
+  # returning changed status
+  when: debian_exim_privs.changed  # noqa: no-handler
+
+# GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";
+- name: 'Grant permissions on all sequences in public schema to Debian-exim'
+  community.postgresql.postgresql_privs:
+    login_db: '{{ database_name_pglister }}'
+    privs: 'ALL'
+    type: 'sequence'
+    objs: 'ALL_IN_SCHEMA'
+    role: "Debian-exim"
+    schema: 'public'
+  when: debian_exim_privs.changed  # noqa: no-handler
+
+- name: 'Grant permissions to database to nagios'
+  when: 'use_nagios'
+  block:
+
+    # GRANT CONNECT ON DATABASE {{ database_name_pglister }} TO "nagios";
+    - name: 'Grant permissions to database to nagios'
+      community.postgresql.postgresql_privs:
+        login_db: '{{ database_name_pglister }}'
+        privs: 'CONNECT'
+        type: 'database'
+        objs: '{{ database_name_pglister }}'
+        role: "nagios"
+
+    # GRANT USAGE ON SCHEMA public TO "nagios";
+    - name: 'Grant usage on schema public to nagios'
+      community.postgresql.postgresql_privs:
+        login_db: '{{ database_name_pglister }}'
+        privs: 'USAGE'
+        type: 'schema'
+        objs: 'public'
+        role: "nagios"
+
+    # GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";
+    - name: 'Grant select on all tables in public schema to nagios'
+      community.postgresql.postgresql_privs:
+        login_db: '{{ database_name_pglister }}'
+        privs: 'SELECT'
+        type: 'table'
+        objs: 'ALL_IN_SCHEMA'
+        role: "nagios"
+        schema: 'public'
+
+- name: 'Install postgresql pgcrypto schema'
+  community.postgresql.postgresql_schema:
+    name: 'pgcrypto'
+    login_db: '{{ database_name_pglister }}'
+
+# CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA pgcrypto;'
+- name: 'Install pgcrypto extension'
+  community.postgresql.postgresql_ext:
+    login_db: '{{ database_name_pglister }}'
+    name: 'pgcrypto'
+    schema: 'pgcrypto'
+    state: 'present'
+
+# GRANT USAGE ON SCHEMA pgcrypto TO {{ database_user }}'
+- name: 'Grant USAGE on pgcrypto schema to database user'
+  community.postgresql.postgresql_privs:
+    login_db: '{{ database_name_pglister }}'
+    privs: 'USAGE'
+    type: 'schema'
+    objs: 'pgcrypto'
+    role: '{{ database_user }}'
+
+- name: 'Run necessary operations to run eximintegration migrations'
+  block:
+
+    # CREATE EXTENSION IF NOT EXISTS file_fdw;
+    - name: 'Ensure file_fdw extension exists'
+      community.postgresql.postgresql_ext:
+        name: 'file_fdw'
+        login_db: '{{ database_name_pglister }}'
+        state: 'present'
+
+    # CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
+    - name: 'Ensure file_fdw foreign server exists'
+      community.postgresql.postgresql_query:
+        query: >
+          DO $$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_foreign_server WHERE srvname = 'file_fdw')
+            THEN CREATE SERVER file_fdw FOREIGN DATA WRAPPER file_fdw;
+            END IF;
+          END $$;
+        login_db: '{{ database_name_pglister }}'
+      register: res
+      changed_when: "'CREATE' in res.statusmessage"
+
+    # CREATE SCHEMA IF NOT EXISTS eximintegration;
+    - name: 'Ensure eximintegration schema exists'
+      community.postgresql.postgresql_schema:
+        login_db: "{{ database_name_pglister }}"
+        name: eximintegration
+        state: present
+        owner: "{{ database_user }}"
+
+    # GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};
+    - name: 'Grant CREATE and USAGE on schema eximintegration to user'
+      community.postgresql.postgresql_privs:
+        login_db: "{{ database_name_pglister }}"
+        privs: "CREATE,USAGE"
+        type: schema
+        objs: eximintegration
+        role: "{{ database_user }}"
+
+    # CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL)
+    # SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
+    - name: 'Ensure foreign table eximintegration._raw_eximqueue exists'
+      community.postgresql.postgresql_query:
+        login_db: "{{ database_name_pglister }}"
+        query: >
+          DO $$ BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM information_schema.tables
+              WHERE table_schema = 'eximintegration'
+              AND table_name = '_raw_eximqueue'
+            )
+            THEN
+              CREATE FOREIGN TABLE eximintegration._raw_eximqueue(
+                jdata jsonb NOT NULL
+              ) SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
+            END IF;
+          END $$;
+      register: res
+      changed_when: "'CREATE' in res.statusmessage"
+
+    # The postgresql_privs module is buggy and fails to properly apply this
+    # permission, reverting back to postgresql_query
+    - name: 'Run necessary operations to run eximintegration migrations'
+      community.postgresql.postgresql_query:
+        query: 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
+        login_db: '{{ database_name_pglister }}'
+      become: true
+      become_user: 'postgres'
+      # for idempotence tests
+      changed_when: false
+
+    #  GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};
+    # - name: 'Grant SELECT on eximintegration._raw_eximqueue to user'
+    #   community.postgresql.postgresql_privs:
+    #     login_db: "{{ database_name_pglister }}"
+    #     login_user: "postgres"
+    #     privs: 'SELECT'
+    #     type: 'table'
+    #     objs: "_raw_eximqueue"
+    #     schema: "eximintegration"
+    #     role: "{{ database_user }}"

@@ -6,9 +6,16 @@
     database_name: '{{ database_name_pgweb }}'
     vhost_extra: ''
     app_user: 'list'
+    repo_uri: '{{ repo_uri_pgweb }}'
+    app_version: '{{ pgweb_version }}'
+    app_base_path: '{{ base_path }}'
+    app_service_base_path: '{{ service_base_path }}'
+    app_virtualenv: '{{ service_base_path }}/pgweb/'
+    psycopg_version: 'psycopg2-binary'
 
-- name: 'Clone repository'
-  import_tasks: clone_repository.yml
+- name: 'Customize repository'
+  import_tasks: customize_repository.yml
+  when: repo.changed or not local_folder.stat.exists  # noqa: no-handler
 
 - name: 'Fix pycopg bug by installing -binary version'
   lineinfile:
@@ -28,7 +35,7 @@
     regexp: '^bleach==3.1.4'
     line: 'bleach==3.3.1'
 
-- name: 'Fix bleach bug on Debian bookworm by using an another version for bleach'
+- name: 'Fix Babel bug on Debian bookworm by using an another version for Babel'
   lineinfile:
     path: '{{ service_base_path }}/requirements.txt'
     regexp: '^Babel==2.6.0'
@@ -40,23 +47,19 @@
     virtualenv: '{{ service_base_path }}/pgweb/'
     virtualenv_python: python3
   become: true
+  become_user: 'list'
   when: not redeploy
 
-- name: 'Include Django role'
-  include_role:
-    name: cchurch.django
-  vars:
-    django_app_path: '{{ service_base_path }}'
-    django_user: list
-    django_virtualenv: '{{ service_base_path }}/pgweb'
+- name: 'Configure django'
+  import_tasks: django.yml
 
-# Todo: it will be better to run this inside the venv
 - name: 'Run varnish_local.sql to disable Varnish functions'
   community.postgresql.postgresql_script:
-    db: '{{ database_name_pgweb }}'
+    login_db: '{{ database_name_pgweb }}'
     path: '{{ service_base_path }}/sql/varnish_local.sql'
   become: true
   become_user: 'postgres'
+  changed_when: false  # ugly but making this task idempotent is otherwise difficult
 
 # To run this manually, simply run
 # python manage.py createsuperuser

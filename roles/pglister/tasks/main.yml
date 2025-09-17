@@ -8,7 +8,8 @@
     app_user: 'list'
     repo_uri: '{{ repo_uri_pglister }}'
     app_version: '{{ pglister_version }}'
-    app_base_path: '{{ service_base_path }}'
+    app_base_path: '{{ base_path }}'
+    app_service_base_path: '{{ service_base_path }}'
     app_virtualenv: '{{ service_base_path }}/web/pglister/'
     psycopg_version: 'psycopg2-binary'
 
@@ -21,86 +22,10 @@
 
 - name: 'Customize repository'
   import_tasks: customize_repository.yml
+  when: repo.changed or not local_folder.stat.exists  # noqa: no-handler
 
-- name: 'Create a postgres user for Debian-exim'
-  community.postgresql.postgresql_user:
-    name: 'Debian-exim'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Add password for list user in postgres, to allow login from exim'
-  community.postgresql.postgresql_query:
-    query: "ALTER USER list WITH password '{{ database_password }}';"
-    db: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Grant permissions to database to Debian-exim'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name_pglister }} TO "Debian-exim";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "Debian-exim";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "Debian-exim";'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Create nagios role for postgres'
-  community.postgresql.postgresql_user:
-    name: nagios
-  become: true
-  become_user: 'postgres'
-  register: result
-  when: 'use_nagios and not redeploy'
-
-- name: 'Grant permissions to database to nagios'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'GRANT CONNECT ON DATABASE {{ database_name_pglister }} TO "nagios";'
-    - 'GRANT USAGE ON SCHEMA public TO "nagios";'
-    - 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "nagios";'
-  become: true
-  become_user: 'postgres'
-  when: 'use_nagios and not redeploy'
-
-- name: 'Install postgresql pgcrypto schema'
-  community.postgresql.postgresql_schema:
-    name: 'pgcrypto'
-    database: '{{ database_name_pglister }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Install postgresql crypto extension and grant usage'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA pgcrypto;'
-    - 'GRANT USAGE ON SCHEMA pgcrypto TO {{ database_user }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Run necessary operations to run eximintegration migrations'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name_pglister }}'
-  loop:
-    - 'CREATE EXTENSION IF NOT EXISTS file_fdw;'
-    - 'CREATE SERVER IF NOT EXISTS file_fdw FOREIGN DATA WRAPPER file_fdw;'
-    - 'CREATE SCHEMA IF NOT EXISTS eximintegration;'
-    - 'GRANT CREATE, USAGE ON SCHEMA eximintegration TO {{ database_user }};'
-    - >
-      CREATE FOREIGN TABLE IF NOT EXISTS eximintegration._raw_eximqueue(jdata jsonb NOT NULL)
-      SERVER file_fdw OPTIONS (PROGRAM '{{ service_base_path }}/bin/exiqjson.py');
-    - 'GRANT SELECT ON eximintegration._raw_eximqueue TO {{ database_user }};'
+- name: 'Postgresql queries'
+  import_tasks: postgresql_queries.yml
   become: true
   become_user: 'postgres'
   when: not redeploy
@@ -115,6 +40,7 @@
     virtualenv: '{{ service_base_path }}/web/pglister/'
     virtualenv_python: python3
   become: true
+  become_user: 'list'
   when: not redeploy
 
 - name: 'Give exim permissions to list user (add list to Debian-exim group)'
@@ -122,6 +48,7 @@
     name: '{{ database_user }}'
     groups: 'Debian-exim'
     append: true
+  register: res
   when: not redeploy
 
 - name: 'Give exim permissions to postgres user (add postgres to Debian-exim group)'
@@ -129,21 +56,17 @@
     name: 'postgres'
     groups: 'Debian-exim'
     append: true
+  register: res2
   when: not redeploy
 
 - name: 'Restart postgresql to make new group perms effective'
   include_role:
     name: 'postgresql'
     tasks_from: 'restart.yml'
-  when: not redeploy
+  when: not redeploy and (res.changed or res2.changed)
 
-- name: 'Include Django role'
-  include_role:
-    name: cchurch.django
-  vars:
-    django_app_path: '{{ service_base_path }}/web'
-    django_user: list
-    django_virtualenv: '{{ service_base_path }}/web/pglister'
+- name: 'Configure django'
+  import_tasks: django.yml
 
 # To run this manually, simply run
 # python manage.py createsuperuser
@@ -236,42 +159,14 @@
   ignore_errors: true
   changed_when: false
 
-- name: 'Install systemd services'
-  command:
-    cmd: './install.sh -install'
-    chdir: '{{ service_base_path }}/systemd/'
-  become: true
-  when: 'not redeploy and systemctl_available.rc == 0'
-
-- name: 'Restart systemd services'
-  service:
-    name: 'pglister_{{ item }}'
-    state: 'restarted'
-    enabled: true
-  loop:
-    - 'bounceprocessor'
-    - 'cleanup'
-    - 'eximcleaner'
-    - 'mailprocessor'
-    - 'mailsender'
-    - 'moderationprocessor'
-  become: true
-  when: 'not redeploy and systemctl_available.rc == 0'
-
-- name: 'Add pglister commands to nagios'
+- name: 'Add pglister commands to nrpe config (nagios)'
   when: use_nagios and not redeploy
-  block:
-    - name: 'Add pglister commands to nrpe config'
-      lineinfile:
-        line: '{{ item }}'
-        path: '/etc/nagios/nrpe_ansible.cfg'
-        state: 'present'
-      loop:
-        - 'command[pglister_log]={{ venv_python }} {{ service_base_path }}/nagios/pglister_log.py'
-        - 'command[pglister_processes]={{ venv_python }} {{ service_base_path }}/nagios/pglister_processes.py'
-        - 'command[pglister_queues]={{ venv_python }} {{ service_base_path }}/nagios/pglister_queues.py'
-
-    - name: 'Restart nagios-nrpe-server'
-      service:
-        name: 'nagios-nrpe-server.service'
-        state: 'restarted'
+  lineinfile:
+    line: '{{ item }}'
+    path: '/etc/nagios/nrpe_ansible.cfg'
+    state: 'present'
+  loop:
+    - 'command[pglister_log]={{ venv_python }} {{ service_base_path }}/nagios/pglister_log.py'
+    - 'command[pglister_processes]={{ venv_python }} {{ service_base_path }}/nagios/pglister_processes.py'
+    - 'command[pglister_queues]={{ venv_python }} {{ service_base_path }}/nagios/pglister_queues.py'
+  notify: 'Restart nagios-nrpe-server'

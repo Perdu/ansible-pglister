@@ -1,0 +1,18 @@
+---
+- name: 'Create folders for systemd service overrides'
+  file:
+    path: '/etc/systemd/system/pglister_{{ service_name }}.d/'
+    owner: 'root'
+    group: 'root'
+    mode: '755'
+    state: 'directory'
+  notify: 'Install systemd services'
+
+- name: 'Add link to venv to systemd services'
+  template:
+    src: 'service_override.conf.j2'
+    dest: '/etc/systemd/system/pglister_{{ service_name }}.d/override.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '644'
+  notify: 'Install systemd services'

@@ -40,8 +40,22 @@
       - 'postgresql-client'
     state: 'present'
 
-- name: 'Include restart'
-  import_tasks: "restart.yml"
+- name: 'Ensure postgresql is started and enabled'
+  block:
+    - name: 'Ensure postgresql is enabled/started (systemd)'
+      service:
+        name: 'postgresql@{{ postgresql_version }}-main'
+        state: 'started'
+        enabled: true
+      ignore_errors: true
+      register: systemd
+
+    - name: 'Ensure postgresql is enabled/started (sysvinit)'
+      service:
+        name: 'postgresql'
+        state: 'started'
+        enabled: true
+      when: systemd.failed
 
 - name: 'Create a postgres user for Debian-exim'
   community.postgresql.postgresql_user:

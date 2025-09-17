@@ -9,6 +9,12 @@ test_only: true
 install_pgbackrest: true
 # for postgresql's repositories and python version
 debian_version: 'bookworm'
+pre_deployment: false
+# Set to true to avoid the HTTP auth check because we can't edit
+# /etc/hosts in the gitlab's pipeline
+production: true
+use_http_auth: true
+redeploy: false
 
 ## exim-pglister
 use_spamassassin: false
@@ -28,6 +34,7 @@ pglister_home_message: '<p><b>To manage your subscriptions, <a href="https://{{ 
 # Example of adding extra vhost definition
 vhost_extra_pglister: |
   Redirect permanent /foo https://bar
+banner_links: []
 
 ## pgarchives
 service_vhost_name_pgarchives: 'pgarchives.{{ domain }}'
@@ -49,7 +56,9 @@ pgweb_version: '1adaab8955ccf022b1c22b23d62a383854eb0e9e'
 database_password: 'CHANGEME'
 django_superuser_pass: 'CHANGEME'
 pgarchives_secret_key: 'CHANGEME'
-pgauth_key: ''  # will be generated if not defined
+pgauth_key: 'CHANGEME'  # will be generated if not defined
+http_auth_username: 'default'
+http_auth_password: 'CHANGEME'
 # for pgweb
 recaptcha_site_key: "YOUR_RECAPTCHA_SITE_KEY"  # https://www.google.com/recaptcha/admin/create
 recaptcha_secret_key: "YOUR_RECAPTCHA_SECRET_KEY"

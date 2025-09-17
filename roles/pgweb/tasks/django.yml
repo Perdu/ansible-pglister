@@ -1,0 +1,15 @@
+- name: 'Django: migrate'
+  community.general.django_manage:
+    command: "migrate"
+    app_path: "{{ service_base_path }}"
+    virtualenv: "{{ service_base_path }}/pgweb"
+  become: true
+  become_user: list
+
+- name: 'Django: collectstatic'
+  community.general.django_manage:
+    command: "collectstatic"
+    app_path: "{{ service_base_path }}"
+    virtualenv: "{{ service_base_path }}/pgweb"
+  become: true
+  become_user: list

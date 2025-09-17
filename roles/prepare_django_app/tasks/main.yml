@@ -13,33 +13,18 @@
       - 'postgresql-contrib'
   when: not redeploy
 
-- name: 'Create database'
-  community.postgresql.postgresql_db:
-    name: '{{ database_name }}'
+- name: 'Postresql queries'
+  import_tasks: postgresql_queries.yml
   become: true
   become_user: 'postgres'
   when: not redeploy
+  notify: 'Restart postgresql'
 
-- name: 'Create role for database_user'
-  community.postgresql.postgresql_user:
-    name: '{{ database_user }}'
-    password: '{{ database_password }}'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
-
-- name: 'Grant permissions to database'
-  community.postgresql.postgresql_query:
-    query: '{{ item }}'
-    db: '{{ database_name }}'
-  loop:
-    - 'GRANT ALL ON DATABASE {{ database_name }} TO "{{ database_user }}";'
-    - 'GRANT CREATE ON SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ database_user }}";'
-    - 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{{ database_user }}";'
-  become: true
-  become_user: 'postgres'
-  when: not redeploy
+# Allow deleting destination path manually for reinstalling properly
+- name: 'Check if local deployment folder exists or has been deleted'
+  ansible.builtin.stat:
+    path: "{{ app_service_base_path }}"
+  register: local_folder
 
 - name: 'Include role http_vhost'
   include_role:
@@ -49,35 +34,43 @@
     http_vhost_app_user: '{{ app_user }}'
   when: not redeploy
 
-# ignore_configcheck prevents module from crashing
-# ignore_error is used because the task WILL crash if wsgi is already enabled
+# Using command because community.general.apache2_module is buggy
 - name: 'Activate mod_wsgi on apache2'
-  community.general.apache2_module:
-    name: wsgi
-    state: present
-    ignore_configcheck: true
-  ignore_errors: true
+  ansible.builtin.command:  # noqa: no-changed-when
+    cmd: /usr/sbin/a2enmod wsgi
+  register: res
+  failed_when: 'res.rc != 0 and "Module wsgi already enabled" not in res.stdout'
+  changed_when: '"Module wsgi already enabled" not in res.stdout'
   notify: 'Reload httpd'
   when: not redeploy
 
 - name: 'Clone repository'
   git:
     repo: '{{ repo_uri }}'
-    dest: '{{ app_base_path }}'
+    dest: '{{ app_base_path }}/repo.git'
     clone: true
     update: true
     version: '{{ app_version }}'
-    force: true
   become: true
   become_user: '{{ app_user }}'
+  notify: 'Reload httpd'
   register: repo
 
-- name: 'Chown app_user:www-data pglister directory'
+- name: 'Copy repository to folder used by apache2'
+  ansible.builtin.copy:
+    src: '{{ app_base_path }}/repo.git/'
+    dest: '{{ app_service_base_path }}/'
+    mode: '755'
+    remote_src: true
+  when: repo.changed or not local_folder.stat.exists  # noqa: no-handler
+
+- name: 'Chown app_user:www-data app directory'
   file:
-    path: '{{ app_base_path }}'
+    path: '{{ app_service_base_path }}'
     owner: '{{ app_user }}'
     group: 'www-data'
     recurse: true
+  when: repo.changed or not local_folder.stat.exists  # noqa: no-handler
 
 - name: 'Install required packages for ansible using pip'
   pip:
@@ -89,7 +82,7 @@
   become: true
   become_user: '{{ app_user }}'
 
-- name: Install python dependencies from requirements.txt
+- name: 'Install python dependencies from requirements.txt'
   ansible.builtin.pip:
     requirements: '{{ requirements_path }}/requirements.txt'
     virtualenv: '{{ app_virtualenv }}'

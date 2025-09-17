@@ -36,7 +36,7 @@ LOGGING = {
 }
 
 ORGANIZATION_INFO = {
-    'name': 'SPI',
+    'name': '{{ org_name }}',
     'motto': "",
     # To use a different banner, change file names here and place images
     # in /media/img/.
@@ -44,6 +44,11 @@ ORGANIZATION_INFO = {
     # mentions of PostgreSQL
     'banner_left': 'hdr_left_generic.png',
     'banner_right': 'hdr_right_generic.png',
+    'links': [
+        {%for l in banner_links%}
+        {'name': '{{ l.name }}', 'href': '{{ l.url }}'},
+        {%endfor%}
+    ],
 }
 
 USE_PG_COMMUNITY_AUTH = True  # Right now we *always* do, but this is used to turn on/off some local features
